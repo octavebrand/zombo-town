@@ -2,6 +2,7 @@ import { GameState, GameRules, Player, Rarity } from './constants.js';
 import { EnemyFactory } from './enemies.js';
 import { ALL_CARDS } from './cards.js';
 import { EffectResolver } from './effects.js';
+import { DeckBuilder } from './deckBuilder.js';
 
 // ========================================
 // INPUT MANAGER
@@ -100,6 +101,7 @@ class GameManager {
         this.enemyFrozenAttacks = 0; // Nombre d'attaques à skip
         this.nextCardDamageMultiplier = 1;
         this.nextCardHealMultiplier = 1;
+        this.customDeck = null;
 
         this.initializeDeck();
         this.shuffleDeck();
@@ -114,7 +116,15 @@ class GameManager {
     }
 
     initializeDeck() {
-        this.deck.push(...ALL_CARDS.map(card => ({...card})));
+        this.deck = [];
+
+        if (this.customDeck && this.customDeck.length > 0) {
+            console.log("Deck custom chargé:", this.customDeck.length, "cartes");
+            this.deck.push(...this.customDeck.map(card => ({...card})));
+        } else {
+            console.log("Deck standard chargé");
+            this.deck.push(...ALL_CARDS.map(card => ({...card})));
+        }
     }
 
     shuffleDeck() {
@@ -838,6 +848,14 @@ function initEnemySelection() {
         
         enemyList.appendChild(card);
     });
+
+    async function constructDeck() {
+        const { DeckBuilder } = await import('./deckBuilder.js');
+        window.deckBuilder = new DeckBuilder(null, selectedEnemyId);
+        window.deckBuilder.show();
+    }
+
+    window.constructDeck = constructDeck;
 }
 
 function selectEnemy(id) {
@@ -853,6 +871,60 @@ function selectEnemy(id) {
 
     document.getElementById('startBtn').disabled = false;
 }
+
+function startGameWithCustomDeck(enemyId) {
+    document.getElementById('deckBuilderScreen').style.display = 'none';
+    document.getElementById('deckBuilderScreen').classList.remove('active');
+    document.getElementById('gameScreen').classList.add('active');
+
+    game = new GameManager(enemyId);
+    game.customDeck = window.customDeckToLoad;
+    game.initializeDeck();
+    game.shuffleDeck();
+    game.startDraftPhase();
+    game.render();
+    
+    window.customDeckToLoad = null;
+}
+
+function loadPreviousDeck() {
+    const saved = localStorage.getItem('customDeck');
+    if (!saved) {
+        alert("Aucun deck sauvegardé!");
+        return;
+    }
+    
+    if (selectedEnemyId === null) {
+        alert("Sélectionnez un ennemi d'abord!");
+        return;
+    }
+    
+    // Cacher l'écran de sélection
+    document.getElementById('enemySelection').style.display = 'none';
+
+    window.customDeckToLoad = JSON.parse(saved).map(id => {
+        const card = ALL_CARDS.find(c => c.id === id);
+        return card ? {...card} : null;
+    }).filter(c => c !== null);
+    
+    startGameWithCustomDeck(selectedEnemyId);
+}
+
+function newGame() {
+    localStorage.removeItem('customDeck');
+    alert("Deck supprimé. Créez un nouveau deck!");
+}
+
+window.loadPreviousDeck = loadPreviousDeck;
+window.newGame = newGame;
+
+// Initialize on page load
+window.addEventListener('DOMContentLoaded', () => {
+    initEnemySelection();
+    document.getElementById('startBtn').disabled = true;
+});
+
+window.startGameWithCustomDeck = startGameWithCustomDeck;
 
 function startGame() {
     if (selectedEnemyId === null) {

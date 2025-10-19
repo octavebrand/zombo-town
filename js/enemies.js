@@ -22,7 +22,7 @@ export class EnemyFactory {
     }
 
 static createBasicEnemy() {
-        const enemy = new Enemy("Petit con", 150, CardType.CAUCHEMAR, [
+        const enemy = new Enemy("Petit con", 160, CardType.CAUCHEMAR, [
             { name: "Griffe", damage: 10 },
             { name: "Morsure", damage: 15 }
         ]);
@@ -32,7 +32,7 @@ static createBasicEnemy() {
     }
 
     static createArchimageEnemy() {
-        const enemy = new Enemy("Ouvrier fou", 150, CardType.TRANSCENDANT, [
+        const enemy = new Enemy("Ouvrier fou", 170, CardType.TRANSCENDANT, [
             { name: "Boulons", damage: 8 },
             { name: "Boule de Boulons", damage: 21 }
         ], (gm) => {
@@ -49,7 +49,7 @@ static createBasicEnemy() {
     }
 
     static createBeteEnemy() {
-        const enemy = new Enemy("Bête Enragée", 150, CardType.CAUCHEMAR, [
+        const enemy = new Enemy("Bête Enragée", 170, CardType.CAUCHEMAR, [
             { name: "Morsure", damage: 10 },
             { name: "Charge", damage: 14 }
         ], (gm) => {
@@ -65,7 +65,7 @@ static createBasicEnemy() {
     }
 
     static createChronophageEnemy() {
-        const enemy = new Enemy("Chronophage", 110, CardType.TRANSCENDANT, [
+        const enemy = new Enemy("Chronophage", 140, CardType.TRANSCENDANT, [
             { name: "Distorsion", damage: 12 },
             { name: "Accélération", damage: 16 }
         ], (gm) => {
@@ -77,7 +77,7 @@ static createBasicEnemy() {
     }
 
     static createFossoyeurEnemy() {
-        const enemy = new Enemy("Fossoyeur", 140, CardType.CAUCHEMAR, [
+        const enemy = new Enemy("Fossoyeur", 150, CardType.CAUCHEMAR, [
             { name: "Faux", damage: 12 },
             { name: "Fauchage", damage: 18 }
         ], (gm) => {
@@ -93,7 +93,7 @@ static createBasicEnemy() {
     }
 
     static createReflecteurEnemy() {
-        const enemy = new Enemy("Miroir Brisé", 150, CardType.TRANSCENDANT, [
+        const enemy = new Enemy("Miroir Brisé", 100, CardType.TRANSCENDANT, [
             { name: "Reflet", damage: 10 },
             { name: "Inversion", damage: 13 }
         ], (gm) => {
@@ -107,7 +107,7 @@ static createBasicEnemy() {
     }
 
     static createVoleurDePoule() {
-        const enemy = new Enemy("Voleur de poule", 160, CardType.TRANSCENDANT, [
+        const enemy = new Enemy("Voleur de poule", 190, CardType.TRANSCENDANT, [
             { name: "Plumer", damage: 8 },
             { name: "Désosser", damage: 12 }
         ], (gm) => {
@@ -122,7 +122,7 @@ static createBasicEnemy() {
     }
 
     static createBalourd() {
-        const enemy = new Enemy("Balourd", 175, CardType.CAUCHEMAR, [
+        const enemy = new Enemy("Balourd", 200, CardType.CAUCHEMAR, [
             { name: "Baffe", damage: 10 },
             { name: "Grosse baffe", damage: 15 },
             { name: "Pansement", damage: -10 } // heal
@@ -156,7 +156,7 @@ static createBasicEnemy() {
     }
 
     static createCyclone() {
-        const enemy = new Enemy("Cyclone", 150, CardType.TRANSCENDANT, [
+        const enemy = new Enemy("Cyclone", 160, CardType.TRANSCENDANT, [
             { name: "Il arrive", damage: 0 },
             { name: "Le vent se lève", damage: 5 },
             { name: "Un peu plus", damage: 10 },

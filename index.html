@@ -16,8 +16,39 @@
             <div class="enemy-list" id="enemyList"></div>
             <div style="text-align: center; margin-top: 20px;">
                 <button id="startBtn" class="start-btn" onclick="startGame()">COMMENCER</button>
+                <button id="constructDeckBtn" class="start-btn" onclick="constructDeck()" style="background: #5b9bd5; margin-left: 10px;">CONSTRUIRE UN DECK</button>
+                <button id="loadDeckBtn" class="start-btn" onclick="loadPreviousDeck()" style="background: #00aa00; margin-left: 10px;">CHARGER DECK</button>
+                <button id="newGameBtn" class="start-btn" onclick="newGame()" style="background: #555; margin-left: 10px;">NOUVELLE PARTIE</button>
             </div>
         </div>
+        
+       <!-- Deck Builder Screen -->
+        <div id="deckBuilderScreen" class="deck-builder-screen" style="display: none;">
+            <h2 style="color: #00d4ff; text-align: center;">CONSTRUIRE VOTRE DECK</h2>
+            <div class="deck-builder-container">
+                <div class="deck-builder-left">
+                    <h3>Cartes disponibles</h3>
+                    <div class="cards-pool" id="cardsPool"></div>
+                </div>
+                <div class="deck-builder-right">
+                    <div class="deck-counter">
+                        <div>Cartes: <span id="deckCounter">0</span>/50</div>
+                        <div style="margin-top: 10px; font-size: 0.9em;">
+                            <div>Communes: <span id="communeCounter">0</span>/∞</div>
+                            <div>Uncommon: <span id="uncommonCounter">0</span>/∞</div>
+                            <div>Rares: <span id="rareCounter">0</span>/∞</div>
+                            <div>Mythiques: <span id="mythicCounter">0</span>/∞</div>
+                        </div>
+                    </div>
+                    <h3>Votre deck</h3>
+                    <div class="deck-list" id="deckList"></div>
+                </div>
+            </div>
+            <div style="text-align: center; margin-top: 20px;">
+                <button class="start-btn" id="validateDeckBtn" onclick="deckBuilder.validateAndPlay()">VALIDER</button>
+                <button class="start-btn" onclick="deckBuilder.cancel()" style="background: #555; margin-left: 10px;">ANNULER</button>
+            </div>
+        </div> 
 
         <!-- Game Screen -->
         <div id="gameScreen" class="game-screen">
