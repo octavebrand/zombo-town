@@ -1,0 +1,434 @@
+/* ========================================
+   STYLE.CSS - Layout responsive du board
+   ======================================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+    color: #fff;
+    overflow-x: hidden;
+}
+
+/* ========================================
+   CONTAINER PRINCIPAL
+   ======================================== */
+
+#gameContainer {
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ========================================
+   BOARD (zone de jeu centrale)
+   ======================================== */
+
+#board {
+    position: relative;
+    width: 100%;
+    height: 80vh;
+    flex-grow: 1;
+}
+
+/* ========================================
+   SLOTS (cercles positionnés en %)
+   ======================================== */
+
+.slot {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 3px solid #fff;
+    background: rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    transform: translate(-50%, -50%); /* Centrer sur position x,y */
+    z-index: 5;
+}
+
+.slot:hover {
+    transform: translate(-50%, -50%) scale(1.1);
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+}
+
+/* Types de slots (couleurs) */
+.slot[data-type="block"] {
+    border-color: #4169E1;
+    background: rgba(65, 105, 225, 0.2);
+}
+
+.slot[data-type="damage"] {
+    border-color: #FF4500;
+    background: rgba(255, 69, 0, 0.2);
+}
+
+.slot[data-type="state"] {
+    border-color: #FFD700;
+    background: rgba(255, 215, 0, 0.2);
+}
+
+.slot[data-type="shared"] {
+    border-color: #DC143C;
+    background: rgba(220, 20, 60, 0.3);
+    border-width: 4px;
+}
+
+.slot[data-type="enemy"] {
+    border-color: #8B0000;
+    background: rgba(139, 0, 0, 0.2);
+}
+
+.slot[data-type="player"] {
+    border-color: #32CD32;
+    background: rgba(50, 205, 50, 0.2);
+}
+
+/* Slot permanent (bordure or) */
+.slot.permanent {
+    border-color: #FFD700;
+    border-width: 5px;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+}
+
+/* Slot avec carte */
+.slot.occupied {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* ========================================
+   ENTITÉS (rectangles BLOCK/DAMAGE/STATE)
+   ======================================== */
+
+.entity {
+    position: absolute;
+    padding: 15px 25px;
+    border-radius: 10px;
+    border: 2px solid #fff;
+    background: rgba(0, 0, 0, 0.4);
+    text-align: center;
+    transform: translate(-50%, -50%);
+    min-width: 120px;
+    z-index: 10;
+}
+
+.entity-name {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.entity-maxxer {
+    font-size: 14px;
+    color: #FFD700;
+}
+
+/* Couleurs selon type */
+.entity[data-type="block"] {
+    border-color: #4169E1;
+    background: rgba(65, 105, 225, 0.3);
+}
+
+.entity[data-type="damage"] {
+    border-color: #FF4500;
+    background: rgba(255, 69, 0, 0.3);
+}
+
+.entity[data-type="state"] {
+    border-color: #FFD700;
+    background: rgba(255, 215, 0, 0.3);
+}
+
+/* ========================================
+   PLAYER & ENEMY INFO
+   ======================================== */
+
+#playerInfo, #enemyInfo {
+    position: absolute;
+    padding: 15px 30px;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.6);
+    border: 3px solid;
+    text-align: center;
+    min-width: 200px;
+    transform: translateX(-50%);
+}
+
+#enemyInfo {
+    top: 2%;
+    left: 50%;
+    border-color: #8B0000;
+    z-index: 100;  /* 🆕 Ajoute cette ligne */
+    pointer-events: auto;  /* 🆕 Ajoute cette ligne */
+}
+
+#playerInfo {
+    bottom: 25%;
+    left: 50%;
+    border-color: #32CD32;
+}
+
+.hp-bar {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+/* ========================================
+   MAIN (cartes en main) - en bas
+   ======================================== */
+
+#handContainer {
+    position: fixed;
+    bottom: 1%;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 10px;
+    max-width: 90vw;
+    overflow-x: auto;
+}
+
+/* ========================================
+   CARTES (style vertical Hearthstone)
+   ======================================== */
+
+.card {
+    width: 120px;
+    min-width: 120px;
+    height: 180px;
+    border-radius: 10px;
+    border: 3px solid #FFD700;
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    padding: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 10px 30px rgba(255, 215, 0, 0.5);
+}
+
+.card-value {
+    font-size: 32px;
+    font-weight: bold;
+    text-align: center;
+    color: #FFD700;
+}
+
+.card-name {
+    font-size: 14px;
+    font-weight: bold;
+    text-align: center;
+    color: #fff;
+    margin: 5px 0;
+}
+
+.card-slots {
+    display: flex;
+    gap: 5px;
+    justify-content: center;
+    font-size: 12px;
+}
+
+.card-rarity {
+    font-size: 11px;
+    text-align: center;
+    color: #aaa;
+}
+
+/* Raretés */
+.card[data-rarity="Commune"] {
+    border-color: #9E9E9E;
+}
+
+.card[data-rarity="Uncommon"] {
+    border-color: #4CAF50;
+}
+
+.card[data-rarity="Rare"] {
+    border-color: #2196F3;
+}
+
+.card[data-rarity="Mythique"] {
+    border-color: #FF9800;
+    box-shadow: 0 0 15px rgba(255, 152, 0, 0.6);
+}
+
+/* Carte artefact (violet) */
+.card.artifact {
+    border-color: #9370DB;
+    background: linear-gradient(135deg, #4B0082 0%, #8A2BE2 100%);
+}
+
+.card.artifact::before {
+    content: "⚡";
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    font-size: 20px;
+}
+
+/* ========================================
+   CONTROLS (boutons)
+   ======================================== */
+
+#controls {
+    position: fixed;
+    bottom: 200px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+button {
+    padding: 15px 30px;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+#endTurnBtn {
+    background: linear-gradient(135deg, #FF4500 0%, #FF6347 100%);
+    color: #fff;
+}
+
+#endTurnBtn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 5px 20px rgba(255, 69, 0, 0.5);
+}
+
+
+/* ========================================
+   LOG (historique en bas à gauche)
+   ======================================== */
+
+#logContainer {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    width: 300px;
+    max-height: 150px;
+    overflow-y: auto;
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 10px;
+    padding: 10px;
+    font-size: 12px;
+}
+
+.log-entry {
+    margin-bottom: 3px;
+    padding: 3px;
+    border-left: 3px solid #FFD700;
+    padding-left: 8px;
+}
+
+/* ========================================
+   LIGNES DE CONNEXION
+   ======================================== */
+
+#boardLines line {
+    stroke-width: 3px;
+    transition: all 0.3s ease;
+}
+
+/* Voisinage inactif (gris) */
+.neighbor-inactive {
+    stroke: rgba(255, 255, 255, 0.2);
+}
+
+/* Voisinage actif (vert ondulant) */
+.neighbor-active {
+    stroke: #00FF00;
+    stroke-width: 4px;
+    animation: wave 2s ease-in-out infinite;
+}
+
+/* Flow inactif (gris) */
+.flow-damage-inactive,
+.flow-block-inactive,
+.flow-state-inactive {
+    stroke: rgba(255, 255, 255, 0.15);
+}
+
+/* Flow actif DMG (rouge ondulant + glow) */
+.flow-damage-active {
+    stroke: #FF4500;
+    stroke-width: 5px;
+    filter: drop-shadow(0 0 6px #FF4500);
+    animation: wave 2s ease-in-out infinite;
+}
+
+/* Flow actif BLOCK (bleu ondulant + glow) */
+.flow-block-active {
+    stroke: #4169E1;
+    stroke-width: 5px;
+    filter: drop-shadow(0 0 6px #4169E1);
+    animation: wave 2s ease-in-out infinite;
+}
+
+/* Flow actif STATE (doré ondulant + glow) */
+.flow-state-active {
+    stroke: #FFD700;
+    stroke-width: 5px;
+    filter: drop-shadow(0 0 6px #FFD700);
+    animation: wave 2s ease-in-out infinite;
+}
+
+/* Animation ondulation */
+@keyframes wave {
+    0%, 100% {
+        stroke-opacity: 0.6;
+    }
+    50% {
+        stroke-opacity: 1;
+        filter: drop-shadow(0 0 8px currentColor);
+    }
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+@media (max-width: 768px) {
+    .slot {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .entity {
+        padding: 10px 15px;
+        font-size: 12px;
+    }
+    
+    .card {
+        width: 80px;
+        height: 120px;
+    }
+    
+    #handContainer {
+        gap: 5px;
+    }
+}

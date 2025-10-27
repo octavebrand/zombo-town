@@ -3,117 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TCG Minigame - Prototype</title>
-    <link rel="stylesheet" href="css/style.css">
+    <title>ZOMBO TOWN v2.0</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <h1>ZOMBO TOWN</h1>
-
-        <!-- Enemy Selection Screen -->
-        <div id="enemySelection" class="enemy-selection">
-            <h2 style="color: #00d4ff; text-align: center;">CHOISISSEZ VOTRE ENNEMI</h2>
-            <div class="enemy-list" id="enemyList"></div>
-            <div style="text-align: center; margin-top: 20px;">
-                <button id="startBtn" class="start-btn" onclick="startGame()">COMMENCER</button>
-                <button id="constructDeckBtn" class="start-btn" onclick="constructDeck()" style="background: #5b9bd5; margin-left: 10px;">CONSTRUIRE UN DECK</button>
-                <button id="loadDeckBtn" class="start-btn" onclick="loadPreviousDeck()" style="background: #00aa00; margin-left: 10px;">CHARGER DECK</button>
-                <button id="newGameBtn" class="start-btn" onclick="newGame()" style="background: #555; margin-left: 10px;">NOUVELLE PARTIE</button>
-            </div>
+    <!-- Container principal -->
+    <div id="gameContainer">
+        
+        <!-- Info Enemy (haut) -->
+        <div id="enemyInfo"></div>
+        
+        <!-- Board central (slots + entités) -->
+        <div id="board"></div>
+        
+        <!-- Info Player (bas) -->
+        <div id="playerInfo"></div>
+        
+        <!-- Main (cartes en main) -->
+        <div id="handContainer"></div>
+        
+        <!-- Controls (boutons) -->
+        <div id="controls">
+            <button id="endTurnBtn">🔚 Fin de Tour</button>
         </div>
         
-       <!-- Deck Builder Screen -->
-        <div id="deckBuilderScreen" class="deck-builder-screen" style="display: none;">
-            <h2 style="color: #00d4ff; text-align: center;">CONSTRUIRE VOTRE DECK</h2>
-            <div class="deck-builder-container">
-                <div class="deck-builder-left">
-                    <h3>Cartes disponibles</h3>
-                    <div class="cards-pool" id="cardsPool"></div>
-                </div>
-                <div class="deck-builder-right">
-                    <div class="deck-counter">
-                        <div>Cartes: <span id="deckCounter">0</span>/50</div>
-                        <div style="margin-top: 10px; font-size: 0.9em;">
-                            <div>Communes: <span id="communeCounter">0</span>/∞</div>
-                            <div>Uncommon: <span id="uncommonCounter">0</span>/∞</div>
-                            <div>Rares: <span id="rareCounter">0</span>/∞</div>
-                            <div>Mythiques: <span id="mythicCounter">0</span>/∞</div>
-                        </div>
-                    </div>
-                    <h3>Votre deck</h3>
-                    <div class="deck-list" id="deckList"></div>
-                </div>
-            </div>
-            <div style="text-align: center; margin-top: 20px;">
-                <button class="start-btn" id="validateDeckBtn" onclick="deckBuilder.validateAndPlay()">VALIDER</button>
-                <button class="start-btn" onclick="deckBuilder.cancel()" style="background: #555; margin-left: 10px;">ANNULER</button>
-            </div>
-        </div> 
-
-        <!-- Game Screen -->
-        <div id="gameScreen" class="game-screen">
-        <!-- Enemy Section -->
-        <div class="enemy-section">
-            <div class="enemy-info">
-                <div class="enemy-name" id="enemyInfo">-</div>
-            </div>
-            <div class="enemy-attack" id="enemyAttack">Prochaine attaque: -</div>
-        </div>
-
-        <!-- Player Section -->
-        <div class="player-section">
-            <div class="player-info">
-                <div class="player-hp" id="playerInfo">-</div>
-            </div>
-            <div class="permanent-effects" id="playerEffects">Effets permanents: Aucun</div>
-        </div>
-
-        <!-- Phase Section -->
-        <div class="phase-section">
-            <div class="phase-title" id="phaseInfo">-</div>
-            <button class="end-turn-btn" id="endTurnBtn" style="display: none;" onclick="game.manualEndTurn()">FIN DU TOUR</button>
-        </div>
-
-        <!-- Historique Section -->
-        <div class="history-section" id="historySection">
-            <div class="history-title">📜 HISTORIQUE</div>
-            <div class="history-container">
-                <div class="history-column" id="historyLeft"></div>
-                <div class="history-column" id="historyRight"></div>
-            </div>
-        </div>
-
-        <!-- Cards Section -->
-        <div class="cards-section">
-            <div class="cards-container" id="cardsContainer">
-                <!-- Cards will be dynamically inserted here -->
-            </div>
-        </div>
-
-        <!-- Deck Info -->
-        <div class="deck-info">
-            <div class="deck-zone">
-                <div class="deck-zone-title">DECK</div>
-                <div class="deck-zone-count" id="deckCount">0</div>
-            </div>
-            <div class="deck-zone">
-                <div class="deck-zone-title">DÉFAUSSE</div>
-                <div class="deck-zone-count" id="discardCount">0</div>
-            </div>
-            <div class="deck-zone">
-                <div class="deck-zone-title">BANNIES</div>
-                <div class="deck-zone-count" id="banishedCount">0</div>
-            </div>
-        </div>
-
-        <!-- Log Section -->
-        <div class="log-section">
-            <div class="log-title">📜 LOG DEBUG</div>
-            <div id="logContainer"></div>
-        </div>
-        </div><!-- End gameScreen -->
+        <!-- Log (historique) -->
+        <div id="logContainer"></div>
+        
     </div>
-
-    <script type="module" src="js/game.js"></script>
+    
+    <!-- Popup overlay (STATE rewards + résultats) -->
+    <div id="popup" style="
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.95);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        padding: 20px;
+    "></div>
+    
+    <!-- Scripts (modules ES6) -->
+    <script type="module" src="main.js"></script>
 </body>
 </html>
