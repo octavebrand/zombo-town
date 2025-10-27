@@ -80,11 +80,29 @@ export class UIManager {
             if (slot.card) {
                 slotDiv.classList.add('occupied');
                 
-                // Si slot enemy, afficher HP
+                
+                // Si slot enemy, afficher HP + effets
                 if (slot.type === 'enemy' && slot.card.currentHp !== undefined) {
+                    // Récupérer effets
+                    let effectText = '';
+                    if (slot.card.effect) {
+                        const effects = Array.isArray(slot.card.effect) ? slot.card.effect : [slot.card.effect];
+                        
+                        effectText = effects.map(eff => {
+                            if (eff.type === 'boost_damage') return `+${eff.value} 🔥`;
+                            if (eff.type === 'boost_block') return `+${eff.value} 🛡️`;
+                            return '';
+                        }).filter(t => t).join(' ');
+                    }
+                    
                     slotDiv.innerHTML = `
-                        <div style="font-size: 12px; font-weight: bold;">${slot.card.name}</div>
+                        <div style="font-size: 11px; font-weight: bold;">${slot.card.name}</div>
                         <div style="font-size: 16px; color: #FF6347;">${slot.card.currentHp}/${slot.card.maxHp}</div>
+                        ${effectText ? `
+                            <div style="font-size: 10px; color: #FFD700; margin-top: 3px;">
+                                ${effectText}
+                            </div>
+                        ` : ''}
                     `;
                 } else {
                     const displayValue = (slot.card.value || 0) + slot.bonus;
@@ -517,6 +535,19 @@ renderHand() {
         if (!slot || !slot.card) return;
         
         const card = slot.removeCard();
+
+        // 🆕 Si la carte avait bonus_neighbors, reset les voisins seulement
+        if (card.effect) {
+            const effects = Array.isArray(card.effect) ? card.effect : [card.effect];
+            const hasNeighborEffect = effects.some(e => e.type === 'bonus_neighbors' || e.type === 'penalty_neighbors');
+            
+            if (hasNeighborEffect) {
+                // Reset seulement les voisins de cette carte
+                const neighbors = this.gm.board.getNeighbors(slotId);
+                neighbors.forEach(n => n.bonus = 0);
+            }
+        }
+
         slot.bonus = 0;
         
         // Remettre en main si possible

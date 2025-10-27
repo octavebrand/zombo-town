@@ -10,12 +10,24 @@ export const STATE_REWARDS_POOL = {
     ],
     tier1: [
         { id: 't1_draw2', name: 'Pioche 2', effects: [{ type: 'draw', value: 2 }] },
-        { id: 't1_heal10', name: 'Heal 10', effects: [{ type: 'heal', value: 10 }] },
+       { id: 't2_heal10_draw1', 
+        name: 'Heal 15 + Pioche 1', 
+            effects: [
+                { type: 'heal', value: 10 },
+                { type: 'draw', value: 1 }
+            ]
+        },
         { id: 't1_random4', name: 'Random slot +4', effects: [{ type: 'random_slot_bonus', value: 4 }] }
     ],
     tier2: [
         { id: 't2_draw3', name: 'Pioche 3', effects: [{ type: 'draw', value: 3 }] },
-        { id: 't2_heal15', name: 'Heal 15', effects: [{ type: 'heal', value: 15 }] },
+        { id: 't2_heal15_draw1', 
+        name: 'Heal 15 + Pioche 1', 
+            effects: [
+                { type: 'heal', value: 15 },
+                { type: 'draw', value: 1 }
+            ]
+        },
         { id: 't2_random4x2', name: '2x Random slots +4', effects: [
             { type: 'random_slot_bonus', value: 4 },
             { type: 'random_slot_bonus', value: 4 }
