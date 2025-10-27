@@ -17,14 +17,14 @@ export const ALL_CARDS = [
         10,
         ['damage', 'block', 'shared', 'state'],  
         Rarity.COMMUNE,
-        null,
-        'Value 10'
+        { type: 'instant_draw', value: 1 },
+        'Value 10, draw 1'
     ),
     
     new Card(
         'dmg_boost',
         'DMG Boost',
-        6,
+        10,
         ['damage', 'shared'],
         Rarity.COMMUNE,
         { type: 'maxxer_dmg', value: 1 },
@@ -34,7 +34,7 @@ export const ALL_CARDS = [
     new Card(
         'block_boost',
         'BLOCK Boost',
-        6,
+        10,
         ['block', 'shared'],
         Rarity.COMMUNE,
         { type: 'maxxer_block', value: 1 },
@@ -46,11 +46,11 @@ export const ALL_CARDS = [
     new Card(
         'coup_moyen',
         'Coup Moyen',
-        15,
+        12,
         ['damage', 'block', 'shared', 'state'],  
         Rarity.COMMUNE,
-        null,
-        'Value 15'
+        { type: 'instant_draw', value: 1 },
+        'Value 12, draw 1'
     ),
     
     // ========================================
@@ -91,13 +91,16 @@ export const ALL_CARDS = [
     
     // Boost Léger
     new Card(
-        'boost_leger',
-        'Boost Léger',
+        'boost_man',
+        'Boost Man',
         4,
         ['damage', 'block', 'shared', 'state'],  // 🆕 + state
         Rarity.UNCOMMON,
-        { type: 'maxxer_any', value: 1 },
-        'Value 4 + Maxxer du slot +1'
+        [
+            { type: 'maxxer_any', value: 1 },
+            { type: 'instant_draw', value: 1 }
+        ],
+        'Value 4 + Maxxer du slot +1, draw 1'
     ),
     
     // ========================================
@@ -147,5 +150,28 @@ export const ALL_CARDS = [
         Rarity.MYTHIQUE,
         { type: 'maxxer_all', value: 2 },
         'Tous maxxers +2'
+    ),
+
+    // Commune - Cycle peon
+    new Card(
+        'card_peon_cycle',
+        'Cycle Peon',
+        5,
+        ['damage', 'block', 'shared', 'state'],
+        Rarity.COMMON,
+        { type: 'instant_draw', value: 2 },
+        'draw 1'
+        
+    ),
+
+    // Uncommon - Moteur
+    new Card(
+        'card_engine',
+        'Moteur',
+        8,
+        ['damage', 'block', 'shared', 'state'],
+        Rarity.UNCOMMON,
+        { type: 'instant_draw', value: 2 },
+        'draw 2'
     )
 ];

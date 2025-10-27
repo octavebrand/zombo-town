@@ -365,6 +365,7 @@ renderHand() {
                     case 'penalty_neighbors': return `Voisins -${eff.value}`;
                     case 'heal': return `Heal ${eff.value}`;
                     case 'draw': return `Pioche ${eff.value}`;
+                    case 'instant_draw': return `📥 Pioche ${eff.value} (immédiat)`;
                     default: return eff.type;
                 }
             }).join(' • ');

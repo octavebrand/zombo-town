@@ -17,7 +17,7 @@ import { STATE_REWARDS_POOL, getTierFromValue, getRandomRewards } from './stateR
 
 const GAME_CONFIG = {
     STARTING_HAND: 5,
-    DRAW_PER_TURN: 1,
+    DRAW_PER_TURN: 0,
     MAX_HAND_SIZE: 10
 };
 

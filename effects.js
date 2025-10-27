@@ -45,9 +45,17 @@ export class EffectResolver {
             case 'draw':
                 // Sera résolu par bouton Player Resolve
                 break;
+            case 'instant_draw':  // 🆕
+                this.resolveInstantDraw(effect.value);
+                break;
             default:
                 console.warn(`Effet inconnu: ${effect.type}`);
         }
+    }
+
+    resolveInstantDraw(count) {
+        this.gm.drawCards(count);
+        this.gm.log(`📥 Instant Draw: ${count} carte(s) piochée(s)`);
     }
     
     // ========================================
