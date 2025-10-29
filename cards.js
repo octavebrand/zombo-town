@@ -25,11 +25,11 @@ export const ALL_CARDS = [
     new Card(
         'botte',
         'Botte',
-        3,
+        5,
         ['damage', 'block', 'shared', 'state'],  
         Rarity.COMMUNE,
         { type: 'instant_draw', value: 1 },
-        'Value 3, draw 1'
+        'Value 5, draw 1'
     ),
     
     new Card(
@@ -134,14 +134,28 @@ export const ALL_CARDS = [
     new Card(
         'boost_man',
         'Boost Man',
-        2,
+        3,
         ['damage', 'block', 'shared', 'state'],  // 🆕 + state
         Rarity.UNCOMMON,
         [
-            { type: 'maxxer_any', value: 1 },
+            { type: 'maxxer_dmg', value: 1 },
             { type: 'instant_draw', value: 1 }
         ],
-        'Value 2 + Maxxer du slot +1, draw 1'
+        'Value 3 + Maxxer du slot +1, draw 1'
+    ),
+
+        // Tower man
+    new Card(
+        'tower_man',
+        'Tower Man',
+        3,
+        ['damage', 'block', 'shared', 'state'],  // 🆕 + state
+        Rarity.UNCOMMON,
+        [
+            { type: 'maxxer_block', value: 1 },
+            { type: 'instant_draw', value: 1 }
+        ],
+        'Value 3 + Maxxer du slot +1, draw 1'
     ),
 
     new Card(
