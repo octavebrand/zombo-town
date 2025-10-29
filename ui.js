@@ -56,6 +56,8 @@ export class UIManager {
         this.highlightTarget();
         this.linesRenderer.render();
     }
+
+
     
     // ========================================
     // BOARD (tous les slots)
@@ -139,6 +141,26 @@ export class UIManager {
                         bonus
                     </div>
                 `;
+            }
+
+            // 🆕 Hover tooltip
+            if (slot.card) {
+                slotDiv.onmouseenter = (e) => {
+                    this.showCardTooltip(slot.card, e.clientX, e.clientY);
+                };
+                
+                slotDiv.onmouseleave = () => {
+                    this.hideCardTooltip();
+                };
+                
+                slotDiv.onmousemove = (e) => {
+                    // Update position si souris bouge
+                    const tooltip = document.getElementById('cardTooltip');
+                    if (tooltip && tooltip.style.display === 'block') {
+                        tooltip.style.left = `${e.clientX + 15}px`;
+                        tooltip.style.top = `${e.clientY + 15}px`;
+                    }
+                };
             }
             
             this.boardElement.appendChild(slotDiv);
@@ -384,6 +406,7 @@ renderHand() {
                     case 'heal': return `Heal ${eff.value}`;
                     case 'draw': return `Pioche ${eff.value}`;
                     case 'instant_draw': return `📥 Pioche ${eff.value} (immédiat)`;
+                    case 'instant_all_slots_bonus': return `All slots +${eff.value}`;  // 🆕
                     default: return eff.type;
                 }
             }).join(' • ');
@@ -534,21 +557,51 @@ renderHand() {
         const slot = this.gm.board.getSlot(slotId);
         if (!slot || !slot.card) return;
         
-        const card = slot.removeCard();
-
-        // 🆕 Si la carte avait bonus_neighbors, reset les voisins seulement
+        // 🆕 Vérifier si la carte a un effet "instant" (AVANT de la retirer)
+        const card = slot.card;
         if (card.effect) {
             const effects = Array.isArray(card.effect) ? card.effect : [card.effect];
-            const hasNeighborEffect = effects.some(e => e.type === 'bonus_neighbors' || e.type === 'penalty_neighbors');
+            const hasInstantEffect = effects.some(e => 
+                e.type === 'instant_draw' || 
+                e.type === 'instant_all_slots_bonus'
+            );
             
+            if (hasInstantEffect) {
+                this.gm.log(`❌ ${card.name} ne peut pas être retirée (effet instantané)`);
+                return;  // 🛑 Bloquer le retrait
+            }
+        }
+        
+        // Retirer la carte
+        slot.removeCard();
+
+        // Gérer retrait des bonus
+        if (card.effect) {
+            const effects = Array.isArray(card.effect) ? card.effect : [card.effect];
+            
+            // Bonus neighbors
+            const hasNeighborEffect = effects.some(e => e.type === 'bonus_neighbors' || e.type === 'penalty_neighbors');
             if (hasNeighborEffect) {
-                // Reset seulement les voisins de cette carte
                 const neighbors = this.gm.board.getNeighbors(slotId);
-                neighbors.forEach(n => n.bonus = 0);
+                neighbors.forEach(n => {
+                    n.neighborBonus = 0;
+                    n.rewardBonus = 0;
+                });
+            }
+            
+            // All slots bonus
+            const allSlotsEffect = effects.find(e => e.type === 'instant_all_slots_bonus');
+            if (allSlotsEffect) {
+                this.gm.board.getAllSlots().forEach(s => {
+                    if (s.type !== 'enemy' && s.type !== 'player' && s.id !== slotId) {
+                        s.neighborBonus -= allSlotsEffect.value;
+                    }
+                });
             }
         }
 
-        slot.bonus = 0;
+        slot.neighborBonus = 0;  
+        slot.rewardBonus = 0;   
         
         // Remettre en main si possible
         if (this.gm.hand.length < 12) {
@@ -559,9 +612,108 @@ renderHand() {
             this.gm.log(`↩️ ${card.name} retirée (main pleine, défaussée)`);
         }
 
+        
+
         this.gm.recalculateMaxxers();
         
         this.render();
+    }
+
+    showCardTooltip(card, mouseX, mouseY) {
+        const tooltip = document.getElementById('cardTooltip');
+        if (!tooltip) return;
+        
+        // Construire contenu
+        let effectText = '';
+        if (card.effect) {
+            const effects = Array.isArray(card.effect) ? card.effect : [card.effect];
+            effectText = effects.map(eff => {
+                switch(eff.type) {
+                    case 'maxxer_dmg': return `Maxxer DMG +${eff.value}`;
+                    case 'maxxer_block': return `Maxxer BLOCK +${eff.value}`;
+                    case 'maxxer_all': return `Tous maxxers +${eff.value}`;
+                    case 'maxxer_any': return `Maxxer slot +${eff.value}`;
+                    case 'bonus_neighbors': return `Voisins +${eff.value}`;
+                    case 'penalty_neighbors': return `Voisins ${eff.value}`;
+                    case 'instant_draw': return `📥 Pioche ${eff.value} (immédiat)`;
+                    case 'instant_all_slots_bonus': return `All slots +${eff.value}`;
+                    case 'heal': return `Heal ${eff.value}`;
+                    case 'draw': return `Pioche ${eff.value}`;
+                    default: return eff.type;
+                }
+            }).join('<br>');
+        }
+        
+        // Slots compatibles (pour cartes joueur)
+        let slotsText = '';
+        if (card.slotTypes) {
+            const slotNames = {
+                damage: 'DMG',
+                block: 'BLOCK',
+                shared: 'SHARED',
+                player: 'PLAYER',
+                enemy: 'ENEMY',
+                state: 'STATE'
+            };
+            
+            if (card.slotTypes.length === 1) {
+                slotsText = `<div style="color: #FF6347; font-size: 12px; margin: 5px 0;">${slotNames[card.slotTypes[0]]} only</div>`;
+            }
+        }
+        
+        // Cartes ennemies (avec effets boost)
+        let enemyEffectText = '';
+        if (card.currentHp !== undefined && card.effect) {
+            const effects = Array.isArray(card.effect) ? card.effect : [card.effect];
+            enemyEffectText = effects.map(eff => {
+                if (eff.type === 'boost_damage') return `+${eff.value} 🔥 Dégâts ennemi`;
+                if (eff.type === 'boost_block') return `+${eff.value} 🛡️ Blocage ennemi`;
+                return '';
+            }).filter(t => t).join('<br>');
+        }
+        
+        tooltip.innerHTML = `
+            <div style="font-size: 16px; font-weight: bold; color: #FFD700; margin-bottom: 8px;">
+                ${card.name}
+            </div>
+            ${card.currentHp !== undefined ? `
+                <div style="font-size: 14px; color: #FF6347; margin: 5px 0;">
+                    HP: ${card.currentHp}/${card.maxHp}
+                </div>
+            ` : `
+                <div style="font-size: 20px; color: #AED581; margin: 5px 0;">
+                    Value: ${card.value || 0}
+                </div>
+            `}
+            ${slotsText}
+            ${effectText ? `
+                <div style="font-size: 12px; color: #AED581; margin: 8px 0; line-height: 1.4;">
+                    ${effectText}
+                </div>
+            ` : ''}
+            ${enemyEffectText ? `
+                <div style="font-size: 12px; color: #FFD700; margin: 8px 0; line-height: 1.4;">
+                    ${enemyEffectText}
+                </div>
+            ` : ''}
+            ${card.rarity ? `
+                <div style="font-size: 11px; color: #888; margin-top: 8px;">
+                    ${card.rarity}
+                </div>
+            ` : ''}
+        `;
+        
+        // Positionner près de la souris
+        tooltip.style.left = `${mouseX + 15}px`;
+        tooltip.style.top = `${mouseY + 15}px`;
+        tooltip.style.display = 'block';
+    }
+
+    hideCardTooltip() {
+        const tooltip = document.getElementById('cardTooltip');
+        if (tooltip) {
+            tooltip.style.display = 'none';
+        }
     }
 
 }

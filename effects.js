@@ -27,6 +27,7 @@ export class EffectResolver {
     }
     
     resolveEffect(effect, card, slot) {
+        
         switch (effect.type) {
             case 'maxxer_dmg':
             case 'maxxer_block':
@@ -47,6 +48,16 @@ export class EffectResolver {
                 break;
             case 'instant_draw':  // 🆕
                 this.resolveInstantDraw(effect.value);
+                break;
+            case 'instant_all_slots_bonus':
+                let count = 0;
+                this.gm.board.getAllSlots().forEach(s => {
+                    if (s.type !== 'enemy' && s.type !== 'player' && s.id !== slot.id) {
+                        s.rewardBonus += effect.value;  
+                        count++;
+                    }
+                });
+                this.gm.log(`⭐ All slots: +${effect.value} (${count} slot(s) boosté(s))`);
                 break;
             default:
                 console.warn(`Effet inconnu: ${effect.type}`);
@@ -88,7 +99,7 @@ export class EffectResolver {
         
         neighbors.forEach(neighborSlot => {
             // 🆕 Appliquer bonus sur le SLOT, pas sur la carte
-            neighborSlot.bonus += bonus;
+            neighborSlot.neighborBonus += bonus;
             
             const sign = bonus > 0 ? '+' : '';
             this.gm.log(`🔗 ${neighborSlot.id}: bonus ${sign}${bonus} (total: ${neighborSlot.bonus})`);

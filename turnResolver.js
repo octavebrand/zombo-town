@@ -61,6 +61,8 @@ export class TurnResolver {
         this.gm.board.slots.damage.forEach(slot => {
             if (slot.card) {
                 results.damageBase += slot.card.value + slot.bonus;
+            } else if (slot.rewardBonus > 0) {
+                results.damageBase += slot.rewardBonus;  // 🆕 Slot vide mais avec reward bonus
             }
         });
         
@@ -68,6 +70,8 @@ export class TurnResolver {
         this.gm.board.slots.shared.forEach(slot => {
             if (slot.card) {
                 results.damageBase += slot.card.value + slot.bonus;
+            } else if (slot.rewardBonus > 0) {
+                results.damageBase += slot.rewardBonus;  // 🆕 Slot vide mais avec reward bonus
             }
         });
 
@@ -104,6 +108,8 @@ export class TurnResolver {
         this.gm.board.slots.block.forEach(slot => {
             if (slot.card) {
                 results.blockBase += slot.card.value + slot.bonus;
+            } else if (slot.rewardBonus > 0) {
+                results.blockBase += slot.rewardBonus;  // 🆕 Slot vide mais avec reward bonus
             }
         });
         
@@ -111,6 +117,8 @@ export class TurnResolver {
         this.gm.board.slots.shared.forEach(slot => {
             if (slot.card) {
                 results.blockBase += slot.card.value + slot.bonus;
+            } else if (slot.rewardBonus > 0) {
+                results.blockBase += slot.rewardBonus;  // 🆕 Slot vide mais avec reward bonus
             }
         });
         
@@ -266,7 +274,8 @@ export class TurnResolver {
         allSlots.forEach(slot => {
             // 🆕 Reset TOUS les bonus (slots vides ou pleins)
             if (slot.type !== 'enemy' && slot.type !== 'player') {
-                slot.bonus = 0;
+                slot.rewardBonus = 0;  
+                slot.neighborBonus = 0;  
             }
             
             // Défausser cartes
@@ -346,15 +355,12 @@ export class TurnResolver {
     }
 
     applyAllSlotsBonus(value) {
-        let count = 0;
+        // 🆕 Stocker pour application au tour suivant
+        if (!this.gm.pendingSlotBonuses) {
+            this.gm.pendingSlotBonuses = [];
+        }
         
-        this.gm.board.getAllSlots().forEach(slot => {
-            if (slot.card && slot.type !== 'enemy' && slot.type !== 'player') {
-                slot.bonus += value;
-                count++;
-            }
-        });
-        
-        this.gm.log(`[H] ⭐ All slots: +${value} bonus (${count} slot(s) affecté(s))`);
+        this.gm.pendingSlotBonuses.push({ type: 'all', value: value });
+        this.gm.log(`[H] ⭐ All slots +${value} (sera appliqué au prochain tour)`);
     }
 }

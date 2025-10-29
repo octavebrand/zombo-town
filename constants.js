@@ -51,9 +51,15 @@ export class Slot {
         this.card = null;
         this.isBlocked = false;          // Debuff enemy (futur)
         this.neighbors = [];             // IDs des slots voisins
-        this.bonus = 0;                    // Bonus cumulé des voisins
+        this.neighborBonus = 0;  // 🆕 Bonus des cartes voisines
+        this.rewardBonus = 0;     // 🆕 Bonus des rewards (random/all)
     }
     
+    // 🆕 Getter pour compatibilité
+    get bonus() {
+        return this.neighborBonus + this.rewardBonus;
+    }
+
     canAccept(card) {
         if (!card) return false;
         return card.slotTypes.includes(this.type) && !this.isBlocked;

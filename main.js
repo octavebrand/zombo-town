@@ -183,8 +183,7 @@ class GameManagerStub {
             }
         });
         
-        // 🆕 Stocker sur le SLOT, pas sur la carte
-        slot.bonus += totalBonus;
+        slot.neighborBonus += totalBonus;
         
         if (totalBonus !== 0) {
             const sign = totalBonus > 0 ? '+' : '';
@@ -249,15 +248,14 @@ class GameManagerStub {
         
         this.board.slots.state.forEach(slot => {
             if (slot.card) {
-                total += slot.card.value + slot.bonus;
+                total += slot.card.value + slot.rewardBonus;
             }
         });
         
-        this.board.slots.shared.forEach(slot => {
-            if (slot.card) {
-                total += slot.card.value + slot.bonus;
-            }
-        });
+        const shared2 = this.board.getSlot('shared_2');
+        if (shared2 && shared2.card) {
+            total += shared2.card.value + shared2.neighborBonus;
+        }
         
         this.stateValue = total;
         this.stateTier = getTierFromValue(total);
@@ -282,10 +280,25 @@ class GameManagerStub {
                 
                 // Choisir aléatoirement (même vide)
                 const randomSlot = validSlots[Math.floor(Math.random() * validSlots.length)];
-                randomSlot.bonus += bonus.value;
+                randomSlot.rewardBonus += bonus.value;
                 
                 this.log(`🎲 ${randomSlot.id}: +${bonus.value} bonus (total: ${randomSlot.bonus})`);
             }
+            // 🆕 Cas 'all'
+            if (bonus.type === 'all') {
+                const allSlots = this.board.getAllSlots().filter(slot => 
+                    slot.type !== 'enemy' && slot.type !== 'player'
+                );
+                
+                let count = 0;
+                allSlots.forEach(slot => {
+                    slot.rewardBonus += bonus.value;
+                    count++;
+                });
+                
+                this.log(`⭐ All slots: +${bonus.value} bonus (${count} slot(s))`);
+            }
+
         });
         
         // Clear pending bonuses
