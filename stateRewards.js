@@ -5,19 +5,22 @@
 export const STATE_REWARDS_POOL = {
     tier0: [
         { id: 't0_draw1', name: 'Pioche 1', effects: [{ type: 'draw', value: 1 }] },
-        { id: 't0_heal5', name: 'Heal 5', effects: [{ type: 'heal', value: 5 }] },
-        { id: 't0_random2', name: 'Random slot +2', effects: [{ type: 'random_slot_bonus', value: 2 }] }
+        { id: 't0_heal10', name: 'Heal 10', effects: [{ type: 'heal', value: 10 }] },
+        { id: 't0_random10', name: 'Random slot +10', effects: [{ type: 'random_slot_bonus', value: 10 }] }
     ],
     tier1: [
         { id: 't1_draw2', name: 'Pioche 2', effects: [{ type: 'draw', value: 2 }] },
-       { id: 't2_heal10_draw1', 
+       { id: 't2_heal15_draw1', 
         name: 'Heal 15 + Pioche 1', 
             effects: [
-                { type: 'heal', value: 10 },
+                { type: 'heal', value: 15 },
                 { type: 'draw', value: 1 }
             ]
         },
-        { id: 't1_random4', name: 'Random slot +4', effects: [{ type: 'random_slot_bonus', value: 4 }] }
+        { id: 't1_random10', name: 'Random slot +10', effects: [
+            { type: 'random_slot_bonus', value: 10 },
+            { type: 'draw', value: 1 }
+        ] }
     ],
     tier2: [
         { id: 't2_draw3', name: 'Pioche 3', effects: [{ type: 'draw', value: 3 }] },
@@ -28,31 +31,31 @@ export const STATE_REWARDS_POOL = {
                 { type: 'draw', value: 1 }
             ]
         },
-        { id: 't2_random4x2', name: '2x Random slots +4', effects: [
-            { type: 'random_slot_bonus', value: 4 },
-            { type: 'random_slot_bonus', value: 4 }
+        { id: 't2_random4x2', name: '2x Random slots +10', effects: [
+            { type: 'random_slot_bonus', value: 10 },
+            { type: 'random_slot_bonus', value: 10 }
         ]}
     ],
     tier3: [
-        { id: 't3_draw3_heal5', name: 'Pioche 3 + Heal 5', effects: [
+        { id: 't3_draw3_heal10', name: 'Pioche 3 + Heal 10', effects: [
             { type: 'draw', value: 3 },
-            { type: 'heal', value: 5 }
+            { type: 'heal', value: 10 }
         ]},
         { id: 't3_heal20', name: 'Heal 20', effects: [{ type: 'heal', value: 20 }] },
-        { id: 't3_all1', name: 'All slots +1', effects: [{ type: 'all_slots_bonus', value: 1 }] }
+        { id: 't3_all2', name: 'All slots +2', effects: [{ type: 'all_slots_bonus', value: 2 }] }
     ],
     tier4: [
         { id: 't4_draw3_heal15', name: 'Pioche 3 + Heal 15', effects: [
             { type: 'draw', value: 3 },
             { type: 'heal', value: 15 }
         ]},
-        { id: 't4_draw2_all1', name: 'Pioche 2 + All slots +1', effects: [
+        { id: 't4_draw2_all2', name: 'Pioche 2 + All slots +2', effects: [
             { type: 'draw', value: 2 },
-            { type: 'all_slots_bonus', value: 1 }
+            { type: 'all_slots_bonus', value: 2 }
         ]},
-        { id: 't4_heal30_draw1', name: 'Heal 30 + Pioche 1', effects: [
+        { id: 't4_heal30_draw2', name: 'Heal 30 + Pioche 2', effects: [
             { type: 'heal', value: 30 },
-            { type: 'draw', value: 1 }
+            { type: 'draw', value: 2 }
         ]}
     ]
 };
