@@ -1,6 +1,8 @@
 // ========================================
 // TURNRESOLVER.JS - Résolution fin de tour (A→H)
 // ========================================
+import { ALL_CARDS } from './cards.js';
+import { Rarity } from './constants.js';
 
 export class TurnResolver {
     constructor(gameManager) {
@@ -41,6 +43,9 @@ export class TurnResolver {
         
         // 🆕 E2) Appliquer effets STATE (draw/heal)
         this.applyStateEffects(results);
+
+        // 🆕 E3) Vérifier timers cartes ennemies
+        this.checkTimers(results);
 
         // F) Reset compteurs
         this.resetCounters();
@@ -221,8 +226,15 @@ export class TurnResolver {
             
             // Si carte morte, la retirer
             if (isDead) {
+                const deadCard = card;
+                
+                // 🆕 Trigger onDeath
+                if (deadCard.onDeath) {
+                    this.resolveOnDeath(deadCard.onDeath);
+                }
+                
                 slot.removeCard();
-                this.gm.log(`💀 ${card.name} détruite !`);
+                this.gm.log(`💀 ${deadCard.name} détruite !`);
                 
                 // Reset cible vers ennemi principal
                 this.gm.currentTarget = 'enemy';
@@ -362,5 +374,64 @@ export class TurnResolver {
         
         this.gm.pendingSlotBonuses.push({ type: 'all', value: value });
         this.gm.log(`[H] ⭐ All slots +${value} (sera appliqué au prochain tour)`);
+    }
+
+    checkTimers(results) {
+        this.gm.board.slots.enemy.forEach(slot => {
+            if (!slot.card || !slot.card.timer || slot.card.turnPlaced === null) return;
+            
+            const turnsElapsed = this.gm.turnNumber - slot.card.turnPlaced;
+            const turnsRemaining = slot.card.timer.turns - turnsElapsed;
+            
+            // Timer expiré
+            if (turnsRemaining <= 1) {
+                this.gm.log(`⏰ ${slot.card.name}: Timer expiré !`);
+                this.resolveTimerEffect(slot.card.timer.effect);
+                
+                // Reset timer
+                slot.card.timer = null;
+            }
+        });
+    }
+
+    resolveTimerEffect(effect) {
+        switch(effect.type) {
+            case 'damage_player':
+                this.gm.player.currentHp = Math.max(0, this.gm.player.currentHp - effect.value);
+                this.gm.log(`💥 Timer: ${effect.value} dégâts au joueur !`);
+                break;
+                
+            case 'heal_enemy':
+                const oldHp = this.gm.enemy.currentHp;
+                this.gm.enemy.currentHp = Math.min(this.gm.enemy.maxHp, this.gm.enemy.currentHp + effect.value);
+                this.gm.log(`💚 Timer: Boss heal ${effect.value} (${oldHp} → ${this.gm.enemy.currentHp})`);
+                break;
+        }
+    }
+
+    resolveOnDeath(onDeath) {
+        switch(onDeath.type) {
+            case 'draw':
+                this.gm.drawCards(onDeath.value);
+                this.gm.log(`📥 OnDeath: Pioche ${onDeath.value}`);
+                break;
+                
+            case 'add_rare_card':
+                // Filtrer cartes Rares du pool
+                const rareCards = ALL_CARDS.filter(c => c.rarity === Rarity.RARE);
+                if (rareCards.length > 0) {
+                    const randomRare = rareCards[Math.floor(Math.random() * rareCards.length)];
+                    // Créer copie
+                    this.gm.hand.push({...randomRare});
+                    this.gm.log(`✨ OnDeath: ${randomRare.name} ajoutée en main !`);
+                }
+                break;
+                
+            case 'heal':
+                const oldHp = this.gm.player.currentHp;
+                this.gm.player.currentHp = Math.min(this.gm.player.maxHp, this.gm.player.currentHp + onDeath.value);
+                this.gm.log(`💚 OnDeath: Heal ${onDeath.value} (${oldHp} → ${this.gm.player.currentHp})`);
+                break;
+        }
     }
 }

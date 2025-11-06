@@ -83,37 +83,79 @@ export class UIManager {
                 slotDiv.classList.add('occupied');
                 
                 
-                // Si slot enemy, afficher HP + effets
-                if (slot.type === 'enemy' && slot.card.currentHp !== undefined) {
-                    // Récupérer effets
-                    let effectText = '';
-                    if (slot.card.effect) {
-                        const effects = Array.isArray(slot.card.effect) ? slot.card.effect : [slot.card.effect];
-                        
-                        effectText = effects.map(eff => {
-                            if (eff.type === 'boost_damage') return `+${eff.value} 🔥`;
-                            if (eff.type === 'boost_block') return `+${eff.value} 🛡️`;
-                            return '';
-                        }).filter(t => t).join(' ');
-                    }
-                    
-                    slotDiv.innerHTML = `
-                        <div style="font-size: 11px; font-weight: bold;">${slot.card.name}</div>
-                        <div style="font-size: 16px; color: #FF6347;">${slot.card.currentHp}/${slot.card.maxHp}</div>
-                        ${effectText ? `
-                            <div style="font-size: 10px; color: #FFD700; margin-top: 3px;">
-                                ${effectText}
-                            </div>
-                        ` : ''}
-                    `;
-                } else {
-                    const displayValue = (slot.card.value || 0) + slot.bonus;
-                    const bonusText = slot.bonus !== 0 ? ` (${slot.card.value}${slot.bonus > 0 ? '+' : ''}${slot.bonus})` : '';
-                    slotDiv.innerHTML = `
-                        <span style="font-size: 20px; font-weight: bold;">${displayValue}</span>
-                        ${bonusText ? `<div style="font-size: 10px; color: #AED581;">${bonusText}</div>` : ''}
-                    `;
+        // Si slot enemy, afficher HP + effets
+        if (slot.type === 'enemy' && slot.card.currentHp !== undefined) {
+            // Récupérer effets passifs
+            let effectText = '';
+            if (slot.card.effect) {
+                const effects = Array.isArray(slot.card.effect) ? slot.card.effect : [slot.card.effect];
+                
+                effectText = effects.map(eff => {
+                    if (eff.type === 'boost_damage') return `+${eff.value} 🔥`;
+                    if (eff.type === 'boost_block') return `+${eff.value} 🛡️`;
+                    return '';
+                }).filter(t => t).join(' ');
+            }
+            
+            // 🆕 Afficher onDeath (MANQUANT DANS TON CODE)
+            let onDeathText = '';
+            if (slot.card.onDeath) {
+                switch(slot.card.onDeath.type) {
+                    case 'draw':
+                        onDeathText = `💀 Draw ${slot.card.onDeath.value}`;
+                        break;
+                    case 'add_rare_card':
+                        onDeathText = `💀 Rare`;
+                        break;
+                    case 'heal':
+                        onDeathText = `💀 Heal ${slot.card.onDeath.value}`;
+                        break;
                 }
+            }
+            
+            // 🆕 Countdown timer
+            let timerText = '';
+            if (slot.card.timer && slot.card.turnPlaced !== null) {
+                const turnsElapsed = this.gm.turnNumber - slot.card.turnPlaced;
+                const turnsRemaining = slot.card.timer.turns - turnsElapsed;
+                
+                if (turnsRemaining > 0) {
+                    const effect = slot.card.timer.effect;
+                    let effectDesc = '';
+                    if (effect.type === 'damage_player') effectDesc = `${effect.value} DMG`;
+                    if (effect.type === 'heal_enemy') effectDesc = `Heal ${effect.value}`;
+                    
+                    timerText = `⏰${turnsRemaining}: ${effectDesc}`;
+                }
+            }
+
+            slotDiv.innerHTML = `
+                <div style="font-size: 11px; font-weight: bold;">${slot.card.name}</div>
+                <div style="font-size: 16px; color: #FF6347;">${slot.card.currentHp}/${slot.card.maxHp}</div>
+                ${effectText ? `
+                    <div style="font-size: 10px; color: #FFD700; margin-top: 3px;">
+                        ${effectText}
+                    </div>
+                ` : ''}
+                ${onDeathText ? `
+                    <div style="font-size: 9px; color: #9370DB; margin-top: 2px;">
+                        ${onDeathText}
+                    </div>
+                ` : ''}
+                ${timerText ? `
+                    <div style="font-size: 9px; color: #FF4500; font-weight: bold; margin-top: 2px;">
+                        ${timerText}
+                    </div>
+                ` : ''}
+            `;
+        } else {
+            const displayValue = (slot.card.value || 0) + slot.bonus;
+            const bonusText = slot.bonus !== 0 ? ` (${slot.card.value}${slot.bonus > 0 ? '+' : ''}${slot.bonus})` : '';
+            slotDiv.innerHTML = `
+                <span style="font-size: 20px; font-weight: bold;">${displayValue}</span>
+                ${bonusText ? `<div style="font-size: 10px; color: #AED581;">${bonusText}</div>` : ''}
+            `;
+        }
                 
                 // 🆕 Click pour retirer (sauf enemy/player)
                 if (slot.type !== 'enemy' && slot.type !== 'player') {
@@ -661,15 +703,51 @@ renderHand() {
             }
         }
         
-        // Cartes ennemies (avec effets boost)
+        // Cartes ennemies (avec effets boost + onDeath + timer)
         let enemyEffectText = '';
-        if (card.currentHp !== undefined && card.effect) {
-            const effects = Array.isArray(card.effect) ? card.effect : [card.effect];
-            enemyEffectText = effects.map(eff => {
-                if (eff.type === 'boost_damage') return `+${eff.value} 🔥 Dégâts ennemi`;
-                if (eff.type === 'boost_block') return `+${eff.value} 🛡️ Blocage ennemi`;
-                return '';
-            }).filter(t => t).join('<br>');
+        if (card.currentHp !== undefined) {
+            let effectsList = [];
+            
+            // Effets passifs
+            if (card.effect) {
+                const effects = Array.isArray(card.effect) ? card.effect : [card.effect];
+                effects.forEach(eff => {
+                    if (eff.type === 'boost_damage') effectsList.push(`+${eff.value} 🔥 Dégâts ennemi`);
+                    if (eff.type === 'boost_block') effectsList.push(`+${eff.value} 🛡️ Blocage ennemi`);
+                });
+            }
+            
+            // 🆕 OnDeath
+            if (card.onDeath) {
+                switch(card.onDeath.type) {
+                    case 'draw':
+                        effectsList.push(`💀 OnDeath: Draw ${card.onDeath.value}`);
+                        break;
+                    case 'add_rare_card':
+                        effectsList.push(`💀 OnDeath: Rare card en main`);
+                        break;
+                    case 'heal':
+                        effectsList.push(`💀 OnDeath: Heal ${card.onDeath.value}`);
+                        break;
+                }
+            }
+            
+            // 🆕 Timer
+            if (card.timer && card.turnPlaced !== null) {
+                const turnsElapsed = this.gm.turnNumber - card.turnPlaced;
+                const turnsRemaining = card.timer.turns - turnsElapsed;
+                
+                if (turnsRemaining > 0) {
+                    const effect = card.timer.effect;
+                    let effectDesc = '';
+                    if (effect.type === 'damage_player') effectDesc = `${effect.value} DMG au joueur`;
+                    if (effect.type === 'heal_enemy') effectDesc = `Heal ${effect.value} au boss`;
+                    
+                    effectsList.push(`⏰ Dans ${turnsRemaining} tour(s): ${effectDesc}`);
+                }
+            }
+            
+            enemyEffectText = effectsList.join('<br>');
         }
         
         tooltip.innerHTML = `

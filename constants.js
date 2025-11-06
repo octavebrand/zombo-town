@@ -134,17 +134,20 @@ export class Maxxer {
 // CLASSE ENEMY CARD
 // ========================================
 export class EnemyCard {
-    constructor(id, name, maxHp, effect = null) {
+    constructor(id, name, maxHp, effect = null, onDeath = null, timer = null) {
         this.id = id;
         this.name = name;
         this.currentHp = maxHp;
         this.maxHp = maxHp;
-        this.effect = effect;  // { type: 'boost_damage', value: 10 } ou { type: 'boost_block', value: 10 }
+        this.effect = effect;      // { type: 'boost_damage', value: 10 }
+        this.onDeath = onDeath;    // 🆕 { type: 'draw', value: 2 }
+        this.timer = timer;        // 🆕 { turns: 3, effect: {...} }
+        this.turnPlaced = null;    // 🆕 Sera rempli quand posée
     }
     
     takeDamage(amount) {
         this.currentHp = Math.max(0, this.currentHp - amount);
-        return this.currentHp <= 0;  // Retourne true si morte
+        return this.currentHp <= 0;
     }
     
     isAlive() {

@@ -135,6 +135,11 @@ class GameManagerStub {
             // Retirer de la main
             this.hand.splice(cardIndex, 1);
             
+        // 🆕 Si carte a un timer, enregistrer le tour de pose
+        if (card.timer) {
+            card.turnPlaced = this.turnNumber;
+        }
+
             // 🆕 Si une ancienne carte était là, la remettre en main (ou défausser si main pleine)
         if (result.oldCard) {
             if (this.hand.length < GAME_CONFIG.MAX_HAND_SIZE) {
@@ -363,7 +368,7 @@ class GameManagerStub {
             this.enemyPlaceCard();
         }  
         // Pioche automatique
-        this.drawCards(GAME_CONFIG.DRAW_PER_TURN);
+        //this.drawCards(GAME_CONFIG.DRAW_PER_TURN);
     }
 
     enemyPlaceCard() {
@@ -378,9 +383,21 @@ class GameManagerStub {
         // Choisir slot aléatoire
         const randomSlot = emptySlots[Math.floor(Math.random() * emptySlots.length)];
         
-        // Choisir carte aléatoire depuis pool (copie profonde)
+        // Choisir carte aléatoire depuis pool (copie profonde COMPLÈTE)
         const randomCard = ENEMY_CARDS_POOL[Math.floor(Math.random() * ENEMY_CARDS_POOL.length)];
-        const cardCopy = new EnemyCard(randomCard.id, randomCard.name, randomCard.maxHp, randomCard.effect);
+        const cardCopy = new EnemyCard(
+            randomCard.id, 
+            randomCard.name, 
+            randomCard.maxHp, 
+            randomCard.effect,
+            randomCard.onDeath,  // 🆕 Copier onDeath
+            randomCard.timer     // 🆕 Copier timer
+        );
+        
+        // 🆕 Enregistrer le tour de pose pour timer
+        if (cardCopy.timer) {
+            cardCopy.turnPlaced = this.turnNumber;
+        }
         
         // Placer carte
         randomSlot.card = cardCopy;
