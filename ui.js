@@ -3,6 +3,7 @@
 // ========================================
 
 import { BoardLinesRenderer } from './boardLines.js';
+import { CardType } from './constants.js';
 
 export class UIManager {
     constructor(gameManager) {
@@ -149,10 +150,19 @@ export class UIManager {
                 ` : ''}
             `;
         } else {
-            const displayValue = (slot.card.value || 0) + slot.bonus;
-            const bonusText = slot.bonus !== 0 ? ` (${slot.card.value}${slot.bonus > 0 ? '+' : ''}${slot.bonus})` : '';
+            const finalValue = this.gm.board.getFinalCardValue(slot.id);
+            const baseValue = slot.card.value || 0;
+            const numCharms = slot.equipments.length;
+            
+            // Construction bonus text
+            let parts = [baseValue];
+            if (slot.bonus !== 0) parts.push(`${slot.bonus > 0 ? '+' : ''}${slot.bonus}`);
+            if (numCharms > 0) parts.push(`+${numCharms}⚙️`);
+            
+            const bonusText = parts.length > 1 ? ` (${parts.join(' ')})` : '';
+            
             slotDiv.innerHTML = `
-                <span style="font-size: 20px; font-weight: bold;">${displayValue}</span>
+                <span style="font-size: 20px; font-weight: bold;">${finalValue}</span>
                 ${bonusText ? `<div style="font-size: 10px; color: #AED581;">${bonusText}</div>` : ''}
             `;
         }
@@ -188,7 +198,7 @@ export class UIManager {
             // 🆕 Hover tooltip
             if (slot.card) {
                 slotDiv.onmouseenter = (e) => {
-                    this.showCardTooltip(slot.card, e.clientX, e.clientY);
+                    this.showCardTooltip(slot.card, e.clientX, e.clientY, slot.id);  // 🆕 Passer slotId
                 };
                 
                 slotDiv.onmouseleave = () => {
@@ -406,6 +416,12 @@ renderHand() {
         cardDiv.className = 'card';
         cardDiv.dataset.rarity = card.rarity;
         cardDiv.dataset.index = index;
+
+        // 🆕 Style spécial pour charmes
+        if (card.cardType === CardType.CHARM) {
+            cardDiv.style.borderColor = '#9370DB';  // Violet
+            cardDiv.style.background = 'linear-gradient(135deg, #4B0082 0%, #8A2BE2 100%)';
+        }
         
         if (card.isArtifact) {
             cardDiv.classList.add('artifact');
@@ -449,6 +465,15 @@ renderHand() {
                     case 'draw': return `Pioche ${eff.value}`;
                     case 'instant_draw': return `📥 Pioche ${eff.value} (immédiat)`;
                     case 'instant_all_slots_bonus': return `All slots +${eff.value}`;  // 🆕
+                    
+                    // 🆕 Effets charmes
+                    case 'charm_boost_creature': return `Créature +${eff.value}`;
+                    case 'charm_boost_neighbors': return `Voisins +${eff.value}`;
+                    case 'charm_penalty_neighbors': return `Voisins ${eff.value}`;
+                    case 'charm_maxxer_slot': return `Maxxer +${eff.value}`;
+                    case 'charm_random_boost': return `Créature +${eff.min} à +${eff.max}`;
+                    case 'charm_heal_on_discard': return `Heal ${eff.value} à la défausse`;
+                    
                     default: return eff.type;
                 }
             }).join(' • ');
@@ -465,6 +490,11 @@ renderHand() {
             ${effectText ? `
                 <div style="font-size: 11px; color: #AED581; margin: 5px 0; line-height: 1.3; text-align: center;">
                     ${effectText}
+                </div>
+            ` : ''}
+            ${card.tags && card.tags.length > 0 ? `
+                <div style="font-size: 10px; color: #FFD700; margin: 5px 0; text-align: center; font-style: italic;">
+                    ${card.tags.join(', ')}
                 </div>
             ` : ''}
             <div class="card-rarity" style="margin-top: auto;">${card.rarity}</div>
@@ -598,6 +628,12 @@ renderHand() {
     removeCardFromSlot(slotId) {
         const slot = this.gm.board.getSlot(slotId);
         if (!slot || !slot.card) return;
+
+        // 🆕 BLOQUER retrait si équipée de charmes
+        if (slot.equipments.length > 0) {
+            this.gm.log(`🔒 ${slot.card.name} est équipée de ${slot.equipments.length} charme(s), impossible de la retirer`);
+            return;  // 🛑 Stop
+        }
         
         // 🆕 Vérifier si la carte a un effet "instant" (AVANT de la retirer)
         const card = slot.card;
@@ -645,6 +681,19 @@ renderHand() {
         slot.neighborBonus = 0;  
         slot.rewardBonus = 0;   
         
+        // 🆕 Gérer les charmes
+        if (slot.equipments.length > 0) {
+            slot.equipments.forEach(charm => {
+                if (this.gm.hand.length < 12) {
+                    this.gm.hand.push(charm);
+                } else {
+                    this.gm.discard.push(charm);
+                }
+            });
+            this.gm.log(`⚙️ ${slot.equipments.length} charme(s) aussi retiré(s)`);
+            slot.equipments = [];
+        }
+
         // Remettre en main si possible
         if (this.gm.hand.length < 12) {
             this.gm.hand.push(card);
@@ -661,7 +710,7 @@ renderHand() {
         this.render();
     }
 
-    showCardTooltip(card, mouseX, mouseY) {
+    showCardTooltip(card, mouseX, mouseY, slotId = null) {
         const tooltip = document.getElementById('cardTooltip');
         if (!tooltip) return;
         
@@ -748,6 +797,28 @@ renderHand() {
             }
             
             enemyEffectText = effectsList.join('<br>');
+        }
+
+        // 🆕 Ajouter section charmes si carte sur board avec équipements
+        let equipmentSection = '';
+        if (slotId) {
+            const slot = this.gm.board.getSlot(slotId);
+            if (slot && slot.equipments.length > 0) {
+                equipmentSection = `
+                    <hr style="border-color: #FFD700; margin: 10px 0;">
+                    <div style="font-size: 12px; color: #FFD700; font-weight: bold; margin-bottom: 5px;">
+                        ⚙️ Charmes (${slot.equipments.length})
+                    </div>
+                `;
+                
+                slot.equipments.forEach(eq => {
+                    equipmentSection += `
+                        <div style="font-size: 11px; color: #AED581; margin: 3px 0; line-height: 1.4;">
+                            • ${eq.name}: ${eq.description}
+                        </div>
+                    `;
+                });
+            }
         }
         
         tooltip.innerHTML = `

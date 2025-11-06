@@ -2,7 +2,7 @@
 // MAIN.JS - Point d'entrée (Jour 1 - Test rendu uniquement)
 // ========================================
 
-import { Card, Maxxer, Rarity, EnemyCard } from './constants.js';
+import { Card, Maxxer, Rarity, EnemyCard, CardType } from './constants.js';
 import { BoardState } from './board.js';
 import { UIManager } from './ui.js';
 import { EffectResolver } from './effects.js';  
@@ -10,6 +10,8 @@ import { TurnResolver } from './turnResolver.js';
 import { ALL_CARDS } from './cards.js';
 import { ENEMY_CARDS_POOL } from './enemyCards.js';
 import { STATE_REWARDS_POOL, getTierFromValue, getRandomRewards } from './stateRewards.js';
+import { TOKENS, createToken } from './tokens.js';
+import { ALL_CHARMS } from './charms.js';
 
 // ========================================
 // CONSTANTES DE JEU
@@ -57,7 +59,10 @@ class GameManagerStub {
         ];
         
         // Deck/Défausse
-        this.deck = [...ALL_CARDS].map(card => ({...card})); // Copie profonde
+        this.deck = [
+            ...[...ALL_CARDS].map(card => ({...card})),
+            ...[...ALL_CHARMS].map(card => ({...card}))
+        ];
         this.discard = [];
         this.shuffleDeck();
 
@@ -122,6 +127,37 @@ class GameManagerStub {
         if (!slot) {
             return { success: false, reason: "Slot introuvable" };
         }
+
+        // 🆕 SI CARTE = CHARME
+        if (card.cardType === CardType.CHARM) {
+            // Vérifier qu'il y a une créature
+            if (!slot.card) {
+                return { success: false, reason: "Pas de créature sur ce slot" };
+            }
+
+            // 🆕 Vérifier effets interdits sur shared
+            if (slot.type === 'shared' && card.effect) {
+                const effects = Array.isArray(card.effect) ? card.effect : [card.effect];
+                const hasNeighborEffect = effects.some(e => 
+                    e.type === 'charm_boost_neighbors' || e.type === 'charm_penalty_neighbors'
+                );
+                
+                if (hasNeighborEffect) {
+                    return { success: false, reason: "Charmes voisins interdits sur SHARED" };
+                }
+            }
+                    
+            // Ajouter charme à la créature
+            slot.equipments.push(card);
+            this.hand.splice(cardIndex, 1);
+            
+            this.log(`✨ ${card.name} équipé sur ${slot.card.name}`);
+            
+            // Appliquer effets du charme
+            this.applyCharmEffects(card, slot);
+            
+            return { success: true };
+        }
         
         // Vérifier compatibilité
         if (!slot.canAccept(card)) {
@@ -164,6 +200,60 @@ class GameManagerStub {
         }
         
         return { success: false, reason: "Placement impossible" };
+    }
+
+    applyCharmEffects(charm, slot) {
+        if (!charm.effect) return;
+        
+        const effects = Array.isArray(charm.effect) ? charm.effect : [charm.effect];
+        
+        effects.forEach(eff => {
+            switch(eff.type) {
+                case 'charm_maxxer_slot':
+                    // Maxxer du slot
+                    if (slot.type === 'damage' || slot.type === 'shared') {
+                        this.maxxers.damage.level += eff.value;
+                    }
+                    if (slot.type === 'block' || slot.type === 'shared') {
+                        this.maxxers.block.level += eff.value;
+                    }
+                    this.log(`🔧 Maxxer +${eff.value}`);
+                    break;
+                    
+                case 'charm_boost_neighbors':
+                    // Voisins gagnent bonus
+                    const neighbors = this.board.getNeighbors(slot.id);
+                    neighbors.forEach(n => {
+                        n.neighborBonus += eff.value;
+                    });
+                    this.log(`🔗 Voisins +${eff.value}`);
+                    break;
+                    
+                case 'charm_penalty_neighbors':
+                    // Voisins perdent value
+                    const neighbors2 = this.board.getNeighbors(slot.id);
+                    neighbors2.forEach(n => {
+                        n.neighborBonus += eff.value;  // Négatif
+                    });
+                    this.log(`🔗 Voisins ${eff.value}`);
+                    break;
+                    
+                case 'charm_random_boost':
+                    // Boost aléatoire (stocké pour calcul final)
+                    const randomBoost = Math.floor(Math.random() * (eff.max - eff.min + 1)) + eff.min;
+                    charm._appliedBoost = randomBoost;  // Stocker sur le charme
+                    this.log(`🎲 Boost aléatoire: +${randomBoost}`);
+                    break;
+                    
+                case 'charm_boost_creature':
+                    // Stocké pour calcul final
+                    break;
+                    
+                case 'charm_heal_on_discard':
+                    // Sera géré dans turnResolver
+                    break;
+            }
+        });
     }
 
     applyNeighborBonusesToCard(slotId) {
@@ -253,13 +343,13 @@ class GameManagerStub {
         
         this.board.slots.state.forEach(slot => {
             if (slot.card) {
-                total += slot.card.value + slot.rewardBonus;
+                total += this.board.getFinalCardValue(slot.id);  // 🆕 Utilise value finale
             }
         });
         
         const shared2 = this.board.getSlot('shared_2');
         if (shared2 && shared2.card) {
-            total += shared2.card.value + shared2.neighborBonus;
+            total += this.board.getFinalCardValue('shared_2');  // 🆕 Utilise value finale
         }
         
         this.stateValue = total;
@@ -439,6 +529,26 @@ class GameManagerStub {
         } else {
             this.log(`⚠️ Impossible de piocher (deck vide)`);
         }
+    }
+
+    // Ajouter un jeton en main
+    addTokenToHand(tokenId) {
+        if (this.hand.length >= GAME_CONFIG.MAX_HAND_SIZE) {
+            this.log(`⚠️ Main pleine, jeton ${tokenId} défaussé`);
+            const token = createToken(tokenId);
+            if (token) this.discard.push(token);
+            return false;
+        }
+        
+        const token = createToken(tokenId);
+        if (!token) {
+            this.log(`❌ Impossible de créer jeton ${tokenId}`);
+            return false;
+        }
+        
+        this.hand.push(token);
+        this.log(`✨ Jeton ${token.name} ajouté en main`);
+        return true;
     }
 
     

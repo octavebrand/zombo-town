@@ -172,4 +172,33 @@ export class BoardState {
         const oldCard = slot.placeCard(card);
         return { success: true, oldCard: oldCard };
     }
+
+    // 🆕 Calculer value finale d'une carte avec ses charmes
+    getFinalCardValue(slotId) {
+        const slot = this.getSlot(slotId);
+        if (!slot || !slot.card) return 0;
+        
+        let total = slot.card.value;
+        
+        // Appliquer charmes
+        slot.equipments.forEach(charm => {
+            if (!charm.effect) return;
+            
+            const effects = Array.isArray(charm.effect) ? charm.effect : [charm.effect];
+            
+            effects.forEach(eff => {
+                if (eff.type === 'charm_boost_creature') {
+                    total += eff.value;
+                }
+                if (eff.type === 'charm_random_boost' && charm._appliedBoost) {
+                    total += charm._appliedBoost;
+                }
+            });
+        });
+        
+        // Appliquer bonus neighbors/rewards
+        total += slot.neighborBonus + slot.rewardBonus;
+        
+        return total;
+    }
 }

@@ -105,6 +105,38 @@ export class EffectResolver {
             this.gm.log(`🔗 ${neighborSlot.id}: bonus ${sign}${bonus} (total: ${neighborSlot.bonus})`);
         });
     }
+
+    // 🆕 Résoudre effets on_discard (créatures + charmes)
+    resolveOnDiscard(card) {
+        if (!card.effect) return;
+        
+        const effects = Array.isArray(card.effect) ? card.effect : [card.effect];
+        
+        effects.forEach(eff => {
+            switch(eff.type) {
+                case 'charm_heal_on_discard':
+                case 'on_discard_heal':  // 🆕 Nom générique pour créatures futures
+                    const oldHp = this.gm.player.currentHp;
+                    this.gm.player.currentHp = Math.min(this.gm.player.maxHp, oldHp + eff.value);
+                    const actualHeal = this.gm.player.currentHp - oldHp;
+                    if (actualHeal > 0) {
+                        this.gm.log(`💚 ${card.name}: Heal ${actualHeal} HP (défausse)`);
+                    }
+                    break;
+                
+                case 'on_discard_create_token':
+                case 'charm_create_token_on_discard':
+                    // Pour futures créatures/charmes qui créent jetons
+                    // this.gm.addTokenToHand(eff.tokenId);
+                    break;
+                
+                case 'on_discard_draw':
+                    this.gm.drawCards(eff.value);
+                    this.gm.log(`🔥 ${card.name}: Pioche ${eff.value} (défausse)`);
+                    break;
+            }
+        });
+    }
     
     // ========================================
     // RÉSOLUTION PLAYER (Heal/Draw)

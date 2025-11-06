@@ -23,11 +23,19 @@ export const Rarity = {
     MYTHIQUE: "Mythique"
 };
 
+// 🆕 Types de cartes
+export const CardType = {
+    CREATURE: "creature",
+    CHARM: "charm",
+    ATOUT: "atout",
+    TOKEN: "token"
+};
+
 // ========================================
 // CLASSE CARD
 // ========================================
 export class Card {
-    constructor(id, name, value, slotTypes, rarity, effect = null, description = "") {
+    constructor(id, name, value, slotTypes, rarity, effect = null, description = "", cardType = CardType.CREATURE, tags = []) {
         this.id = id;
         this.name = name;
         this.value = value;              // Value de base (damage ou block selon slot)
@@ -36,6 +44,10 @@ export class Card {
         this.effect = effect;            // Effet additionnel (maxxer boost, neighbors, etc.)
         this.description = description;
         this.isArtifact = false;         // True si créé par create_artifact_on_discard
+        
+        // 🆕 Nouveaux champs v2.0
+        this.cardType = cardType;        // "creature", "charm", "atout", "token"
+        this.tags = tags;                // ["Mollusque", "Zigouilleur", "Ombre", ...]
     }
 }
 
@@ -51,8 +63,11 @@ export class Slot {
         this.card = null;
         this.isBlocked = false;          // Debuff enemy (futur)
         this.neighbors = [];             // IDs des slots voisins
-        this.neighborBonus = 0;  // 🆕 Bonus des cartes voisines
-        this.rewardBonus = 0;     // 🆕 Bonus des rewards (random/all)
+        this.neighborBonus = 0;          // 🆕 Bonus des cartes voisines
+        this.rewardBonus = 0;            // 🆕 Bonus des rewards (random/all)
+        
+        // 🆕 v2.0 - Charmes équipés
+        this.equipments = [];            // Array de cartes Charme
     }
     
     // 🆕 Getter pour compatibilité

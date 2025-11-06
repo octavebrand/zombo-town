@@ -1,8 +1,8 @@
 // ========================================
-// CARDS.JS - Les 15 cartes du prototype
+// CARDS.JS - Cartes du prototype
 // ========================================
 
-import { Card, Rarity } from './constants.js';
+import { Card, Rarity, CardType } from './constants.js';
 
 export const ALL_CARDS = [
     
@@ -10,7 +10,6 @@ export const ALL_CARDS = [
     // COMMUNES (5 cartes)
     // ========================================
     
-
     // Coup bas 
     new Card(
         'Coup_bas',
@@ -18,7 +17,10 @@ export const ALL_CARDS = [
         10,
         ['damage', 'block', 'shared', 'state'],  
         Rarity.COMMUNE,
-        'Value 10'
+        null,
+        'Value 10',
+        CardType.CREATURE,  // 🆕
+        []                  // 🆕 Pas de tag (neutre)
     ),
 
     // Botte 
@@ -29,7 +31,9 @@ export const ALL_CARDS = [
         ['damage', 'block', 'shared', 'state'],  
         Rarity.COMMUNE,
         { type: 'instant_draw', value: 1 },
-        'Value 5, draw 1'
+        'Value 5, draw 1',
+        CardType.CREATURE,
+        []
     ),
     
     new Card(
@@ -39,7 +43,9 @@ export const ALL_CARDS = [
         ['damage', 'shared'],
         Rarity.COMMUNE,
         { type: 'maxxer_dmg', value: 1 },
-        'Value 6 + Maxxer DMG +1'
+        'Value 6 + Maxxer DMG +1',
+        CardType.CREATURE,
+        []
     ),
     
     new Card(
@@ -49,11 +55,25 @@ export const ALL_CARDS = [
         ['block', 'shared'],
         Rarity.COMMUNE,
         { type: 'maxxer_block', value: 1 },
-        'Value 6 + Maxxer BLOCK +1'
+        'Value 6 + Maxxer BLOCK +1',
+        CardType.CREATURE,
+        []
+    ),
+    
+    new Card(
+        'Coup_du_chapeau',
+        'Coup du chapeau',
+        13,
+        ['damage', 'block', 'shared', 'state'],  
+        Rarity.COMMUNE,
+        null,
+        'Value 13',
+        CardType.CREATURE,
+        []
     ),
     
     // ========================================
-    // UNCOMMON (5 cartes)
+    // UNCOMMON (10 cartes)
     // ========================================
     
     // Déluge
@@ -61,10 +81,12 @@ export const ALL_CARDS = [
         'deluge',
         'Déluge',
         5,
-        ['damage', 'block', 'shared', 'state'],  // 🆕 + state
+        ['damage', 'block', 'shared', 'state'],
         Rarity.UNCOMMON,
         { type: 'maxxer_all', value: 1 },
-        'Value 5 + Tous maxxers +1'
+        'Value 5 + Tous maxxers +1',
+        CardType.CREATURE,
+        []
     ),
 
     // Body stretch
@@ -72,13 +94,15 @@ export const ALL_CARDS = [
         'Body_stretch',
         'Body stretch',
         5,
-        ['damage', 'block', 'shared', 'state'],  // 🆕 + state
+        ['damage', 'block', 'shared', 'state'],
         Rarity.UNCOMMON,
         [
             { type: 'maxxer_any', value: 1 },
             { type: 'instant_draw', value: 1 }
         ],
-        'Value 5, Draw 1 + Slot maxxer +1'
+        'Value 5, Draw 1 + Slot maxxer +1',
+        CardType.CREATURE,
+        []
     ),
 
      // Renaissance
@@ -86,13 +110,15 @@ export const ALL_CARDS = [
         'Renaissance',
         'Renaissance',
         0,
-        ['damage', 'block', 'shared', 'state'],  // 🆕 + state
+        ['damage', 'block', 'shared', 'state'],
         Rarity.UNCOMMON,
         [
             { type: 'maxxer_any', value: 1 },
             { type: 'instant_draw', value: 2 }
         ],
-        'Draw 2 + Slot maxxer +1'
+        'Draw 2 + Slot maxxer +1',
+        CardType.CREATURE,
+        []
     ),
 
     // Maintenance
@@ -100,13 +126,15 @@ export const ALL_CARDS = [
         'Maintenance',
         'Maintenance',
         2,
-        ['damage', 'block', 'shared', 'state'],  // 🆕 + state
+        ['damage', 'block', 'shared', 'state'],
         Rarity.UNCOMMON,
         [
             { type: 'maxxer_all', value: 1 },
             { type: 'instant_draw', value: 1 }
         ],
-        'Draw 1 + Tous maxxers +1'
+        'Draw 1 + Tous maxxers +1',
+        CardType.CREATURE,
+        []
     ),
 
     // Joie Communicative
@@ -114,10 +142,12 @@ export const ALL_CARDS = [
         'joie_communicative',
         'Joie Communicative',
         5,
-        ['damage', 'block', 'state'],  // 🆕 + state
+        ['damage', 'block', 'state'],
         Rarity.UNCOMMON,
         { type: 'bonus_neighbors', value: 5 },
-        'Value 5 + Voisins +5'
+        'Value 5 + Voisins +5',
+        CardType.CREATURE,
+        []
     ),
     
     new Card(
@@ -127,7 +157,9 @@ export const ALL_CARDS = [
         ['damage', 'block', 'shared', 'state'],
         Rarity.UNCOMMON,
         { type: 'penalty_neighbors', value: 5 },
-        'Value 20 + Voisins -5'
+        'Value 20 + Voisins -5',
+        CardType.CREATURE,
+        []
     ),
     
     // Boost Léger
@@ -135,51 +167,61 @@ export const ALL_CARDS = [
         'boost_man',
         'Boost Man',
         3,
-        ['damage', 'block', 'shared', 'state'],  // 🆕 + state
+        ['damage', 'block', 'shared', 'state'],
         Rarity.UNCOMMON,
         [
             { type: 'maxxer_dmg', value: 1 },
             { type: 'instant_draw', value: 1 }
         ],
-        'Value 3 + Maxxer du slot +1, draw 1'
+        'Value 3 + Maxxer DMG +1, draw 1',
+        CardType.CREATURE,
+        []
     ),
 
-        // Tower man
+    // Tower man
     new Card(
         'tower_man',
         'Tower Man',
         3,
-        ['damage', 'block', 'shared', 'state'],  // 🆕 + state
+        ['damage', 'block', 'shared', 'state'],
         Rarity.UNCOMMON,
         [
             { type: 'maxxer_block', value: 1 },
             { type: 'instant_draw', value: 1 }
         ],
-        'Value 3 + Maxxer du slot +1, draw 1'
+        'Value 3 + Maxxer BLOCK +1, draw 1',
+        CardType.CREATURE,
+        []
     ),
 
     new Card(
-         'all_boost',
+        'all_boost',
         'Catalyseur',
         4,
         ['damage', 'block', 'shared', 'state'],
-        Rarity.RARE,
+        Rarity.UNCOMMON,
         { type: 'instant_all_slots_bonus', value: 1 },
-        'Value 4 + All slots +1'
+        'Value 4 + All slots +1',
+        CardType.CREATURE,
+        []
+    ),
+    
+    // Commune - Cycle peon
+    new Card(
+        'card_peon_cycle',
+        'Cycle Peon',
+        5,
+        ['damage', 'block', 'shared', 'state'],
+        Rarity.UNCOMMON,
+        { type: 'instant_draw', value: 1 },
+        'Value 5, draw 1',
+        CardType.CREATURE,
+        []
     ),
         
     // ========================================
     // RARES (3 cartes)
     // ========================================
-    
-    new Card(
-        'Coup_du_chapeau',
-        'Coup du chapeau',
-        13,
-        ['damage', 'block', 'shared', 'state'],  
-        Rarity.COMMUNE,
-        'Value 13'
-    ),
     
     new Card(
         'coup_puissant',
@@ -188,7 +230,9 @@ export const ALL_CARDS = [
         ['damage'],
         Rarity.RARE,
         null,
-        'Value 15 (damage only)'
+        'Value 15 (damage only)',
+        CardType.CREATURE,
+        []
     ),
     
     new Card(
@@ -198,7 +242,9 @@ export const ALL_CARDS = [
         ['block'],
         Rarity.RARE,
         null,
-        'Value 15 (block only)'
+        'Value 15 (block only)',
+        CardType.CREATURE,
+        []
     ),
     
     // Résonance Parfaite
@@ -206,24 +252,16 @@ export const ALL_CARDS = [
         'resonance_parfaite',
         'Résonance Parfaite',
         4,
-        ['damage', 'block', 'state'],  // 🆕 + state
+        ['damage', 'block', 'state'],
         Rarity.RARE,
         { type: 'bonus_neighbors', value: 6 },
-        'Value 4 + Voisins +6'
-    ),
-
-    new Card(
-        'all_boost',
-        'Catalyseur',
-        0,
-        ['damage', 'block', 'shared', 'state'],
-        Rarity.RARE,
-        { type: 'instant_all_slots_bonus', value: 2 },
-        'Value 0 + All slots +2'
+        'Value 4 + Voisins +6',
+        CardType.CREATURE,
+        []
     ),
     
     // ========================================
-    // MYTHIQUES (2 cartes)
+    // MYTHIQUES (1 carte)
     // ========================================
     
     new Card(
@@ -233,29 +271,150 @@ export const ALL_CARDS = [
         ['damage', 'block', 'shared', 'state'],
         Rarity.MYTHIQUE,
         { type: 'maxxer_all', value: 2 },
-        'Value 2, Tous maxxers +2'
+        'Value 2, Tous maxxers +2',
+        CardType.CREATURE,
+        []
     ),
 
-    // Commune - Cycle peon
+    // ========================================
+    // v2.0 - CRÉATURES SIMPLES (value pure + tags)
+    // ========================================
+    
+    // MOLLUSQUES
     new Card(
-        'card_peon_cycle',
-        'Cycle Peon',
+        'mollusque_devoue',
+        'Mollusque Dévoué',
+        12,
+        ['damage', 'block', 'shared', 'state'],
+        Rarity.COMMUNE,
+        null,
+        'Value pure tribale',
+        CardType.CREATURE,
+        ['Mollusque']
+    ),
+    
+    new Card(
+        'mollusque_curieux',
+        'Mollusque Curieux',
         5,
         ['damage', 'block', 'shared', 'state'],
-        Rarity.COMMON,
-        { type: 'instant_draw', value: 1 },
-        'draw 1'
-        
+        Rarity.UNCOMMON,
+        [
+            { type: 'maxxer_any', value: 1 },
+            { type: 'instant_draw', value: 1 }
+        ],
+        'Value 5, Maxxer +1, draw 1',
+        CardType.CREATURE,
+        ['Mollusque']
     ),
-
-    // Uncommon - Moteur
+    
+    // ZIGOUILLEURS
     new Card(
-        'card_engine',
-        'Moteur',
+        'archiviste_zigouilleur',
+        'Archiviste Zigouilleur',
+        5,
+        ['damage', 'block', 'shared', 'state'],
+        Rarity.UNCOMMON,
+        [
+            { type: 'maxxer_any', value: 1 },
+            { type: 'instant_draw', value: 1 }
+        ],
+        'Value 5, Maxxer +1, draw 1',
+        CardType.CREATURE,
+        ['Zigouilleur']
+    ),
+    
+    // TRAFIQUANTS
+    new Card(
+        'trafiquant_legumes',
+        'Trafiquant de Légumes',
+        12,
+        ['damage', 'block', 'shared', 'state'],
+        Rarity.COMMUNE,
+        null,
+        'Value pure tribale',
+        CardType.CREATURE,
+        ['Trafiquant']
+    ),
+    
+    new Card(
+        'trafiquant_biens',
+        'Trafiquant de Biens',
+        5,
+        ['damage', 'block', 'shared', 'state'],
+        Rarity.UNCOMMON,
+        [
+            { type: 'maxxer_any', value: 1 },
+            { type: 'instant_draw', value: 1 }
+        ],
+        'Value 5, Maxxer +1, draw 1',
+        CardType.CREATURE,
+        ['Trafiquant']
+    ),
+    
+    // OMBRES
+    new Card(
+        'ombre_studieuse',
+        'Ombre Studieuse',
         3,
         ['damage', 'block', 'shared', 'state'],
-        Rarity.RARE,
+        Rarity.COMMUNE,
         { type: 'instant_draw', value: 2 },
-        'value 3, draw 2'
+        'Value 3, draw 2',
+        CardType.CREATURE,
+        ['Ombre']
+    ),
+    
+    new Card(
+        'ombre_amplificatrice',
+        'Ombre Amplificatrice',
+        5,
+        ['damage', 'block', 'shared', 'state'],
+        Rarity.UNCOMMON,
+        [
+            { type: 'maxxer_any', value: 1 },
+            { type: 'instant_draw', value: 1 }
+        ],
+        'Value 5, Maxxer +1, draw 1',
+        CardType.CREATURE,
+        ['Ombre']
+    ),
+    
+    // ILLUSIONS
+    new Card(
+        'illusion_simple',
+        'Illusion Simple',
+        12,
+        ['damage', 'block', 'shared', 'state'],
+        Rarity.COMMUNE,
+        null,
+        'Value pure tribale',
+        CardType.CREATURE,
+        ['Illusion']
+    ),
+    
+    new Card(
+        'illusion_fouineuse',
+        'Illusion Fouineuse',
+        3,
+        ['damage', 'block', 'shared', 'state'],
+        Rarity.COMMUNE,
+        { type: 'instant_draw', value: 2 },
+        'Value 3, draw 2',
+        CardType.CREATURE,
+        ['Illusion']
+    ),
+    
+    // NEUTRES (pour équilibrer le deck)
+    new Card(
+        'tacticien',
+        'Tacticien',
+        0,
+        ['damage', 'block', 'shared', 'state'],
+        Rarity.UNCOMMON,
+        { type: 'instant_all_slots_bonus', value: 3 },
+        'Value 0, tous slots +3',
+        CardType.CREATURE,
+        []  // Pas de tag
     )
 ];

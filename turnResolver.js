@@ -65,18 +65,18 @@ export class TurnResolver {
         // Somme values DAMAGE
         this.gm.board.slots.damage.forEach(slot => {
             if (slot.card) {
-                results.damageBase += slot.card.value + slot.bonus;
+                results.damageBase += this.gm.board.getFinalCardValue(slot.id);
             } else if (slot.rewardBonus > 0) {
-                results.damageBase += slot.rewardBonus;  // 🆕 Slot vide mais avec reward bonus
+                results.damageBase += slot.rewardBonus;
             }
         });
         
         // Somme values SHARED
         this.gm.board.slots.shared.forEach(slot => {
             if (slot.card) {
-                results.damageBase += slot.card.value + slot.bonus;
+                results.damageBase += this.gm.board.getFinalCardValue(slot.id);
             } else if (slot.rewardBonus > 0) {
-                results.damageBase += slot.rewardBonus;  // 🆕 Slot vide mais avec reward bonus
+                results.damageBase += slot.rewardBonus;
             }
         });
 
@@ -112,18 +112,18 @@ export class TurnResolver {
         // Somme values BLOCK
         this.gm.board.slots.block.forEach(slot => {
             if (slot.card) {
-                results.blockBase += slot.card.value + slot.bonus;
+                results.blockBase += this.gm.board.getFinalCardValue(slot.id);
             } else if (slot.rewardBonus > 0) {
-                results.blockBase += slot.rewardBonus;  // 🆕 Slot vide mais avec reward bonus
+                results.blockBase += slot.rewardBonus;
             }
         });
         
         // Somme values SHARED
         this.gm.board.slots.shared.forEach(slot => {
             if (slot.card) {
-                results.blockBase += slot.card.value + slot.bonus;
+                results.blockBase += this.gm.board.getFinalCardValue(slot.id);
             } else if (slot.rewardBonus > 0) {
-                results.blockBase += slot.rewardBonus;  // 🆕 Slot vide mais avec reward bonus
+                results.blockBase += slot.rewardBonus;
             }
         });
         
@@ -293,6 +293,15 @@ export class TurnResolver {
             // Défausser cartes
             if (slot.card && slot.type !== 'player' && slot.type !== 'enemy') {
                 this.gm.discard.push(slot.card);
+                
+            // 🆕 Défausser charmes + trigger effets on_discard
+            slot.equipments.forEach(charm => {
+                this.gm.effectResolver.resolveOnDiscard(charm);  // 🆕 Méthode générique
+                this.gm.discard.push(charm);
+                discardedCount++;
+            });
+                slot.equipments = [];  // Clear
+                
                 slot.removeCard();
                 discardedCount++;
             }
