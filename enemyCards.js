@@ -29,7 +29,6 @@ export const ENEMY_CARDS_POOL = [
         ]
     ),
 
-    // 🆕 NOUVELLES CARTES AVANCÉES
     new EnemyCard(
         'enemy_treasure_guard',
         'Trésor Gardé',

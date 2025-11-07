@@ -12,6 +12,7 @@ import { ENEMY_CARDS_POOL } from './enemyCards.js';
 import { STATE_REWARDS_POOL, getTierFromValue, getRandomRewards } from './stateRewards.js';
 import { TOKENS, createToken } from './tokens.js';
 import { ALL_CHARMS } from './charms.js';
+import { ALL_ATOUTS } from './atouts.js';
 
 // ========================================
 // CONSTANTES DE JEU
@@ -30,7 +31,7 @@ const GAME_CONFIG = {
 class GameManagerStub {
     constructor() {
         // Board
-        this.board = new BoardState();
+        this.board = new BoardState(this);
         
         // Maxxers
         this.maxxers = {
@@ -60,8 +61,9 @@ class GameManagerStub {
         
         // Deck/Défausse
         this.deck = [
-            ...[...ALL_CARDS].map(card => ({...card})),
-            ...[...ALL_CHARMS].map(card => ({...card}))
+            ...ALL_CARDS.map(card => ({...card})),
+            ...ALL_CHARMS.map(card => ({...card})),
+            ...ALL_ATOUTS.map(card => ({...card}))
         ];
         this.discard = [];
         this.shuffleDeck();
@@ -75,17 +77,21 @@ class GameManagerStub {
 
         this.turnNumber = 1;
 
-        // 🆕 Ciblage
+        // Ciblage
         this.currentTarget = 'enemy';
+        
+        // Tracking défausses ce tour
+        this.discardsThisTurn = [];
 
         this.effectResolver = new EffectResolver(this);
+        this.ui = null;
 
         this.turnResolver = new TurnResolver(this);
         
         // Test : Mettre une carte sur un slot aléatoire
         this.placeTestCard();
 
-        // 🆕 STATE rewards
+        // STATE rewards
         this.stateValue = 0;
         this.stateTier = 0;
         this.pendingStateRewards = [];  // Rewards à appliquer en fin de tour
@@ -128,14 +134,14 @@ class GameManagerStub {
             return { success: false, reason: "Slot introuvable" };
         }
 
-        // 🆕 SI CARTE = CHARME
+        // SI CARTE = CHARME
         if (card.cardType === CardType.CHARM) {
             // Vérifier qu'il y a une créature
             if (!slot.card) {
                 return { success: false, reason: "Pas de créature sur ce slot" };
             }
 
-            // 🆕 Vérifier effets interdits sur shared
+            // Vérifier effets interdits sur shared
             if (slot.type === 'shared' && card.effect) {
                 const effects = Array.isArray(card.effect) ? card.effect : [card.effect];
                 const hasNeighborEffect = effects.some(e => 
@@ -171,12 +177,12 @@ class GameManagerStub {
             // Retirer de la main
             this.hand.splice(cardIndex, 1);
             
-        // 🆕 Si carte a un timer, enregistrer le tour de pose
+        // Si carte a un timer, enregistrer le tour de pose
         if (card.timer) {
             card.turnPlaced = this.turnNumber;
         }
 
-            // 🆕 Si une ancienne carte était là, la remettre en main (ou défausser si main pleine)
+        // Si une ancienne carte était là, la remettre en main (ou défausser si main pleine)
         if (result.oldCard) {
             if (this.hand.length < GAME_CONFIG.MAX_HAND_SIZE) {
                 this.hand.push(result.oldCard);
@@ -189,7 +195,7 @@ class GameManagerStub {
             
             this.log(`✅ ${card.name} posée sur ${slotId}`);
             
-            // 🆕 Résoudre les effets de la carte
+            // Résoudre les effets de la carte
             this.effectResolver.resolveCardEffects(card, slotId);
 
             this.applyNeighborBonusesToCard(slotId);
@@ -287,10 +293,18 @@ class GameManagerStub {
     }
 
     recalculateMaxxers() {
-        // Reset à 0
-        this.maxxers.damage.level = 0;
-        this.maxxers.block.level = 0;
+        // Check si Stabilisateur actif
+        const playerSlots = this.board.getSlotsByType('player');
+        const stabilisateur = playerSlots.find(s => 
+            s.card && s.card.id === 'stabilisateur'
+        );
         
+        // Reset avec base modifiée si Stabilisateur
+        const baseLevel = stabilisateur ? 1 : 0;
+        const maxLevel = stabilisateur ? 2 : Infinity;
+        
+        this.maxxers.damage.level = baseLevel;
+        this.maxxers.block.level = baseLevel;
         // Scanner tous les slots
         const allSlots = this.board.getAllSlots();
         
@@ -324,6 +338,13 @@ class GameManagerStub {
                 }
             });
         });
+
+        // Appliquer limite max si Stabilisateur
+        if (stabilisateur) {
+            this.maxxers.damage.level = Math.min(this.maxxers.damage.level, maxLevel);
+            this.maxxers.block.level = Math.min(this.maxxers.block.level, maxLevel);
+        }
+
     }
 
     reshuffle() {
@@ -343,13 +364,13 @@ class GameManagerStub {
         
         this.board.slots.state.forEach(slot => {
             if (slot.card) {
-                total += this.board.getFinalCardValue(slot.id);  // 🆕 Utilise value finale
+                total += this.board.getFinalCardValue(slot.id);  // Utilise value finale
             }
         });
         
         const shared2 = this.board.getSlot('shared_2');
         if (shared2 && shared2.card) {
-            total += this.board.getFinalCardValue('shared_2');  // 🆕 Utilise value finale
+            total += this.board.getFinalCardValue('shared_2');  // Utilise value finale
         }
         
         this.stateValue = total;
@@ -379,7 +400,7 @@ class GameManagerStub {
                 
                 this.log(`🎲 ${randomSlot.id}: +${bonus.value} bonus (total: ${randomSlot.bonus})`);
             }
-            // 🆕 Cas 'all'
+            // Cas 'all'
             if (bonus.type === 'all') {
                 const allSlots = this.board.getAllSlots().filter(slot => 
                     slot.type !== 'enemy' && slot.type !== 'player'
@@ -448,12 +469,12 @@ class GameManagerStub {
         this.playerResolved = false;
         
         this.log('═══════════════════════════════════');
-        this.log(`🆕 TOUR ${this.turnNumber}`);
+        this.log(` TOUR ${this.turnNumber}`);
         this.log('═══════════════════════════════════');
         
         this.applyPendingSlotBonuses();
 
-        // 🆕 Ennemi pose 1 carte aléatoire
+        // Ennemi pose 1 carte aléatoire
         if (this.turnNumber % 3 === 0) {
             this.enemyPlaceCard();
         }  
@@ -480,11 +501,11 @@ class GameManagerStub {
             randomCard.name, 
             randomCard.maxHp, 
             randomCard.effect,
-            randomCard.onDeath,  // 🆕 Copier onDeath
-            randomCard.timer     // 🆕 Copier timer
+            randomCard.onDeath,  
+            randomCard.timer     
         );
         
-        // 🆕 Enregistrer le tour de pose pour timer
+        // Enregistrer le tour de pose pour timer
         if (cardCopy.timer) {
             cardCopy.turnPlaced = this.turnNumber;
         }
@@ -573,6 +594,7 @@ window.addEventListener('DOMContentLoaded', () => {
     
     // Créer UI manager
     ui = new UIManager(game);
+    game.ui = ui;
     
     // Render initial
     ui.render();
@@ -596,10 +618,10 @@ window.addEventListener('DOMContentLoaded', () => {
         game.log('🔚 FIN DE TOUR - Résolution...');
         game.log('═══════════════════════════════════');
         
-        // 🆕 Calculer STATE tier
+        // Calculer STATE tier
         const stateData = game.calculateStateValue();
         
-        // 🆕 Si tier >= 0, proposer choix reward
+        // Si tier >= 0, proposer choix reward
         if (stateData.tier >= 0) {
             game.showStateRewardsPopup(stateData.tier, (chosenReward) => {
                 if (chosenReward) {
@@ -689,7 +711,7 @@ window.addEventListener('DOMContentLoaded', () => {
         
         document.body.appendChild(popup);
         
-        // 🆕 Handler bouton nouveau tour
+        // Handler bouton nouveau tour
         document.getElementById('nextTurnBtn').onclick = () => {
             popup.remove();
             game.startNewTurn();

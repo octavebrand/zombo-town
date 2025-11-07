@@ -137,7 +137,7 @@ export class BoardLinesRenderer {
         line.setAttribute('y2', `${y2}%`);
         line.setAttribute('class', className);
         
-        // 🆕 Style selon classe
+        // Style selon classe
         const styles = {
             'neighbor-inactive': { stroke: 'rgba(255, 255, 255, 0.2)', width: 3 },
             'neighbor-active': { stroke: '#00FF00', width: 6 },

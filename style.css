@@ -169,8 +169,8 @@ body {
     top: 2%;
     left: 50%;
     border-color: #8B0000;
-    z-index: 100;  /* 🆕 Ajoute cette ligne */
-    pointer-events: auto;  /* 🆕 Ajoute cette ligne */
+    z-index: 100;  
+    pointer-events: auto;  
 }
 
 #playerInfo {

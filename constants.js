@@ -23,7 +23,7 @@ export const Rarity = {
     MYTHIQUE: "Mythique"
 };
 
-// 🆕 Types de cartes
+// Types de cartes
 export const CardType = {
     CREATURE: "creature",
     CHARM: "charm",
@@ -44,8 +44,6 @@ export class Card {
         this.effect = effect;            // Effet additionnel (maxxer boost, neighbors, etc.)
         this.description = description;
         this.isArtifact = false;         // True si créé par create_artifact_on_discard
-        
-        // 🆕 Nouveaux champs v2.0
         this.cardType = cardType;        // "creature", "charm", "atout", "token"
         this.tags = tags;                // ["Mollusque", "Zigouilleur", "Ombre", ...]
     }
@@ -63,14 +61,14 @@ export class Slot {
         this.card = null;
         this.isBlocked = false;          // Debuff enemy (futur)
         this.neighbors = [];             // IDs des slots voisins
-        this.neighborBonus = 0;          // 🆕 Bonus des cartes voisines
-        this.rewardBonus = 0;            // 🆕 Bonus des rewards (random/all)
+        this.neighborBonus = 0;          // Bonus des cartes voisines
+        this.rewardBonus = 0;            // Bonus des rewards (random/all)
         
-        // 🆕 v2.0 - Charmes équipés
+        // v2.0 - Charmes équipés
         this.equipments = [];            // Array de cartes Charme
     }
     
-    // 🆕 Getter pour compatibilité
+    // Getter pour compatibilité
     get bonus() {
         return this.neighborBonus + this.rewardBonus;
     }
@@ -155,9 +153,9 @@ export class EnemyCard {
         this.currentHp = maxHp;
         this.maxHp = maxHp;
         this.effect = effect;      // { type: 'boost_damage', value: 10 }
-        this.onDeath = onDeath;    // 🆕 { type: 'draw', value: 2 }
-        this.timer = timer;        // 🆕 { turns: 3, effect: {...} }
-        this.turnPlaced = null;    // 🆕 Sera rempli quand posée
+        this.onDeath = onDeath;    // { type: 'draw', value: 2 }
+        this.timer = timer;        // { turns: 3, effect: {...} }
+        this.turnPlaced = null;    // Sera rempli quand posée
     }
     
     takeDamage(amount) {

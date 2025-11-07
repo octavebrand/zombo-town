@@ -65,7 +65,8 @@ const NEIGHBORS = {
 };
 
 export class BoardState {
-    constructor() {
+    constructor(gameManager) { 
+        this.gm = gameManager;
         this.slots = {
             block: [],   // 3 slots
             damage: [],  // 2 slots
@@ -111,7 +112,7 @@ export class BoardState {
     }
     
     assignPermanentSlots() {
-        // 🆕 Plus de slots permanents
+        // Plus de slots permanents
         console.log('Slots permanents désactivés');
     }
     
@@ -173,7 +174,91 @@ export class BoardState {
         return { success: true, oldCard: oldCard };
     }
 
-    // 🆕 Calculer value finale d'une carte avec ses charmes
+    // Calculer bonus des auras tribales pour un slot
+    calculateTribalAuras(targetSlot) {
+        if (!targetSlot.card || !targetSlot.card.tags) return 0;
+        
+        let bonus = 0;
+        const allSlots = this.getAllSlots();
+        
+        // Parcourir tous les slots pour trouver les auras
+        allSlots.forEach(slot => {
+            if (!slot.card || !slot.card.effect) return;
+            
+            const effects = Array.isArray(slot.card.effect) ? slot.card.effect : [slot.card.effect];
+            
+            effects.forEach(eff => {
+                if (eff.type !== 'aura_tribal') return;
+                
+                // Vérifier si la carte cible a le bon tag
+                const hasTag = targetSlot.card.tags.includes(eff.tag);
+                if (!hasTag) return;
+                
+                // Vérifier si on s'inclut soi-même
+                if (slot.id === targetSlot.id && !eff.includesSelf) return;
+                
+                // Appliquer bonus
+                bonus += eff.value;
+            });
+        });
+        
+        return bonus;
+    }
+
+    // Calculer bonus count tribal (carte qui scale elle-même)
+    calculateTribalCount(slot) {
+        if (!slot.card || !slot.card.effect) return 0;
+        
+        const effects = Array.isArray(slot.card.effect) ? slot.card.effect : [slot.card.effect];
+        let bonus = 0;
+        
+        effects.forEach(eff => {
+            if (eff.type !== 'count_tribal') return;
+            
+            // Compter les alliés de la même tribu
+            const allSlots = this.getAllSlots();
+            let count = 0;
+            
+            allSlots.forEach(otherSlot => {
+                if (!otherSlot.card || !otherSlot.card.tags) return;
+                
+                // Vérifier tag
+                if (!otherSlot.card.tags.includes(eff.tag)) return;
+                
+                // Exclure soi-même si includesSelf = false
+                if (otherSlot.id === slot.id && !eff.includesSelf) return;
+                
+                count++;
+            });
+            
+            bonus += count * eff.value;
+        });
+        
+        return bonus;
+    }
+
+    // Calculer bonus selon défausses ce tour
+    calculateBonusPerDiscard(slot) {
+        if (!slot.card || !slot.card.effect) return 0;
+        
+        const effects = Array.isArray(slot.card.effect) ? slot.card.effect : [slot.card.effect];
+        let bonus = 0;
+        
+        effects.forEach(eff => {
+            if (eff.type !== 'bonus_per_discard') return;
+            
+            // Compter les cartes défaussées avec le bon tag
+            const count = this.gm.discardsThisTurn.filter(card => 
+                card.tags && card.tags.includes(eff.tag)
+            ).length;
+            
+            bonus += count * eff.value;
+        });
+        
+        return bonus;
+    }
+
+    // Calculer value finale d'une carte avec ses charmes
     getFinalCardValue(slotId) {
         const slot = this.getSlot(slotId);
         if (!slot || !slot.card) return 0;
@@ -195,6 +280,15 @@ export class BoardState {
                 }
             });
         });
+
+        // Appliquer auras tribales
+        total += this.calculateTribalAuras(slot);
+
+        // Appliquer count tribal (self-scaling)
+        total += this.calculateTribalCount(slot);
+
+        // Appliquer bonus per discard
+        total += this.calculateBonusPerDiscard(slot);
         
         // Appliquer bonus neighbors/rewards
         total += slot.neighborBonus + slot.rewardBonus;

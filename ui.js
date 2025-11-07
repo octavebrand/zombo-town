@@ -15,7 +15,7 @@ export class UIManager {
         this.selectedCardIndex = null;
         this.highlightedSlots = [];
 
-        // 🆕 Désélectionner au click ailleurs
+        // Désélectionner au click ailleurs
         this.setupDeselectListener();
 
         this.linesRenderer = new BoardLinesRenderer(gameManager);
@@ -24,7 +24,7 @@ export class UIManager {
     //déselection si clique ailleurs que sur une carte
     setupDeselectListener() {
         document.getElementById('gameContainer').addEventListener('click', (e) => {
-            // 🆕 Ne rien faire si click sur carte, slot, OU enemyInfo
+            // Ne rien faire si click sur carte, slot, OU enemyInfo
             if (e.target.closest('.card') || 
                 e.target.closest('.slot') || 
                 e.target.closest('#enemyInfo') ||
@@ -98,7 +98,7 @@ export class UIManager {
                 }).filter(t => t).join(' ');
             }
             
-            // 🆕 Afficher onDeath (MANQUANT DANS TON CODE)
+            // Afficher onDeath (MANQUANT DANS TON CODE)
             let onDeathText = '';
             if (slot.card.onDeath) {
                 switch(slot.card.onDeath.type) {
@@ -114,7 +114,7 @@ export class UIManager {
                 }
             }
             
-            // 🆕 Countdown timer
+            // Countdown timer
             let timerText = '';
             if (slot.card.timer && slot.card.turnPlaced !== null) {
                 const turnsElapsed = this.gm.turnNumber - slot.card.turnPlaced;
@@ -167,7 +167,7 @@ export class UIManager {
             `;
         }
                 
-                // 🆕 Click pour retirer (sauf enemy/player)
+                // Click pour retirer (sauf enemy/player)
                 if (slot.type !== 'enemy' && slot.type !== 'player') {
                     slotDiv.style.cursor = 'pointer';
                     slotDiv.onclick = (e) => {
@@ -183,7 +183,7 @@ export class UIManager {
                 }
             }
 
-            // 🆕 Slot vide avec bonus en attente
+            // Slot vide avec bonus en attente
             else if (slot.bonus !== 0 && slot.type !== 'enemy' && slot.type !== 'player') {
                 slotDiv.innerHTML = `
                     <div style="font-size: 18px; color: #FFD700; font-weight: bold;">
@@ -195,10 +195,10 @@ export class UIManager {
                 `;
             }
 
-            // 🆕 Hover tooltip
+            // Hover tooltip
             if (slot.card) {
                 slotDiv.onmouseenter = (e) => {
-                    this.showCardTooltip(slot.card, e.clientX, e.clientY, slot.id);  // 🆕 Passer slotId
+                    this.showCardTooltip(slot.card, e.clientX, e.clientY, slot.id);  // Passer slotId
                 };
                 
                 slotDiv.onmouseleave = () => {
@@ -220,7 +220,7 @@ export class UIManager {
     }
     
     setupTargeting() {
-        // 🆕 Utiliser délégation pour ennemi principal
+        // Utiliser délégation pour ennemi principal
         const enemyInfo = document.getElementById('enemyInfo');
         if (enemyInfo) {
             enemyInfo.style.cursor = 'pointer';
@@ -255,7 +255,7 @@ export class UIManager {
             }
         });
 
-        // 🆕 Click sur autres slots (retrait si pas de carte sélectionnée)
+        // Click sur autres slots (retrait si pas de carte sélectionnée)
         ['block', 'damage', 'state', 'shared'].forEach(type => {
             this.gm.board.slots[type].forEach(slot => {
                 const slotElement = document.getElementById(slot.id);
@@ -330,7 +330,7 @@ export class UIManager {
                 html += `<div class="entity-maxxer">${icon} x${mult.toFixed(1)}</div>`;
             }
             
-            // 🆕 Tier et progression pour STATE
+            // Tier et progression pour STATE
             if (entity.type === 'state') {
                 const stateData = this.gm.calculateStateValue();
                 const nextThreshold = stateData.tier < 4 ? (stateData.tier + 1) * 10 : null;
@@ -417,10 +417,16 @@ renderHand() {
         cardDiv.dataset.rarity = card.rarity;
         cardDiv.dataset.index = index;
 
-        // 🆕 Style spécial pour charmes
+        // Style spécial pour charmes
         if (card.cardType === CardType.CHARM) {
             cardDiv.style.borderColor = '#9370DB';  // Violet
             cardDiv.style.background = 'linear-gradient(135deg, #4B0082 0%, #8A2BE2 100%)';
+        }
+
+        // Style spécial pour atouts
+        if (card.cardType === CardType.ATOUT) {
+            cardDiv.style.borderColor = '#32CD32';  // Vert lime
+            cardDiv.style.background = 'linear-gradient(135deg, #006400 0%, #228B22 100%)';
         }
         
         if (card.isArtifact) {
@@ -434,7 +440,7 @@ renderHand() {
             cardDiv.style.boxShadow = '0 10px 30px rgba(0, 255, 0, 0.8)';
         }
         
-        // 🆕 Afficher "X only" si spécialisée
+        // Afficher "X only" si spécialisée
         let slotText = '';
         if (card.slotTypes.length === 1) {
             const slotNames = {
@@ -464,9 +470,45 @@ renderHand() {
                     case 'heal': return `Heal ${eff.value}`;
                     case 'draw': return `Pioche ${eff.value}`;
                     case 'instant_draw': return `📥 Pioche ${eff.value} (immédiat)`;
-                    case 'instant_all_slots_bonus': return `All slots +${eff.value}`;  // 🆕
+                    case 'instant_all_slots_bonus': return `All slots +${eff.value}`;  
                     
-                    // 🆕 Effets charmes
+                    // Effets auras tribales
+                    case 'aura_tribal':
+                        if (eff.includesSelf) {
+                            return `Toutes ${eff.tag}s +${eff.value}`;
+                        } else {
+                            return `Autres ${eff.tag}s +${eff.value}`;
+                        }
+
+                    // Distribution aléatoire
+                    case 'instant_missiles':
+                        return `${eff.count} missiles ×${eff.value} sur ${eff.targetTypes.join('/')}`;
+                    case 'instant_distribute':
+                        const occupiedText = eff.onlyOccupied ? ' (slots occupés)' : '';
+                        return `Distribue ${eff.value} sur ${eff.targetTypes.join('/')}${occupiedText}`;    
+
+                    // Count tribal (self-scaling)
+                    case 'count_tribal':
+                        if (eff.includesSelf) {
+                            return `+${eff.value} par ${eff.tag} (inclus soi-même)`;
+                        } else {
+                            return `+${eff.value} par autre ${eff.tag}`;
+                        }
+
+                    case 'instant_devour_neighbors':
+                        return `Dévore voisins (×${eff.multiplier} value)`;
+
+                    // Création jetons
+                    case 'instant_create_token':
+                        return `Crée jeton en main`;
+                    case 'on_discard_create_token':
+                        return `Crée jeton à la défausse`;
+                    case 'on_discard_create_token_same_slot':
+                        return `Crée jeton sur même slot (défausse)`;
+                    case 'bonus_per_discard':
+                        return `+${eff.value} par ${eff.tag} défaussé au tour précédent`;
+
+                    // Effets charmes
                     case 'charm_boost_creature': return `Créature +${eff.value}`;
                     case 'charm_boost_neighbors': return `Voisins +${eff.value}`;
                     case 'charm_penalty_neighbors': return `Voisins ${eff.value}`;
@@ -474,6 +516,26 @@ renderHand() {
                     case 'charm_random_boost': return `Créature +${eff.min} à +${eff.max}`;
                     case 'charm_heal_on_discard': return `Heal ${eff.value} à la défausse`;
                     
+                    // 🆕 Discover / Transform
+                    case 'instant_discover':
+                        if (eff.filter && eff.filter.tag) {
+                            return `Discover ${eff.filter.tag}`;
+                        }
+                        return `Discover ${eff.pool}`;
+                    case 'instant_transform_neighbor':
+                        if (eff.filter && eff.filter.tag) {
+                            return `Transform voisin en ${eff.filter.tag}`;
+                        }
+                        return `Transform voisin`;
+
+                    // Effets atouts
+                    case 'atout_draw_eot': 
+                        return `Pioche ${eff.value} fin de tour (max ${eff.max_hand} main)`;
+                    case 'atout_token_on_discard': 
+                        return `Crée jeton ${eff.tag} quand ${eff.tag} défaussé`;
+                    case 'atout_maxxer_start': 
+                        return `Maxxers débutent à ${eff.start}, max ${eff.max}`;
+
                     default: return eff.type;
                 }
             }).join(' • ');
@@ -612,7 +674,7 @@ renderHand() {
             slotElement.style.background = 'rgba(0, 255, 0, 0.5)';
             setTimeout(() => {
                 slotElement.style.background = '';
-                // 🆕 Re-render APRÈS le flash pour voir les bonus voisins
+                // Re-render APRÈS le flash pour voir les bonus voisins
                 this.render();
             }, 300);
             
@@ -628,14 +690,12 @@ renderHand() {
     removeCardFromSlot(slotId) {
         const slot = this.gm.board.getSlot(slotId);
         if (!slot || !slot.card) return;
-
-        // 🆕 BLOQUER retrait si équipée de charmes
-        if (slot.equipments.length > 0) {
-            this.gm.log(`🔒 ${slot.card.name} est équipée de ${slot.equipments.length} charme(s), impossible de la retirer`);
-            return;  // 🛑 Stop
-        }
         
-        // 🆕 Vérifier si la carte a un effet "instant" (AVANT de la retirer)
+        // 🔒 BLOQUER tout retrait (design TCG)
+        this.gm.log(`🔒 Impossible de retirer une carte une fois jouée`);
+        return;
+        
+ /*        // Vérifier si la carte a un effet "instant" (AVANT de la retirer)
         const card = slot.card;
         if (card.effect) {
             const effects = Array.isArray(card.effect) ? card.effect : [card.effect];
@@ -681,7 +741,7 @@ renderHand() {
         slot.neighborBonus = 0;  
         slot.rewardBonus = 0;   
         
-        // 🆕 Gérer les charmes
+        // Gérer les charmes
         if (slot.equipments.length > 0) {
             slot.equipments.forEach(charm => {
                 if (this.gm.hand.length < 12) {
@@ -707,7 +767,7 @@ renderHand() {
 
         this.gm.recalculateMaxxers();
         
-        this.render();
+        this.render(); */
     }
 
     showCardTooltip(card, mouseX, mouseY, slotId = null) {
@@ -730,7 +790,57 @@ renderHand() {
                     case 'instant_all_slots_bonus': return `All slots +${eff.value}`;
                     case 'heal': return `Heal ${eff.value}`;
                     case 'draw': return `Pioche ${eff.value}`;
+                    // Effets atouts
+                    case 'atout_draw_eot': return `Pioche ${eff.value} fin de tour (max ${eff.max_hand} main)`;
+                    case 'atout_token_on_discard': return `Crée jeton ${eff.tag} quand ${eff.tag} défaussé`;
+                    case 'atout_maxxer_start': return `Maxxers débutent à ${eff.start}, max ${eff.max}`;
+                    // Distribution aléatoire
+                    case 'instant_missiles':
+                        return `${eff.count} missiles ×${eff.value} sur ${eff.targetTypes.join('/')}`;
+                    case 'instant_distribute':
+                        const occupiedText = eff.onlyOccupied ? ' (slots occupés)' : '';
+                        return `Distribue ${eff.value} sur ${eff.targetTypes.join('/')}${occupiedText}`;
+                    // Aura tribal
+                    case 'aura_tribal':
+                        if (eff.includesSelf) {
+                            return `Toutes ${eff.tag}s +${eff.value}`;
+                        } else {
+                            return `Autres ${eff.tag}s +${eff.value}`;
+                        }
                     default: return eff.type;
+
+                    // Count tribal (self-scaling)
+                    case 'count_tribal':
+                        if (eff.includesSelf) {
+                            return `+${eff.value} par ${eff.tag} (inclus soi-même)`;
+                        } else {
+                            return `+${eff.value} par autre ${eff.tag}`;
+                        }
+
+                    // 🆕 Discover / Transform
+                    case 'instant_discover':
+                        if (eff.filter && eff.filter.tag) {
+                            return `Discover ${eff.filter.tag}`;
+                        }
+                        return `Discover ${eff.pool}`;
+                    case 'instant_transform_neighbor':
+                        if (eff.filter && eff.filter.tag) {
+                            return `Transform voisin en ${eff.filter.tag}`;
+                        }
+                        return `Transform voisin`;
+
+                    case 'instant_devour_neighbors':
+                        return `Dévore voisins (×${eff.multiplier} value)`;
+
+                    // Création jetons
+                    case 'instant_create_token':
+                        return `Crée jeton en main`;
+                    case 'on_discard_create_token':
+                        return `Crée jeton à la défausse`;
+                    case 'on_discard_create_token_same_slot':
+                        return `Crée jeton sur même slot (défausse)`;
+                    case 'bonus_per_discard':
+                        return `+${eff.value} par ${eff.tag} défaussé au tour précédent`;
                 }
             }).join('<br>');
         }
@@ -766,7 +876,7 @@ renderHand() {
                 });
             }
             
-            // 🆕 OnDeath
+            // OnDeath
             if (card.onDeath) {
                 switch(card.onDeath.type) {
                     case 'draw':
@@ -781,7 +891,7 @@ renderHand() {
                 }
             }
             
-            // 🆕 Timer
+            // Timer
             if (card.timer && card.turnPlaced !== null) {
                 const turnsElapsed = this.gm.turnNumber - card.turnPlaced;
                 const turnsRemaining = card.timer.turns - turnsElapsed;
@@ -799,7 +909,7 @@ renderHand() {
             enemyEffectText = effectsList.join('<br>');
         }
 
-        // 🆕 Ajouter section charmes si carte sur board avec équipements
+        // Ajouter section charmes si carte sur board avec équipements
         let equipmentSection = '';
         if (slotId) {
             const slot = this.gm.board.getSlot(slotId);
@@ -845,6 +955,7 @@ renderHand() {
                     ${enemyEffectText}
                 </div>
             ` : ''}
+            ${equipmentSection}
             ${card.rarity ? `
                 <div style="font-size: 11px; color: #888; margin-top: 8px;">
                     ${card.rarity}

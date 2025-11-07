@@ -3,6 +3,8 @@
 // ========================================
 import { ALL_CARDS } from './cards.js';
 import { Rarity } from './constants.js';
+import { createToken } from './tokens.js';  
+import { CardType } from './constants.js';  
 
 export class TurnResolver {
     constructor(gameManager) {
@@ -25,6 +27,9 @@ export class TurnResolver {
             playerDamageTaken: 0,
             enemyDamageTaken: 0
         };
+
+        // Reset tracking défausses
+        this.gm.discardsThisTurn = [];
         
         // A) Calculer DAMAGE
         this.calculateDamage(results);
@@ -41,14 +46,17 @@ export class TurnResolver {
         // E) Appliquer (enemy attack - block) → player
         this.applyDamageToPlayer(results);
         
-        // 🆕 E2) Appliquer effets STATE (draw/heal)
+        // E2) Appliquer effets STATE (draw/heal)
         this.applyStateEffects(results);
 
-        // 🆕 E3) Vérifier timers cartes ennemies
+        // E3) Vérifier timers cartes ennemies
         this.checkTimers(results);
 
         // F) Reset compteurs
         this.resetCounters();
+
+        // I) Appliquer effets atouts
+        this.applyAtoutEffects();
         
         // G) Défausser cartes temporaires
         this.discardTemporaryCards();
@@ -80,7 +88,7 @@ export class TurnResolver {
             }
         });
 
-            // 🆕 Appliquer effets cartes ennemies (boost_damage)
+            // Appliquer effets cartes ennemies (boost_damage)
         let enemyDamageBoost = 0;
         this.gm.board.slots.enemy.forEach(slot => {
             if (slot.card && slot.card.effect) {
@@ -141,7 +149,7 @@ export class TurnResolver {
     calculateEnemyAttack(results) {
         let baseDamage = this.gm.enemy.attackDamage;
         
-        // 🆕 Appliquer boost des cartes ennemies
+        // Appliquer boost des cartes ennemies
         let damageBoost = 0;
         this.gm.board.slots.enemy.forEach(slot => {
             if (slot.card && slot.card.effect) {
@@ -170,7 +178,7 @@ export class TurnResolver {
     applyDamageToEnemy(results) {
         const target = this.gm.currentTarget;
         
-        // 🆕 Calculer block de l'ennemi (depuis cartes ennemies)
+        // Calculer block de l'ennemi (depuis cartes ennemies)
         let enemyBlock = 0;
         this.gm.board.slots.enemy.forEach(slot => {
             if (slot.card && slot.card.effect) {
@@ -228,7 +236,7 @@ export class TurnResolver {
             if (isDead) {
                 const deadCard = card;
                 
-                // 🆕 Trigger onDeath
+                // Trigger onDeath
                 if (deadCard.onDeath) {
                     this.resolveOnDeath(deadCard.onDeath);
                 }
@@ -273,6 +281,33 @@ export class TurnResolver {
         
         this.gm.log(`[F] 🔄 Reset compteurs`);
     }
+
+    // Appliquer effets des atouts en fin de tour
+    applyAtoutEffects() {
+        const playerSlots = this.gm.board.getSlotsByType('player');
+        
+        playerSlots.forEach(slot => {
+            if (!slot.card || slot.card.cardType !== CardType.ATOUT) return;
+            
+            const atout = slot.card;
+            if (!atout.effect) return;
+            
+            switch(atout.effect.type) {
+                case 'atout_draw_eot':
+                    // Draw en fin de tour avec limite main
+                    const maxHand = atout.effect.max_hand || 10;
+                    if (this.gm.hand.length < maxHand) {
+                        this.gm.drawCards(atout.effect.value);
+                        this.gm.log(`📚 ${atout.name}: Pioche ${atout.effect.value}`);
+                    } else {
+                        this.gm.log(`⚠️ ${atout.name}: Main pleine (max ${maxHand})`);
+                    }
+                    break;
+                    
+                // Autres effets atouts gérés ailleurs (usines, stabilisateur)
+            }
+        });
+    }
     
     // ========================================
     // G) DÉFAUSSER CARTES TEMPORAIRES
@@ -284,7 +319,7 @@ export class TurnResolver {
         const allSlots = this.gm.board.getAllSlots();
         
         allSlots.forEach(slot => {
-            // 🆕 Reset TOUS les bonus (slots vides ou pleins)
+            // Reset TOUS les bonus (slots vides ou pleins)
             if (slot.type !== 'enemy' && slot.type !== 'player') {
                 slot.rewardBonus = 0;  
                 slot.neighborBonus = 0;  
@@ -292,31 +327,93 @@ export class TurnResolver {
             
             // Défausser cartes
             if (slot.card && slot.type !== 'player' && slot.type !== 'enemy') {
-                this.gm.discard.push(slot.card);
+                const discardedCard = slot.card;  // Stocker AVANT de défausser
+                this.gm.discard.push(discardedCard);
+
+                // Tracker pour Collecteur d'Ombres
+                this.gm.discardsThisTurn.push(discardedCard);
+                // Trigger atouts "token_on_discard"
+                this.checkAtoutTokenOnDiscard(discardedCard);
+                // Trigger effets on_discard (créatures)
+                this.gm.effectResolver.resolveOnDiscard(discardedCard);
+
+                // Effet spécial : créer jeton sur même slot
+                let tokenCreatedOnSlot = false;
+                if (discardedCard.effect) {
+                    const effects = Array.isArray(discardedCard.effect) ? discardedCard.effect : [discardedCard.effect];
+                    effects.forEach(eff => {
+                        if (eff.type === 'on_discard_create_token_same_slot') {
+                            const token = createToken(eff.tokenId);
+                            if (token) {
+                                slot.card = token;  // Remettre jeton sur le slot
+                                tokenCreatedOnSlot = true;
+                                this.gm.log(`👻 ${discardedCard.name}: Jeton ${token.name} créé sur ${slot.id}`);
+                            }
+                        }
+                    });
+                }
                 
-            // 🆕 Défausser charmes + trigger effets on_discard
-            slot.equipments.forEach(charm => {
-                this.gm.effectResolver.resolveOnDiscard(charm);  // 🆕 Méthode générique
-                this.gm.discard.push(charm);
-                discardedCount++;
-            });
-                slot.equipments = [];  // Clear
+                // Si aucun jeton créé, vider le slot
+                if (slot.card === discardedCard) {
+                    slot.removeCard();
+                }
                 
-                slot.removeCard();
-                discardedCount++;
+                // Défausser charmes + trigger effets on_discard
+                slot.equipments.forEach(charm => {
+                    this.gm.effectResolver.resolveOnDiscard(charm); 
+                    this.gm.discard.push(charm);
+                    discardedCount++;
+                });
+                    slot.equipments = [];  // Clear
+                    
+                    if (!tokenCreatedOnSlot) {
+                        slot.removeCard();
+                    }
+
+                    discardedCount++;
             }
-        });
-        
-        // Vider slots PLAYER
-        this.gm.board.slots.player.forEach(slot => {
-            if (slot.card) {
-                this.gm.discard.push(slot.card);
-                slot.removeCard();
-                discardedCount++;
+
+            // Pour slots PLAYER : ne défausser QUE les créatures, pas les atouts
+            if (slot.type === 'player' && slot.card) {
+                if (slot.card.cardType !== CardType.ATOUT) {
+                    const discardedCard = slot.card;  // Stocker avant de retirer
+                    this.gm.discard.push(discardedCard);
+                    
+                    // Trigger atouts "token_on_discard"
+                    this.checkAtoutTokenOnDiscard(discardedCard);
+                    
+                    slot.removeCard();
+                    discardedCount++;
+                }
+                // Sinon (ATOUT) → on ne fait rien, il reste
             }
         });
         
         this.gm.log(`[G] 🗑️ ${discardedCount} carte(s) défaussée(s) + Reset bonus`);
+    }
+
+    // Vérifier si un atout doit créer un jeton
+    checkAtoutTokenOnDiscard(discardedCard) {
+        if (!discardedCard.tags || discardedCard.tags.length === 0) return;
+        
+        const playerSlots = this.gm.board.getSlotsByType('player');
+        
+        playerSlots.forEach(slot => {
+            if (!slot.card || slot.card.cardType !== CardType.ATOUT) return;
+            
+            const atout = slot.card;
+            if (!atout.effect || atout.effect.type !== 'atout_token_on_discard') return;
+            
+            // Vérifier si le tag correspond
+            if (discardedCard.tags.includes(atout.effect.tag)) {
+                // Créer jeton
+                const token = createToken(atout.effect.tokenId);
+                if (token && this.gm.hand.length < 10) {
+                    this.gm.hand.push(token);
+                    this.gm.log(`🏭 ${atout.name}: Crée jeton ${token.name}`);
+                }
+            }
+        });
     }
     
     // ========================================
@@ -331,7 +428,7 @@ export class TurnResolver {
         
         this.gm.log(`[H] 🌍 STATE: ${stateData.value} value (Tier ${stateData.tier})`);
         
-        // 🆕 Appliquer les rewards choisis
+        // Appliquer les rewards choisis
         if (this.gm.pendingStateRewards.length > 0) {
             this.gm.log(`[H] ✨ Application de ${this.gm.pendingStateRewards.length} reward(s)`);
             
@@ -370,13 +467,13 @@ export class TurnResolver {
     }
 
     applyRandomSlotBonus(value) {
-        // 🆕 Stocker pour application au tour suivant
+        // Stocker pour application au tour suivant
         this.gm.pendingSlotBonuses.push({ type: 'random', value: value });
         this.gm.log(`[H] 🎲 Random slot +${value} (sera appliqué au prochain tour)`);
     }
 
     applyAllSlotsBonus(value) {
-        // 🆕 Stocker pour application au tour suivant
+        // Stocker pour application au tour suivant
         if (!this.gm.pendingSlotBonuses) {
             this.gm.pendingSlotBonuses = [];
         }

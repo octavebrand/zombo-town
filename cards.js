@@ -19,8 +19,8 @@ export const ALL_CARDS = [
         Rarity.COMMUNE,
         null,
         'Value 10',
-        CardType.CREATURE,  // 🆕
-        []                  // 🆕 Pas de tag (neutre)
+        CardType.CREATURE,  
+        []                  
     ),
 
     // Botte 
@@ -307,6 +307,42 @@ export const ALL_CARDS = [
         CardType.CREATURE,
         ['Mollusque']
     ),
+
+    new Card(
+        'guerrier_mollusque',
+        'Guerrier Mollusque',
+        10,
+        ['damage', 'block', 'shared', 'state'],
+        Rarity.UNCOMMON,
+        { type: 'count_tribal', tag: 'Mollusque', value: 2, includesSelf: false },
+        'Value 10, +2 par autre Mollusque',
+        CardType.CREATURE,
+        ['Mollusque']
+    ),
+
+    new Card(
+        'commandant_mollusque',
+        'Commandant Mollusque',
+        8,
+        ['damage', 'block', 'shared', 'state'],
+        Rarity.RARE,
+        { type: 'aura_tribal', tag: 'Mollusque', value: 3, includesSelf: false },
+        'Value 8, autres Mollusques +3',
+        CardType.CREATURE,
+        ['Mollusque']
+    ),
+
+    new Card(
+        'artisan_mollusque',
+        'Artisan Mollusque',
+        6,
+        ['damage', 'block', 'shared', 'state'],
+        Rarity.RARE,
+        { type: 'instant_discover', pool: 'charms', count: 3 },
+        'Value 6, révèle 3 Charmes, choisis-en 1',
+        CardType.CREATURE,
+        ['Mollusque']
+    ),
     
     // ZIGOUILLEURS
     new Card(
@@ -320,6 +356,45 @@ export const ALL_CARDS = [
             { type: 'instant_draw', value: 1 }
         ],
         'Value 5, Maxxer +1, draw 1',
+        CardType.CREATURE,
+        ['Zigouilleur']
+    ),
+
+    new Card(
+        'zigouilleur_artificier',
+        'Zigouilleur Artificier',
+        3,
+        ['damage', 'block', 'shared', 'state'],
+        Rarity.UNCOMMON,
+        { type: 'instant_missiles', count: 5, value: 2, targetTypes: ['damage', 'shared'] },
+        'Value 3, 5 missiles ×2 sur slots damage/shared',
+        CardType.CREATURE,
+        ['Zigouilleur']
+    ),
+
+    new Card(
+        'ingenieur_zigouilleur',
+        'Ingénieur Zigouilleur',
+        3,
+        ['damage', 'block', 'shared', 'state'],
+        Rarity.UNCOMMON,
+        [
+            { type: 'maxxer_any', value: 1 },
+            { type: 'instant_discover', pool: 'creatures', filter: { tag: 'Zigouilleur' }, count: 3 }
+        ],
+        'Value 3, Maxxer +1, discover Zigouilleur',
+        CardType.CREATURE,
+        ['Zigouilleur']
+    ),
+
+    new Card(
+        'zigouilleur_affame',
+        'Zigouilleur Affamé',
+        8,
+        ['damage', 'block', 'shared', 'state'],
+        Rarity.RARE,
+        { type: 'instant_devour_neighbors', multiplier: 2 },
+        'Value 8, dévore voisins (gagne value ×2)',
         CardType.CREATURE,
         ['Zigouilleur']
     ),
@@ -351,6 +426,18 @@ export const ALL_CARDS = [
         CardType.CREATURE,
         ['Trafiquant']
     ),
+
+    new Card(
+        'trafiquant_genereux',
+        'Trafiquant Généreux',
+        2,
+        ['damage', 'block', 'shared', 'state'],
+        Rarity.UNCOMMON,
+        { type: 'instant_distribute', value: 13, targetTypes: ['damage', 'block', 'shared', 'state'], onlyOccupied: true },
+        'Value 2, distribue 13 sur slots occupés',
+        CardType.CREATURE,
+        ['Trafiquant']
+    ),
     
     // OMBRES
     new Card(
@@ -361,6 +448,18 @@ export const ALL_CARDS = [
         Rarity.COMMUNE,
         { type: 'instant_draw', value: 2 },
         'Value 3, draw 2',
+        CardType.CREATURE,
+        ['Ombre']
+    ),
+
+    new Card(
+        'maitre_ombres',
+        'Maître des Ombres',
+        10,
+        ['damage', 'block', 'shared', 'state'],
+        Rarity.MYTHIQUE,
+        { type: 'aura_tribal', tag: 'Ombre', value: 4, includesSelf: true },
+        'Value 10, toutes Ombres +4',
         CardType.CREATURE,
         ['Ombre']
     ),
@@ -379,7 +478,44 @@ export const ALL_CARDS = [
         CardType.CREATURE,
         ['Ombre']
     ),
-    
+
+    new Card(
+        'generateur_ombres',
+        'Générateur d\'Ombres',
+        6,
+        ['damage', 'block', 'shared', 'state'],
+        Rarity.UNCOMMON,
+        { type: 'instant_create_token', tokenId: 'token_ombre' },
+        'Value 6, crée jeton Ombre en main',
+        CardType.CREATURE,
+        ['Ombre']
+    ),
+
+    new Card(
+        'ombre_persistante',
+        'Ombre Persistante',
+        8,
+        ['damage', 'block', 'shared', 'state'],
+        Rarity.RARE,
+        { type: 'on_discard_create_token', tokenId: 'token_ombre' },
+        'Value 8, crée jeton Ombre quand défaussée',
+        CardType.CREATURE,
+        ['Ombre']
+    ),
+
+    new Card(
+        'collecteur_ombres',
+        'Collecteur d\'Ombres',
+        5,
+        ['damage', 'block', 'shared', 'state'],
+        Rarity.UNCOMMON,
+        { type: 'bonus_per_discard', tag: 'Ombre', value: 3 },
+        'Value 5, +3 par Ombre défaussée au tour précédent',
+        CardType.CREATURE,
+        ['Ombre']
+    ),
+
+        
     // ILLUSIONS
     new Card(
         'illusion_simple',
@@ -401,6 +537,45 @@ export const ALL_CARDS = [
         Rarity.COMMUNE,
         { type: 'instant_draw', value: 2 },
         'Value 3, draw 2',
+        CardType.CREATURE,
+        ['Illusion']
+    ),
+
+    new Card(
+        'illusion_feu',
+        'Illusion de Feu',
+        0,
+        ['damage', 'block', 'shared', 'state'],
+        Rarity.RARE,
+        [
+            { type: 'maxxer_all', value: 1 },
+            { type: 'instant_distribute', value: 10, targetTypes: ['damage', 'block', 'shared', 'state'], onlyOccupied: false }
+        ],
+        'Value 0, All maxxers +1, distribue 10',
+        CardType.CREATURE,
+        ['Illusion']
+    ),
+
+    new Card(
+        'illusion_genante',
+        'Illusion Gênante',
+        8,
+        ['damage', 'block', 'shared', 'state'],
+        Rarity.RARE,
+        { type: 'on_discard_create_token_same_slot', tokenId: 'token_illusion' },
+        'Value 8, crée jeton Illusion sur même slot',
+        CardType.CREATURE,
+        ['Illusion']
+    ),
+
+    new Card(
+        'illusion_changeante_v1',
+        'Illusion Changeante',
+        8,
+        ['damage', 'block', 'shared', 'state'],
+        Rarity.RARE,
+        { type: 'instant_transform_neighbor', pool: 'creatures', filter: { tag: 'Illusion' } },
+        'Value 8, transforme voisin en Illusion',
         CardType.CREATURE,
         ['Illusion']
     ),
