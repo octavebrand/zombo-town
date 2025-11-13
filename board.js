@@ -7,32 +7,32 @@ import { Slot } from './constants.js';
 // Positions spatiales (en % de l'écran pour responsive)
 const SLOT_POSITIONS = {
     // BLOCK (left side)
-    block_left:   { x: 15, y: 40 },
-    block_top:    { x: 25, y: 30 },
-    block_bottom: { x: 25, y: 50 },
+    block_left:   { x: 15, y: 35 },
+    block_top:    { x: 26, y: 23 },
+    block_bottom: { x: 26, y: 48 },
     
     // DAMAGE (center)
-    damage_top:    { x: 50, y: 30 },
-    damage_bottom: { x: 50, y: 50 },
+    damage_top:    { x: 50, y: 23 },
+    damage_bottom: { x: 50, y: 48 },
     
     // STATE (right side)
-    state_right:  { x: 85, y: 40 },
-    state_top:    { x: 75, y: 30 },
-    state_bottom: { x: 75, y: 50 },
+    state_right:  { x: 85, y: 35 },
+    state_top:    { x: 74, y: 23 },
+    state_bottom: { x: 74, y: 48 },
     
     // SHARED (between entities)
-    shared_1: { x: 37.5, y: 40 }, // BLOCK ↔ DAMAGE
-    shared_2: { x: 62.5, y: 40 }, // DAMAGE ↔ STATE
+    shared_1: { x: 37.5, y: 35 }, // BLOCK ↔ DAMAGE
+    shared_2: { x: 62.5, y: 35 }, // DAMAGE ↔ STATE
     
     // ENEMY (top)
-    enemy_1: { x: 35, y: 20 },
-    enemy_2: { x: 50, y: 20 },
-    enemy_3: { x: 65, y: 20 },
+    enemy_1: { x: 35, y: 10 },
+    enemy_2: { x: 50, y: 10 },
+    enemy_3: { x: 65, y: 10 },
     
     // PLAYER (bottom)
-    player_1: { x: 40, y: 60 },
-    player_2: { x: 50, y: 60 },
-    player_3: { x: 60, y: 60 }
+    player_1: { x: 10, y: 80 },
+    player_2: { x: 10, y: 70 },
+    player_3: { x: 10, y: 90 }
 };
 
 // Voisinage (selon schéma corrigé)
@@ -289,10 +289,37 @@ export class BoardState {
 
         // Appliquer bonus per discard
         total += this.calculateBonusPerDiscard(slot);
+
+        // Calculer bonus/penalty des voisins (passif)
+        total += this.calculateNeighborEffects(slot);
         
         // Appliquer bonus neighbors/rewards
         total += slot.neighborBonus + slot.rewardBonus;
         
         return total;
+    }
+
+    // Calculer bonus/penalty des voisins (passif)
+    calculateNeighborEffects(targetSlot) {
+        let bonus = 0;
+        const neighbors = this.getNeighbors(targetSlot.id);
+        
+        neighbors.forEach(neighborSlot => {
+            if (!neighborSlot.card) return;
+            
+            const effects = Array.isArray(neighborSlot.card.effect) 
+                ? neighborSlot.card.effect 
+                : [neighborSlot.card.effect].filter(e => e);
+            
+            effects.forEach(eff => {
+                if (eff.type === 'bonus_neighbors') {
+                    bonus += eff.value;
+                } else if (eff.type === 'penalty_neighbors') {
+                    bonus -= eff.value;
+                }
+            });
+        });
+        
+        return bonus;
     }
 }

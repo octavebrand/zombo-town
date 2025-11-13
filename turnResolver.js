@@ -335,7 +335,7 @@ export class TurnResolver {
                 // Trigger atouts "token_on_discard"
                 this.checkAtoutTokenOnDiscard(discardedCard);
                 // Trigger effets on_discard (créatures)
-                this.gm.effectResolver.resolveOnDiscard(discardedCard);
+                this.gm.effectResolver.resolveOnDiscard(discardedCard, slot.id);
 
                 // Effet spécial : créer jeton sur même slot
                 let tokenCreatedOnSlot = false;
@@ -348,6 +348,28 @@ export class TurnResolver {
                                 slot.card = token;  // Remettre jeton sur le slot
                                 tokenCreatedOnSlot = true;
                                 this.gm.log(`👻 ${discardedCard.name}: Jeton ${token.name} créé sur ${slot.id}`);
+                            }
+                        }
+
+                        if (eff.type === 'on_discard_create_creature_same_slot') {
+                            // Construire pool de créatures
+                            let pool = ALL_CARDS.filter(c => c.cardType === CardType.CREATURE);
+                            
+                            // Appliquer filtres
+                            if (eff.filter) {
+                                if (eff.filter.tag) {
+                                    pool = pool.filter(c => c.tags && c.tags.includes(eff.filter.tag));
+                                }
+                                if (eff.filter.rarity) {
+                                    pool = pool.filter(c => c.rarity === eff.filter.rarity);
+                                }
+                            }
+                            
+                            if (pool.length > 0) {
+                                const randomCreature = {...pool[Math.floor(Math.random() * pool.length)]};
+                                slot.card = randomCreature;
+                                tokenCreatedOnSlot = true;
+                                this.gm.log(`🎲 ${discardedCard.name}: ${randomCreature.name} apparaît sur ${slot.id}`);
                             }
                         }
                     });

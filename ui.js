@@ -130,24 +130,32 @@ export class UIManager {
                 }
             }
 
+            
+
             slotDiv.innerHTML = `
-                <div style="font-size: 11px; font-weight: bold;">${slot.card.name}</div>
-                <div style="font-size: 16px; color: #FF6347;">${slot.card.currentHp}/${slot.card.maxHp}</div>
-                ${effectText ? `
-                    <div style="font-size: 10px; color: #FFD700; margin-top: 3px;">
-                        ${effectText}
+                <div style="display: flex; flex-direction: column; gap: 2px; align-items: center;">
+                    <div style="font-size: 13px; font-weight: bold;">
+                        ${slot.card.name}
                     </div>
-                ` : ''}
-                ${onDeathText ? `
-                    <div style="font-size: 9px; color: #9370DB; margin-top: 2px;">
-                        ${onDeathText}
+                    <div style="font-size: 15px; color: #FF6347;">
+                        ${slot.card.currentHp}/${slot.card.maxHp}
                     </div>
-                ` : ''}
-                ${timerText ? `
-                    <div style="font-size: 9px; color: #FF4500; font-weight: bold; margin-top: 2px;">
-                        ${timerText}
-                    </div>
-                ` : ''}
+                    ${effectText ? `
+                        <div style="font-size: 12px; color: #FFD700;">
+                            ${effectText}
+                        </div>
+                    ` : ''}
+                    ${onDeathText ? `
+                        <div style="font-size: 11px; color: #9370DB;">
+                            ${onDeathText}
+                        </div>
+                    ` : ''}
+                    ${timerText ? `
+                        <div style="font-size: 11px; color: #FF4500; font-weight: bold;">
+                            ${timerText}
+                        </div>
+                    ` : ''}
+                </div>
             `;
         } else {
             const finalValue = this.gm.board.getFinalCardValue(slot.id);
@@ -344,7 +352,7 @@ export class UIManager {
                     </div>
                 `;
                 
-                if (nextThreshold) {
+               /*  if (nextThreshold) {
                     html += `
                         <div style="font-size: 10px; opacity: 0.6; margin-top: 3px;">
                             Prochain: ${nextThreshold - stateData.value}
@@ -356,7 +364,7 @@ export class UIManager {
                             Max tier
                         </div>
                     `;
-                }
+                } */
             }
             
             entityDiv.innerHTML = html;
@@ -393,9 +401,9 @@ export class UIManager {
         
         const enemy = this.gm.enemy;
         enemyDiv.innerHTML = `
-            <div style="font-size: 14px; color: #FF6347;">ENEMY</div>
+            <div style="font-size: 20px; color: #FF6347;">Gros Monstre Méchant</div>
             <div class="hp-bar">💀 ${enemy.currentHp}/${enemy.maxHp}</div>
-            <div style="font-size: 12px; color: #aaa;">Attaque: ${enemy.attackDamage} dmg/tour</div>
+            <div style="font-size: 16px; color: #aaa;">Prochaine attaque : ${enemy.attackDamage} dmg</div>
         `;
     }
     
@@ -501,10 +509,21 @@ renderHand() {
                     // Création jetons
                     case 'instant_create_token':
                         return `Crée jeton en main`;
+                    case 'instant_create_token_on_neighbors':
+                        return `Crée jetons sur voisins vides`;
                     case 'on_discard_create_token':
                         return `Crée jeton à la défausse`;
+                    case 'on_discard_draw':
+                        return `Draw ${eff.value} à la défausse`;
                     case 'on_discard_create_token_same_slot':
                         return `Crée jeton sur même slot (défausse)`;
+                    case 'on_discard_create_creature_same_slot':
+                        if (eff.filter && eff.filter.tag) {
+                            return `Crée ${eff.filter.tag} aléatoire sur même slot (défausse)`;
+                        } else if (eff.filter && eff.filter.rarity) {
+                            return `Crée créature ${eff.filter.rarity} aléatoire sur même slot (défausse)`;
+                        }
+                        return `Crée créature aléatoire sur même slot (défausse)`;
                     case 'bonus_per_discard':
                         return `+${eff.value} par ${eff.tag} défaussé au tour précédent`;
 
@@ -522,11 +541,14 @@ renderHand() {
                             return `Discover ${eff.filter.tag}`;
                         }
                         return `Discover ${eff.pool}`;
+
                     case 'instant_transform_neighbor':
                         if (eff.filter && eff.filter.tag) {
                             return `Transform voisin en ${eff.filter.tag}`;
                         }
                         return `Transform voisin`;
+                    case 'instant_transform_random_to_mythic':
+                        return `Transform créature aléatoire en Mythique`;
 
                     // Effets atouts
                     case 'atout_draw_eot': 
@@ -829,16 +851,30 @@ renderHand() {
                         }
                         return `Transform voisin`;
 
+                    case 'instant_transform_random_to_mythic':
+                        return `Transform créature aléatoire en Mythique`;
+
                     case 'instant_devour_neighbors':
                         return `Dévore voisins (×${eff.multiplier} value)`;
 
                     // Création jetons
                     case 'instant_create_token':
                         return `Crée jeton en main`;
+                    case 'instant_create_token_on_neighbors':
+                        return `Crée jetons sur voisins vides`;
                     case 'on_discard_create_token':
                         return `Crée jeton à la défausse`;
                     case 'on_discard_create_token_same_slot':
                         return `Crée jeton sur même slot (défausse)`;
+                    case 'on_discard_create_creature_same_slot':
+                        if (eff.filter && eff.filter.tag) {
+                            return `Crée ${eff.filter.tag} aléatoire sur même slot (défausse)`;
+                        } else if (eff.filter && eff.filter.rarity) {
+                            return `Crée créature ${eff.filter.rarity} aléatoire sur même slot (défausse)`;
+                        }
+                        return `Crée créature aléatoire sur même slot (défausse)`;
+                    case 'on_discard_draw':
+                        return `Draw ${eff.value} à la défausse`;
                     case 'bonus_per_discard':
                         return `+${eff.value} par ${eff.tag} défaussé au tour précédent`;
                 }

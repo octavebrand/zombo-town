@@ -1,6 +1,8 @@
 /* ========================================
-   STYLE.CSS - Layout responsive du board
+   STYLE.CSS - Retro Arcade/Terminal/Trading Card
    ======================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
 
 * {
     margin: 0;
@@ -9,10 +11,43 @@
 }
 
 body {
-    font-family: 'Arial', sans-serif;
-    background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
-    color: #fff;
+    font-family: 'VT323', monospace;
+    background: #0a0a0a;
+    color: #00ff00;
     overflow-x: hidden;
+    position: relative;
+}
+
+/* CRT Scanlines effect sur tout le jeu */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: repeating-linear-gradient(
+        0deg,
+        rgba(0, 255, 0, 0.03),
+        rgba(0, 255, 0, 0.03) 1px,
+        transparent 1px,
+        transparent 2px
+    );
+    pointer-events: none;
+    z-index: 9999;
+}
+
+/* Vignette effect */
+body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.8);
+    pointer-events: none;
+    z-index: 9998;
 }
 
 /* ========================================
@@ -47,64 +82,93 @@ body {
     width: 60px;
     height: 60px;
     border-radius: 50%;
-    border: 3px solid #fff;
-    background: rgba(255, 255, 255, 0.1);
+    border: 3px solid #00ff00;
+    background: rgba(0, 0, 0, 0.3);
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all 0.3s ease;
-    transform: translate(-50%, -50%); /* Centrer sur position x,y */
+    transition: all 0.2s ease;
+    transform: translate(-50%, -50%);
     z-index: 5;
+    box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+    font-family: 'VT323', monospace !important;
+    font-size: 32px !important;
+    font-weight: bold !important;
+    color: #FF9500 !important;
+    text-shadow: 0 0 8px rgba(255, 149, 0, 0.6) !important;
+    line-height: 1 !important;
+}
+
+/* Style spécifique pour le texte dans les slots */
+.slot-value,
+.slot > span {  /* Le > cible uniquement les span directs */
+    font-family: 'VT323', monospace !important;
+    font-size: 32px !important;
+    font-weight: bold !important;
+    color: #FF9500 !important;
+    text-shadow: 0 0 8px rgba(255, 149, 0, 0.6) !important;
 }
 
 .slot:hover {
-    transform: translate(-50%, -50%) scale(1.1);
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+    transform: translate(-50%, -50%) scale(1.15);
+    box-shadow: 0 0 20px currentColor;
 }
 
-/* Types de slots (couleurs) */
+/* Types de slots (couleurs néon) */
 .slot[data-type="block"] {
-    border-color: #4169E1;
-    background: rgba(65, 105, 225, 0.2);
+    border-color: #00BFFF;
+    box-shadow: 0 0 10px rgba(0, 191, 255, 0.5);
 }
 
 .slot[data-type="damage"] {
-    border-color: #FF4500;
-    background: rgba(255, 69, 0, 0.2);
+    border-color: #FF1744;
+    box-shadow: 0 0 10px rgba(255, 23, 68, 0.5);
 }
 
 .slot[data-type="state"] {
     border-color: #FFD700;
-    background: rgba(255, 215, 0, 0.2);
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
 }
 
 .slot[data-type="shared"] {
-    border-color: #DC143C;
-    background: rgba(220, 20, 60, 0.3);
+    border-color: #FF1744;
+    background: rgba(255, 23, 68, 0.1);
     border-width: 4px;
+    box-shadow: 0 0 15px rgba(255, 23, 68, 0.6);
 }
 
 .slot[data-type="enemy"] {
-    border-color: #8B0000;
-    background: rgba(139, 0, 0, 0.2);
+    border-color: #FF0000;
+    background: rgba(255, 0, 0, 0.1);
+    box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+    width: 80px; 
+    height: 80px;
 }
 
 .slot[data-type="player"] {
-    border-color: #32CD32;
-    background: rgba(50, 205, 50, 0.2);
+    border-color: #00ff00;
+    background: rgba(0, 255, 0, 0.1);
+    box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
 }
 
-/* Slot permanent (bordure or) */
+/* Slot permanent (bordure or avec glow) */
 .slot.permanent {
     border-color: #FFD700;
     border-width: 5px;
-    box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.8); }
+    50% { box-shadow: 0 0 30px rgba(255, 215, 0, 1); }
 }
 
 /* Slot avec carte */
 .slot.occupied {
-    background: rgba(255, 255, 255, 0.3);
+    background: #000000;
+    box-shadow: 0 0 15px currentColor;
 }
 
 /* ========================================
@@ -114,40 +178,44 @@ body {
 .entity {
     position: absolute;
     padding: 15px 25px;
-    border-radius: 10px;
-    border: 2px solid #fff;
-    background: rgba(0, 0, 0, 0.4);
+    border-radius: 5px;
+    border: 3px solid;
+    background: rgba(0, 0, 0, 0.9);
     text-align: center;
-    transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%) translateY(-40px);
     min-width: 120px;
     z-index: 10;
+    font-family: 'VT323', monospace;
+    box-shadow: 0 0 15px currentColor;
 }
 
 .entity-name {
-    font-size: 18px;
-    font-weight: bold;
+    font-size: 24px;
+    font-weight: normal;
     margin-bottom: 5px;
+    letter-spacing: 2px;
 }
 
 .entity-maxxer {
-    font-size: 14px;
+    font-size: 18px;
     color: #FFD700;
+    text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
 }
 
 /* Couleurs selon type */
 .entity[data-type="block"] {
-    border-color: #4169E1;
-    background: rgba(65, 105, 225, 0.3);
+    border-color: #00BFFF;
+    color: #00BFFF;
 }
 
 .entity[data-type="damage"] {
-    border-color: #FF4500;
-    background: rgba(255, 69, 0, 0.3);
+    border-color: #FF1744;
+    color: #FF1744;
 }
 
 .entity[data-type="state"] {
     border-color: #FFD700;
-    background: rgba(255, 215, 0, 0.3);
+    color: #FFD700;
 }
 
 /* ========================================
@@ -157,32 +225,40 @@ body {
 #playerInfo, #enemyInfo {
     position: absolute;
     padding: 15px 30px;
-    border-radius: 10px;
-    background: rgba(0, 0, 0, 0.6);
+    border-radius: 5px;
+    background: rgba(0, 0, 0, 0.9);
     border: 3px solid;
     text-align: center;
     min-width: 200px;
     transform: translateX(-50%);
+    font-family: 'VT323', monospace;
+    box-shadow: 0 0 20px currentColor;
 }
 
 #enemyInfo {
     top: 2%;
-    left: 50%;
-    border-color: #8B0000;
-    z-index: 100;  
-    pointer-events: auto;  
+    left: 2%;
+    transform: translateX(0);
+    border-color: #FF0000;
+    color: #FF0000;
+    z-index: 100;
+    pointer-events: auto;
 }
 
 #playerInfo {
-    bottom: 25%;
-    left: 50%;
-    border-color: #32CD32;
+    bottom: 37%;
+    left: 2%;
+    transform: translateX(0);
+    border-color: #00ff00;
+    color: #00ff00;
 }
 
 .hp-bar {
-    font-size: 20px;
-    font-weight: bold;
+    font-size: 28px;
+    font-weight: normal;
     margin-bottom: 5px;
+    letter-spacing: 2px;
+    text-shadow: 0 0 5px currentColor;
 }
 
 /* ========================================
@@ -191,110 +267,207 @@ body {
 
 #handContainer {
     position: fixed;
-    bottom: 1%;
+    bottom: 5%;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
-    gap: 10px;
-    padding: 10px;
-    background: rgba(0, 0, 0, 0.5);
-    border-radius: 10px;
+    gap: 12px;
+    padding: 60px 0 0 0;
+    background: transparent;
+    border: none;
+    border-radius: 0;
     max-width: 90vw;
     overflow-x: auto;
+    overflow-y: hidden;
+    box-shadow: none;
+    height: auto;
+    min-height: 280px;
+}
+
+/* Scrollbar plus discrète pour la main */
+#handContainer::-webkit-scrollbar {
+    height: 4px;
+}
+
+#handContainer::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#handContainer::-webkit-scrollbar-thumb {
+    background: rgba(0, 255, 0, 0.3);
+    border-radius: 2px;
+}
+
+#handContainer::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 255, 0, 0.5);
 }
 
 /* ========================================
-   CARTES (style vertical Hearthstone)
+   CARTES (style trading card rétro)
    ======================================== */
 
 .card {
-    width: 120px;
-    min-width: 120px;
-    height: 180px;
-    border-radius: 10px;
-    border: 3px solid #FFD700;
-    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-    padding: 10px;
+    width: 140px;
+    min-width: 140px;
+    height: 210px;
+    border-radius: 8px;
+    border: 3px solid;
+    background: linear-gradient(145deg, #1a1a1a 0%, #0d0d0d 100%);
+    padding: 12px;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    position: relative;
+    box-shadow: 
+        0 4px 8px rgba(0, 0, 0, 0.8),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Effet holographique sur les cartes */
+.card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+        45deg,
+        transparent 30%,
+        rgba(255, 255, 255, 0.1) 50%,
+        transparent 70%
+    );
+    transform: rotate(45deg);
+    transition: all 0.5s;
+    pointer-events: none;
+}
+
+.card:hover::before {
+    left: 100%;
 }
 
 .card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 10px 30px rgba(255, 215, 0, 0.5);
+    transform: translateY(-40px) scale(1.05);
+    box-shadow: 
+        0 8px 16px rgba(0, 0, 0, 0.9),
+        0 0 20px currentColor;
+    z-index: 1000;
 }
 
 .card-value {
-    font-size: 32px;
-    font-weight: bold;
+    font-size: 42px;
+    font-weight: normal;
     text-align: center;
-    color: #FFD700;
+    color: #FF9500;
+    text-shadow: 0 0 10px rgba(255, 149, 0, 0.6);
+    font-family: 'VT323', monospace;
 }
 
 .card-name {
-    font-size: 14px;
-    font-weight: bold;
+    font-size: 13px;
+    font-weight: normal;
     text-align: center;
     color: #fff;
     margin: 5px 0;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 0.5px;
+    text-shadow: 0 0 2px rgba(255, 255, 255, 0.3), 1px 1px 0px rgba(0, 0, 0, 0.8);
 }
 
 .card-slots {
     display: flex;
     gap: 5px;
     justify-content: center;
-    font-size: 12px;
+    font-size: 14px;
+    font-family: 'VT323', monospace;
 }
 
 .card-rarity {
-    font-size: 11px;
+    font-size: 13px;
     text-align: center;
     color: #aaa;
+    font-family: 'VT323', monospace;
 }
 
-/* Raretés */
+.card-description {
+    font-size: 11px;
+    font-weight: normal;
+    text-align: center;
+    color: #e0e0e0;
+    margin: 5px 0;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 0.8px;
+    line-height: 1.4;
+    text-shadow: none;
+}
+
+.card-effect {
+    font-size: 11px;
+    font-weight: normal;
+    text-align: center;
+    color: #cccccc;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 0.8px;
+    line-height: 1.4;
+    text-shadow: none;
+}
+
+/* Style spécifique pour tout texte dans les cartes */
+.card span,
+.card p,
+.card div:not(.card-value):not(.card-name) {
+    font-family: 'Courier New', monospace !important;
+    letter-spacing: 0.8px !important;
+    text-shadow: none !important;
+}
+
+/* Raretés avec couleurs néon */
 .card[data-rarity="Commune"] {
-    border-color: #9E9E9E;
+    border-color: #808080;
+    color: #808080;
 }
 
 .card[data-rarity="Uncommon"] {
-    border-color: #4CAF50;
+    border-color: #00ff00;
+    color: #00ff00;
 }
 
 .card[data-rarity="Rare"] {
-    border-color: #2196F3;
+    border-color: #00BFFF;
+    color: #00BFFF;
 }
 
 .card[data-rarity="Mythique"] {
-    border-color: #FF9800;
-    box-shadow: 0 0 15px rgba(255, 152, 0, 0.6);
+    border-color: #FF00FF;
+    color: #FF00FF;
+    box-shadow: 0 0 20px rgba(255, 0, 255, 0.6);
 }
 
-/* Carte artefact (violet) */
+/* Carte charme (violet) */
 .card.artifact {
     border-color: #9370DB;
-    background: linear-gradient(135deg, #4B0082 0%, #8A2BE2 100%);
+    color: #9370DB;
+    box-shadow: 0 0 15px rgba(147, 112, 219, 0.5);
 }
 
-.card.artifact::before {
+.card.artifact::after {
     content: "⚡";
     position: absolute;
     top: 5px;
     right: 5px;
-    font-size: 20px;
+    font-size: 24px;
 }
 
 /* ========================================
-   CONTROLS (boutons)
+   CONTROLS (boutons style terminal)
    ======================================== */
 
 #controls {
     position: fixed;
-    bottom: 200px;
-    right: 20px;
+    bottom: 670px;
+    right: 40px;
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -302,47 +475,80 @@ body {
 
 button {
     padding: 15px 30px;
-    font-size: 16px;
-    font-weight: bold;
-    border: none;
-    border-radius: 10px;
+    font-size: 22px;
+    font-weight: normal;
+    border: 2px solid;
+    border-radius: 0;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.1s ease;
+    font-family: 'VT323', monospace;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    background: #000;
 }
 
 #endTurnBtn {
-    background: linear-gradient(135deg, #FF4500 0%, #FF6347 100%);
-    color: #fff;
+    background: rgba(0, 0, 0, 0.9);
+    color: #ff17b6;
+    border-color: #ff17b6;
+    border-width: 3px;
+    box-shadow: 0 0 20px rgba(216, 10, 231, 0.6);
+    padding: 40px 40px;
+    min-width: 200px;
+    font-size: 20px;
+}
+
+#endTurnBtn::before {
+    content: '[ ';
+}
+
+#endTurnBtn::after {
+    content: ' ]';
 }
 
 #endTurnBtn:hover {
+    background: #c31ba7;
+    color: #000;
     transform: scale(1.05);
-    box-shadow: 0 5px 20px rgba(255, 69, 0, 0.5);
+    box-shadow: 0 0 20px rgba(192, 22, 167, 0.8);
 }
 
+#endTurnBtn:active {
+    transform: scale(0.95);
+}
 
 /* ========================================
-   LOG (historique en bas à gauche)
+   LOG (historique style terminal)
    ======================================== */
 
 #logContainer {
     position: fixed;
-    top: 10px;
-    left: 10px;
-    width: 300px;
-    max-height: 150px;
+    bottom: 25px;
+    right: 25px;
+    width: 250px;
+    max-height: 300px;
     overflow-y: auto;
-    background: rgba(0, 0, 0, 0.8);
-    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.95);
+    border: 2px solid #00ff00;
+    border-radius: 3px;
     padding: 10px;
     font-size: 12px;
+    font-family: 'Courier New', monospace;
+    box-shadow: 0 0 15px rgba(0, 255, 0, 0.3);
+    color: #ffffff;
 }
 
 .log-entry {
     margin-bottom: 3px;
     padding: 3px;
-    border-left: 3px solid #FFD700;
+    border-left: 3px solid #00ff00;
     padding-left: 8px;
+    color: #ffffff;
+    letter-spacing: 1px;
+}
+
+.log-entry::before {
+    content: '> ';
 }
 
 /* ========================================
@@ -354,58 +560,81 @@ button {
     transition: all 0.3s ease;
 }
 
-/* Voisinage inactif (gris) */
+/* Voisinage inactif */
 .neighbor-inactive {
-    stroke: rgba(255, 255, 255, 0.2);
+    stroke: rgba(0, 255, 0, 0.2);
 }
 
-/* Voisinage actif (vert ondulant) */
+/* Voisinage actif (vert pulsant) */
 .neighbor-active {
     stroke: #00FF00;
     stroke-width: 4px;
-    animation: wave 2s ease-in-out infinite;
+    filter: drop-shadow(0 0 8px #00FF00);
+    animation: pulse-line 1.5s ease-in-out infinite;
 }
 
-/* Flow inactif (gris) */
+/* Flow inactif */
 .flow-damage-inactive,
 .flow-block-inactive,
 .flow-state-inactive {
     stroke: rgba(255, 255, 255, 0.15);
 }
 
-/* Flow actif DMG (rouge ondulant + glow) */
+/* Flow actif DMG */
 .flow-damage-active {
-    stroke: #FF4500;
+    stroke: #FF1744;
     stroke-width: 5px;
-    filter: drop-shadow(0 0 6px #FF4500);
-    animation: wave 2s ease-in-out infinite;
+    filter: drop-shadow(0 0 8px #FF1744);
+    animation: pulse-line 1.5s ease-in-out infinite;
 }
 
-/* Flow actif BLOCK (bleu ondulant + glow) */
+/* Flow actif BLOCK */
 .flow-block-active {
-    stroke: #4169E1;
+    stroke: #00BFFF;
     stroke-width: 5px;
-    filter: drop-shadow(0 0 6px #4169E1);
-    animation: wave 2s ease-in-out infinite;
+    filter: drop-shadow(0 0 8px #00BFFF);
+    animation: pulse-line 1.5s ease-in-out infinite;
 }
 
-/* Flow actif STATE (doré ondulant + glow) */
+/* Flow actif STATE */
 .flow-state-active {
     stroke: #FFD700;
     stroke-width: 5px;
-    filter: drop-shadow(0 0 6px #FFD700);
-    animation: wave 2s ease-in-out infinite;
+    filter: drop-shadow(0 0 8px #FFD700);
+    animation: pulse-line 1.5s ease-in-out infinite;
 }
 
-/* Animation ondulation */
-@keyframes wave {
+/* Animation pulsation pour les lignes */
+@keyframes pulse-line {
     0%, 100% {
         stroke-opacity: 0.6;
     }
     50% {
         stroke-opacity: 1;
-        filter: drop-shadow(0 0 8px currentColor);
+        stroke-width: 6px;
     }
+}
+
+/* ========================================
+   SCROLLBAR STYLE TERMINAL
+   ======================================== */
+
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #000;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #00ff00;
+    border-radius: 0;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #00cc00;
 }
 
 /* ========================================
@@ -420,15 +649,22 @@ button {
     
     .entity {
         padding: 10px 15px;
-        font-size: 12px;
+        font-size: 18px;
     }
     
     .card {
-        width: 80px;
-        height: 120px;
+        width: 90px;
+        height: 140px;
     }
     
     #handContainer {
         gap: 5px;
+        padding: 10px;
+    }
+    
+    #logContainer {
+        width: 250px;
+        max-height: 120px;
+        font-size: 12px;
     }
 }

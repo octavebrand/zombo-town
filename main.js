@@ -13,6 +13,8 @@ import { STATE_REWARDS_POOL, getTierFromValue, getRandomRewards } from './stateR
 import { TOKENS, createToken } from './tokens.js';
 import { ALL_CHARMS } from './charms.js';
 import { ALL_ATOUTS } from './atouts.js';
+import { getDeckById } from './prebuiltDecks.js';
+import { DeckSelectionUI } from './deckSelection.js';
 
 // ========================================
 // CONSTANTES DE JEU
@@ -24,12 +26,55 @@ const GAME_CONFIG = {
     MAX_HAND_SIZE: 10
 };
 
+/**
+ * PRE-CONSTRUIT 
+ */
+function buildDeckFromConfig(deckConfig) {
+    // Si flag "all", retourner toutes les cartes
+    if (deckConfig.cards === 'all') {
+        return [
+            ...ALL_CARDS.map(card => ({...card})),
+            ...ALL_CHARMS.map(card => ({...card})),
+            ...ALL_ATOUTS.map(card => ({...card}))
+        ];
+    }
+    
+    // Sinon, construire deck depuis la liste
+    const deck = [];
+    
+    // Pool complet de cartes disponibles
+    const allAvailableCards = [
+        ...ALL_CARDS,
+        ...ALL_CHARMS,
+        ...ALL_ATOUTS
+    ];
+    
+    // Pour chaque entrée dans le deck config
+    deckConfig.cards.forEach(entry => {
+        const card = allAvailableCards.find(c => c.id === entry.cardId);
+        
+        if (!card) {
+            console.warn(`⚠️ Carte introuvable: ${entry.cardId}`);
+            return;
+        }
+        
+        // Ajouter N copies
+        for (let i = 0; i < entry.count; i++) {
+            deck.push({...card});  // Copie profonde
+        }
+    });
+    
+    console.log(`✅ Deck construit: ${deck.length} cartes`);
+    return deck;
+}
+
+
 // ========================================
 // GAME MANAGER MINIMAL (pour test Jour 1)
 // ========================================
 
 class GameManagerStub {
-    constructor() {
+    constructor(deckConfig = null) {
         // Board
         this.board = new BoardState(this);
         
@@ -59,12 +104,20 @@ class GameManagerStub {
             'Prêt pour les tests !'
         ];
         
-        // Deck/Défausse
-        this.deck = [
-            ...ALL_CARDS.map(card => ({...card})),
-            ...ALL_CHARMS.map(card => ({...card})),
-            ...ALL_ATOUTS.map(card => ({...card}))
-        ];
+        // Deck/Défausse - Construction depuis config ou all cards
+        if (deckConfig) {
+            this.deck = buildDeckFromConfig(deckConfig);
+            this.log(`🎴 Deck chargé: "${deckConfig.name}" (${this.deck.length} cartes)`);
+        } else {
+            // Fallback: toutes les cartes
+            this.deck = [
+                ...ALL_CARDS.map(card => ({...card})),
+                ...ALL_CHARMS.map(card => ({...card})),
+                ...ALL_ATOUTS.map(card => ({...card}))
+            ];
+            this.log('🎴 Deck par défaut: Collection Complète');
+        }
+
         this.discard = [];
         this.shuffleDeck();
 
@@ -198,9 +251,11 @@ class GameManagerStub {
             // Résoudre les effets de la carte
             this.effectResolver.resolveCardEffects(card, slotId);
 
-            this.applyNeighborBonusesToCard(slotId);
+            //this.applyNeighborBonusesToCard(slotId);
 
             this.recalculateMaxxers();
+
+            this.ui.render();
             
             return { success: true };
         }
@@ -262,7 +317,7 @@ class GameManagerStub {
         });
     }
 
-    applyNeighborBonusesToCard(slotId) {
+    /* applyNeighborBonusesToCard(slotId) {
         const slot = this.board.getSlot(slotId);
         if (!slot || !slot.card) return;
         
@@ -290,7 +345,7 @@ class GameManagerStub {
             const sign = totalBonus > 0 ? '+' : '';
             this.log(`💫 ${slot.id}: bonus ${sign}${totalBonus} des voisins`);
         }
-    }
+    } */
 
     recalculateMaxxers() {
         // Check si Stabilisateur actif
@@ -579,18 +634,22 @@ class GameManagerStub {
     }
 }
 
-// ========================================
-// INITIALISATION
-// ========================================
-
-let game;
-let ui;
-
-window.addEventListener('DOMContentLoaded', () => {
-    console.log('🎮 Initialisation du prototype v2.0...');
+/**
+ * Initialise le jeu avec un deck spécifique
+ */
+function initGameWithDeck(deckId) {
+    console.log(`🎴 Chargement du deck: ${deckId}`);
     
-    // Créer game manager (stub pour test)
-    game = new GameManagerStub();
+    // Récupérer config du deck
+    const deckConfig = getDeckById(deckId);
+    
+    if (!deckConfig) {
+        console.error(`❌ Deck introuvable: ${deckId}`);
+        return;
+    }
+    
+    // Créer game manager avec le deck
+    game = new GameManagerStub(deckConfig);
     
     // Créer UI manager
     ui = new UIManager(game);
@@ -599,20 +658,20 @@ window.addEventListener('DOMContentLoaded', () => {
     // Render initial
     ui.render();
     
-    console.log('✅ Board affiché ! Vérifiez :');
-    console.log('- 16 slots positionnés (cercles)');
-    console.log('- 2 slots avec bordure OR (permanents)');
-    console.log('- 2 slots ROUGES (shared)');
-    console.log('- 3 entités (BLOCK, DAMAGE, STATE)');
-    console.log('- Maxxers affichés (x0.0)');
-    console.log('- Info Player/Enemy');
-    console.log('- 4 cartes en main');
-    console.log('- 1 carte posée sur damage_top (pour test)');
+    console.log('✅ Jeu démarré avec succès !');
     
-    // Exposer pour debug console
+    // Exposer pour debug
     window.game = game;
     window.ui = ui;
     
+    // Setup end turn button
+    setupEndTurnButton();
+}
+
+/**
+ * Configure le bouton de fin de tour
+ */
+function setupEndTurnButton() {
     document.getElementById('endTurnBtn').onclick = () => {
         game.log('═══════════════════════════════════');
         game.log('🔚 FIN DE TOUR - Résolution...');
@@ -646,7 +705,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 }
             });
         } else {
-            // Pas de reward (ne devrait jamais arriver car tier0 existe)
+            // Pas de reward
             const results = game.turnResolver.resolve();
             showResultsPopup(results, game, ui);
             ui.render();
@@ -658,65 +717,91 @@ window.addEventListener('DOMContentLoaded', () => {
             }
         }
     };
+}
 
-    function showResultsPopup(results, game, ui) {
-        const popup = document.createElement('div');
-        popup.style.cssText = `
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.95);
-            border: 4px solid #FFD700;
-            border-radius: 15px;
-            padding: 30px;
-            z-index: 1000;
-            min-width: 400px;
-            color: white;
-            font-family: Arial;
-            box-shadow: 0 0 50px rgba(255, 215, 0, 0.8);
-        `;
-        
-        popup.innerHTML = `
-            <h2 style="text-align: center; color: #FFD700; margin-bottom: 20px;">📊 RÉSULTATS DU TOUR ${game.turnNumber}</h2>
-            <div style="font-size: 16px; line-height: 1.8;">
-                        <div>🎯 <strong>Cible:</strong> ${results.targetName}</div>
-                        <div>💥 <strong>Dégâts bruts:</strong> ${results.damageTotal}</div>
-                        ${results.enemyBlock > 0 ? `<div>🛡️ <strong>BLOCK ennemi:</strong> ${results.enemyBlock}</div>` : ''}
-                        ${results.enemyBlock > 0 ? `<div style="color: #FFD700;">⚔️ <strong>Dégâts nets:</strong> ${results.damageTotal - results.enemyBlock}</div>` : ''}
-                        <hr style="border-color: #FFD700; margin: 10px 0;">
-                        <div>🛡️ <strong>Votre blocage:</strong> ${results.blockTotal}</div>
-                        <div>⚔️ <strong>Attaque ennemie:</strong> ${results.enemyAttack}</div>
-                        <hr style="border-color: #FFD700; margin: 15px 0;">
-                        <div style="color: #FF6347;">💀 <strong>${results.targetName}:</strong> -${results.enemyDamageTaken} HP</div>
-                        <div style="color: ${results.playerDamageTaken > 0 ? '#FF6347' : '#32CD32'};">
-                            ❤️ <strong>Vous:</strong> ${results.playerDamageTaken > 0 ? '-' : ''}${results.playerDamageTaken} HP
-                        </div>
-
-
-            </div>
-            <button id="nextTurnBtn" style="
-                width: 100%;
-                margin-top: 20px;
-                padding: 15px;
-                background: linear-gradient(135deg, #FFD700, #FFA500);
-                border: none;
-                border-radius: 10px;
-                font-size: 18px;
-                font-weight: bold;
-                cursor: pointer;
-                color: #000;
-            ">➡️ Tour suivant</button>
-        `;
-        
-        document.body.appendChild(popup);
-        
-        // Handler bouton nouveau tour
-        document.getElementById('nextTurnBtn').onclick = () => {
-            popup.remove();
-            game.startNewTurn();
-            ui.render();
-        };
-    }
+/**
+ * Affiche popup résultats du tour
+ */
+function showResultsPopup(results, game, ui) {
+    const popup = document.createElement('div');
+    popup.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(0, 0, 0, 0.95);
+        border: 4px solid #FFD700;
+        border-radius: 15px;
+        padding: 30px;
+        z-index: 1000;
+        min-width: 400px;
+        color: white;
+        font-family: Arial;
+        box-shadow: 0 0 50px rgba(255, 215, 0, 0.8);
+    `;
     
+    popup.innerHTML = `
+        <h2 style="text-align: center; color: #FFD700; margin-bottom: 20px;">📊 RÉSULTATS DU TOUR ${game.turnNumber}</h2>
+        <div style="font-size: 16px; line-height: 1.8;">
+                    <div>🎯 <strong>Cible:</strong> ${results.targetName}</div>
+                    <div>💥 <strong>Dégâts bruts:</strong> ${results.damageTotal}</div>
+                    ${results.enemyBlock > 0 ? `<div>🛡️ <strong>BLOCK ennemi:</strong> ${results.enemyBlock}</div>` : ''}
+                    ${results.enemyBlock > 0 ? `<div style="color: #FFD700;">⚔️ <strong>Dégâts nets:</strong> ${results.damageTotal - results.enemyBlock}</div>` : ''}
+                    <hr style="border-color: #FFD700; margin: 10px 0;">
+                    <div>🛡️ <strong>Votre blocage:</strong> ${results.blockTotal}</div>
+                    <div>⚔️ <strong>Attaque ennemie:</strong> ${results.enemyAttack}</div>
+                    <hr style="border-color: #FFD700; margin: 15px 0;">
+                    <div style="color: #FF6347;">💀 <strong>${results.targetName}:</strong> -${results.enemyDamageTaken} HP</div>
+                    <div style="color: ${results.playerDamageTaken > 0 ? '#FF6347' : '#32CD32'};">
+                        ❤️ <strong>Vous:</strong> ${results.playerDamageTaken > 0 ? '-' : ''}${results.playerDamageTaken} HP
+                    </div>
+        </div>
+        <button id="nextTurnBtn" style="
+            width: 100%;
+            margin-top: 20px;
+            padding: 15px;
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #000;
+        ">➡️ Tour suivant</button>
+    `;
+    
+    document.body.appendChild(popup);
+    
+    // Handler bouton nouveau tour
+    document.getElementById('nextTurnBtn').onclick = () => {
+        popup.remove();
+        game.startNewTurn();
+        ui.render();
+    };
+}
+
+
+// ========================================
+// INITIALISATION
+// ========================================
+
+let game;
+let ui;
+let deckSelectionUI;
+
+window.addEventListener('DOMContentLoaded', () => {
+    console.log('🎮 Initialisation du prototype v2.0...');
+    
+    // Créer UI de sélection de deck
+    deckSelectionUI = new DeckSelectionUI();
+    
+    // Afficher l'écran de sélection
+    deckSelectionUI.show((selectedDeckId) => {
+        console.log(`✅ Deck sélectionné: ${selectedDeckId}`);
+        
+        // Initialiser le jeu avec le deck choisi
+        initGameWithDeck(selectedDeckId);
+    });
+    
+    console.log('✅ Écran de sélection affiché');
 });

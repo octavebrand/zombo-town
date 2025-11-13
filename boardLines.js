@@ -84,7 +84,7 @@ export class BoardLinesRenderer {
         this.gm.board.slots.damage.forEach(slot => {
             this.drawLine(
                 slot.position.x, slot.position.y,
-                50, 40, // Position entité DAMAGE
+                50, 35, // Changé de 40 à 35 (remonté de 5%)
                 slot.card ? 'flow-damage-active' : 'flow-damage-inactive'
             );
         });
@@ -93,7 +93,7 @@ export class BoardLinesRenderer {
         this.gm.board.slots.block.forEach(slot => {
             this.drawLine(
                 slot.position.x, slot.position.y,
-                26, 40, // Position entité BLOCK
+                26, 35, // Changé de 40 à 35
                 slot.card ? 'flow-block-active' : 'flow-block-inactive'
             );
         });
@@ -102,7 +102,7 @@ export class BoardLinesRenderer {
         this.gm.board.slots.state.forEach(slot => {
             this.drawLine(
                 slot.position.x, slot.position.y,
-                74, 40, // Position entité STATE
+                74, 35, // Changé de 40 à 35
                 slot.card ? 'flow-state-active' : 'flow-state-inactive'
             );
         });
@@ -111,19 +111,19 @@ export class BoardLinesRenderer {
         this.gm.board.slots.shared.forEach(slot => {
             const hasCard = !!slot.card;
             
-            // shared_1 → BLOCK (26, 40) et DAMAGE (50, 40)
+            // shared_1 → BLOCK (26, 35) et DAMAGE (50, 35)
             if (slot.id === 'shared_1') {
-                this.drawLine(slot.position.x, slot.position.y, 26, 40, 
+                this.drawLine(slot.position.x, slot.position.y, 26, 35, 
                     hasCard ? 'flow-block-active' : 'flow-block-inactive');
-                this.drawLine(slot.position.x, slot.position.y, 50, 40, 
+                this.drawLine(slot.position.x, slot.position.y, 50, 35, 
                     hasCard ? 'flow-damage-active' : 'flow-damage-inactive');
             }
             
-            // shared_2 → DAMAGE (50, 40) et STATE (74, 40)
+            // shared_2 → DAMAGE (50, 35) et STATE (74, 35)
             if (slot.id === 'shared_2') {
-                this.drawLine(slot.position.x, slot.position.y, 50, 40, 
+                this.drawLine(slot.position.x, slot.position.y, 50, 35, 
                     hasCard ? 'flow-damage-active' : 'flow-damage-inactive');
-                this.drawLine(slot.position.x, slot.position.y, 74, 40, 
+                this.drawLine(slot.position.x, slot.position.y, 74, 35, 
                     hasCard ? 'flow-state-active' : 'flow-state-inactive');
             }
         });

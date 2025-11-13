@@ -150,7 +150,7 @@ export const ALL_CARDS = [
         []
     ),
     
-    new Card(
+/*     new Card(
         'gne',
         'Gné',
         20,
@@ -160,7 +160,7 @@ export const ALL_CARDS = [
         'Value 20 + Voisins -5',
         CardType.CREATURE,
         []
-    ),
+    ), */
     
     // Boost Léger
     new Card(
@@ -343,6 +343,82 @@ export const ALL_CARDS = [
         CardType.CREATURE,
         ['Mollusque']
     ),
+
+    new Card(
+        'mollusque_joyeux',
+        'Mollusque Joyeux',
+        15,
+        ['damage', 'block', 'shared', 'state'],
+        Rarity.RARE,
+        { type: 'bonus_neighbors', value: 4 },
+        'Value 15, voisins +4',
+        CardType.CREATURE,
+        ['Mollusque']
+    ),
+
+        new Card(
+        'mollusque_archiviste',
+        'Mollusque Archiviste',
+        5,
+        ['damage', 'block', 'shared', 'state'],
+        Rarity.UNCOMMON,
+        [
+            { type: 'maxxer_any', value: 1 },
+            { type: 'instant_discover', pool: 'creatures', filter: { tag: 'Mollusque' }, count: 3 }
+        ],
+        'Value 5, Maxxer +1, discover Mollusque',
+        CardType.CREATURE,
+        ['Mollusque']
+    ),
+
+    new Card(
+        'mollusque_reproducteur',
+        'Mollusque Reproducteur',
+        7,
+        ['damage', 'block', 'shared', 'state'],
+        Rarity.RARE,
+        { type: 'on_discard_create_token', tokenId: 'token_mollusque' },
+        'Value 7, crée jeton Mollusque à la défausse',
+        CardType.CREATURE,
+        ['Mollusque']
+    ),
+
+    new Card(
+        'mollusque_mutagene',
+        'Mollusque Mutagène',
+        6,
+        ['damage', 'block', 'shared', 'state'],
+        Rarity.RARE,
+        { type: 'instant_transform_neighbor', pool: 'creatures', filter: { tag: 'Mollusque' } },
+        'Value 6, transforme voisin en Mollusque',
+        CardType.CREATURE,
+        ['Mollusque']
+    ),
+
+    new Card(
+        'mollusque_a_mollusque',
+        'Mollusque à Mollusque',
+        8,
+        ['damage', 'block', 'shared', 'state'],
+        Rarity.RARE,
+        { type: 'on_discard_create_creature_same_slot', pool: 'creatures', filter: { tag: 'Mollusque' } },
+        'Value 8, crée Mollusque aléatoire sur même slot',
+        CardType.CREATURE,
+        ['Mollusque']
+    ),
+
+    new Card(
+        'mollusque_erudit',
+        'Mollusque Érudit',
+        8,
+        ['damage', 'block', 'shared', 'state'],
+        Rarity.UNCOMMON,
+        { type: 'on_discard_draw', value: 2 },
+        'Value 8, draw 2 à la défausse',
+        CardType.CREATURE,
+        ['Mollusque']
+    ),
+
     
     // ZIGOUILLEURS
     new Card(
@@ -399,6 +475,72 @@ export const ALL_CARDS = [
         ['Zigouilleur']
     ),
     
+    new Card(
+        'zigouilleur_adroit',
+        'Zigouilleur Adroit',
+        5,
+        ['damage', 'block', 'shared', 'state'],
+        Rarity.RARE,
+        { type: 'instant_missiles', count: 3, value: 5, targetTypes: ['damage', 'shared'] },
+        'Value 5, 3 missiles ×5 sur slots damage/shared',
+        CardType.CREATURE,
+        ['Zigouilleur']
+    ),
+
+    new Card(
+        'canonnier_zigouilleur',
+        'Canonnier Zigouilleur',
+        5,
+        ['damage', 'block', 'shared', 'state'],
+        Rarity.UNCOMMON,
+        { type: 'instant_missiles', count: 15, value: 1, targetTypes: ['damage', 'block', 'shared', 'state'] },
+        'Value 5, 15 missiles ×1 sur tous slots',
+        CardType.CREATURE,
+        ['Zigouilleur']
+    ),
+
+    new Card(
+        'zigouilleur_de_masse',
+        'Zigouilleur De Masse',
+        7,
+        ['damage', 'block', 'shared', 'state'],
+        Rarity.RARE,
+        { type: 'count_tribal', tag: 'Zigouilleur', value: 3, includesSelf: true },
+        'Value 7, +3 par Zigouilleur',
+        CardType.CREATURE,
+        ['Zigouilleur']
+    ),
+
+    new Card(
+        'zigouilleur_kamikaze',
+        'Zigouilleur Kamikaze',
+        5,
+        ['damage', 'block', 'shared', 'state'],
+        Rarity.RARE,
+        [
+            { type: 'instant_missiles', count: 8, value: 2, targetTypes: ['damage', 'shared'] },
+            { type: 'on_discard_create_token_same_slot', tokenId: 'token_zigouilleur' }
+        ],
+        'Value 5, 8 missiles ×2, laisse jeton Zigouilleur',
+        CardType.CREATURE,
+        ['Zigouilleur']
+    ),
+
+    new Card(
+        'zigouilleur_archiveur',
+        'Zigouilleur Archiveur',
+        4,
+        ['damage', 'block', 'shared', 'state'],
+        Rarity.UNCOMMON,
+        [
+            { type: 'maxxer_any', value: 1 },
+            { type: 'on_discard_draw', value: 2 }
+        ],
+        'Value 4, Maxxer +1, draw 2 à la défausse',
+        CardType.CREATURE,
+        ['Zigouilleur']
+    ),
+
     // TRAFIQUANTS
     new Card(
         'trafiquant_legumes',
@@ -412,6 +554,67 @@ export const ALL_CARDS = [
         ['Trafiquant']
     ),
     
+    new Card(
+        'zigouilleur_intello',
+        'Zigouilleur Intello',
+        6,
+        ['damage', 'block', 'shared', 'state'],
+        Rarity.UNCOMMON,
+        [
+            { type: 'maxxer_any', value: 1 },
+            { type: 'on_discard_draw', value: 2 }
+        ],
+        'Value 6, Maxxer +1, draw 2 à la défausse',
+        CardType.CREATURE,
+        ['Zigouilleur']
+    ),
+
+    new Card(
+            'grand_stratege_zigouilleur',
+            'Grand Stratège Zigouilleur',
+            3,
+            ['damage', 'block', 'shared', 'state'],
+            Rarity.MYTHIQUE,
+            [
+                { type: 'instant_missiles', count: 7, value: 2, targetTypes: ['damage', 'shared'] },
+                { type: 'maxxer_all', value: 1 },
+                { type: 'instant_draw', value: 1 }
+            ],
+            'Value 3, 7 missiles ×2, Maxxers +1, draw 1',
+            CardType.CREATURE,
+            ['Zigouilleur']
+        ),
+
+    new Card(
+        'zigouilleur_fanatique',
+        'Zigouilleur Fanatique',
+        4,
+        ['damage', 'block', 'shared', 'state'],
+        Rarity.UNCOMMON,
+        [
+            { type: 'instant_discover', pool: 'creatures', filter: { tag: 'Zigouilleur' }, count: 3 },
+            { type: 'instant_missiles', count: 3, value: 1, targetTypes: ['damage', 'shared'] }
+        ],
+        'Value 4, discover Zigouilleur, 3 missiles ×1',
+        CardType.CREATURE,
+        ['Zigouilleur']
+    ),
+
+    new Card(
+        'zigouilleur_transformiste',
+        'Zigouilleur Transformiste',
+        5,
+        ['damage', 'block', 'shared', 'state'],
+        Rarity.RARE,
+        [
+            { type: 'instant_transform_neighbor', pool: 'creatures', filter: { tag: 'Zigouilleur' } },
+            { type: 'instant_missiles', count: 4, value: 2, targetTypes: ['damage', 'shared'] }
+        ],
+        'Value 5, transforme voisin en Zigouilleur, 4 missiles ×2',
+        CardType.CREATURE,
+        ['Zigouilleur']
+    ),
+
     new Card(
         'trafiquant_biens',
         'Trafiquant de Biens',
@@ -435,6 +638,102 @@ export const ALL_CARDS = [
         Rarity.UNCOMMON,
         { type: 'instant_distribute', value: 13, targetTypes: ['damage', 'block', 'shared', 'state'], onlyOccupied: true },
         'Value 2, distribue 13 sur slots occupés',
+        CardType.CREATURE,
+        ['Trafiquant']
+    ),
+
+    new Card(
+        'trafiquant_reves',
+        'Trafiquant de Rêves',
+        4,
+        ['damage', 'block', 'shared', 'state'],
+        Rarity.RARE,
+        [
+            { type: 'instant_discover', pool: 'creatures', filter: { tag: 'Trafiquant' }, count: 3 },
+            { type: 'instant_draw', value: 1 }
+        ],
+        'Value 4, discover Trafiquant, draw 1',
+        CardType.CREATURE,
+        ['Trafiquant']
+    ),
+
+    new Card(
+        'trafiquant_influent',
+        'Trafiquant Influent',
+        7,
+        ['damage', 'block', 'shared', 'state'],
+        Rarity.UNCOMMON,
+        { type: 'instant_transform_random_to_mythic' },
+        'Value 7, transforme crÃ©ature alÃ©atoire en Mythique',
+        CardType.CREATURE,
+        ['Trafiquant']
+    ),
+
+    new Card(
+        'trafiquant_negociateur',
+        'Trafiquant Négociateur',
+        5,
+        ['damage', 'block', 'shared', 'state'],
+        Rarity.RARE,
+        [
+            { type: 'instant_draw', value: 1 },
+            { type: 'instant_distribute', value: 8, targetTypes: ['damage', 'block', 'shared', 'state'], onlyOccupied: true }
+        ],
+        'Value 5, draw 1, distribue 8 sur slots occupÃ©s',
+        CardType.CREATURE,
+        ['Trafiquant']
+    ),
+
+    new Card(
+        'trafiquant_lourd',
+        'Trafiquant Lourd',
+        5,
+        ['damage', 'block', 'shared', 'state'],
+        Rarity.MYTHIQUE,
+        { type: 'instant_distribute', value: 15, targetTypes: ['damage', 'block', 'shared', 'state'], onlyOccupied: false },
+        'Value 5, distribue 15 sur tous slots',
+        CardType.CREATURE,
+        ['Trafiquant']
+    ),
+
+    new Card(
+        'trafiquant_du_four',
+        'Trafiquant du Four',
+        7,
+        ['damage', 'block', 'shared', 'state'],
+        Rarity.UNCOMMON,
+        [
+            { type: 'maxxer_any', value: 1 },
+            { type: 'instant_discover', pool: 'charms', count: 3 }
+        ],
+        'Value 7, Maxxer +1, discover Charme',
+        CardType.CREATURE,
+        ['Trafiquant']
+    ),
+
+    new Card(
+        'trafiquant_de_cartes',
+        'Trafiquant de Cartes',
+        9,
+        ['damage', 'block', 'shared', 'state'],
+        Rarity.RARE,
+        { type: 'on_discard_create_creature_same_slot', pool: 'creatures', filter: { rarity: 'Uncommon' } },
+        'Value 9, crée créature Uncommon aléatoire sur même slot',
+        CardType.CREATURE,
+        ['Trafiquant']
+    ),   
+    
+    new Card(
+        'trafiquant_de_livres',
+        'Trafiquant de Livres',
+        5,
+        ['damage', 'block', 'shared', 'state'],
+        Rarity.UNCOMMON,
+        [
+            { type: 'instant_draw', value: 1 },
+            { type: 'on_discard_draw', value: 2 }
+        ],
+        'Value 5, draw 1 immédiat, draw 2 à la défausse',
         CardType.CREATURE,
         ['Trafiquant']
     ),
@@ -515,6 +814,78 @@ export const ALL_CARDS = [
         ['Ombre']
     ),
 
+    new Card(
+        'ombre_replicante',
+        'Ombre Réplicante',
+        6,
+        ['damage', 'block', 'shared', 'state'],
+        Rarity.UNCOMMON,
+        { type: 'instant_create_token_on_neighbors' },
+        'Value 6, crée jetons Ombre sur slots voisins vides',
+        CardType.CREATURE,
+        ['Ombre']
+    ),
+
+    new Card(
+        'ombre_fugace',
+        'Ombre Fugace',
+        3,
+        ['damage', 'block', 'shared', 'state'],
+        Rarity.UNCOMMON,
+        [
+            { type: 'on_discard_create_token', tokenId: 'token_ombre' },
+            { type: 'on_discard_create_token', tokenId: 'token_ombre' }
+        ],
+        'Value 3, crée 2 jetons Ombre à la défausse',
+        CardType.CREATURE,
+        ['Ombre']
+    ),
+
+    new Card(
+        'ombre_absorbante',
+        'Ombre Absorbante',
+        6,
+        ['damage', 'block', 'shared', 'state'],
+        Rarity.RARE,
+        [
+            { type: 'instant_devour_neighbors', multiplier: 1 },
+            { type: 'instant_create_token', tokenId: 'token_ombre' },
+            { type: 'on_discard_create_token', tokenId: 'token_ombre' }
+        ],
+        'Value 6, dévore voisins (×1), crée jeton Ombre immédiat+défausse)',
+        CardType.CREATURE,
+        ['Ombre']
+    ),
+
+    new Card(
+        'ombre_chercheuse',
+        'Ombre Chercheuse',
+        5,
+        ['damage', 'block', 'shared', 'state'],
+        Rarity.UNCOMMON,
+        [
+            { type: 'instant_discover', pool: 'creatures', filter: { tag: 'Ombre' }, count: 3 },
+            { type: 'maxxer_any', value: 1 },
+        ],
+        'Value 6, discover Ombre, maxxer 1',
+        CardType.CREATURE,
+        ['Ombre']
+    ),
+
+    new Card(
+        'ombre_de_vie',
+        'Ombre de Vie',
+        8,
+        ['damage', 'block', 'shared', 'state'],
+        Rarity.MYTHIQUE,
+        [
+            { type: 'maxxer_any', value: 2 },
+            { type: 'on_discard_create_creature_same_slot', pool: 'creatures', filter: { tag: 'Ombre' } }
+        ],
+        'Value 8, maxxer +2, crée Ombre aléatoire sur même slot',
+        CardType.CREATURE,
+        ['Ombre']
+    ),
         
     // ILLUSIONS
     new Card(
@@ -576,6 +947,91 @@ export const ALL_CARDS = [
         Rarity.RARE,
         { type: 'instant_transform_neighbor', pool: 'creatures', filter: { tag: 'Illusion' } },
         'Value 8, transforme voisin en Illusion',
+        CardType.CREATURE,
+        ['Illusion']
+    ),
+
+    new Card(
+        'illusion_miroir',
+        'Illusion Miroir',
+        5,
+        ['damage', 'block', 'shared', 'state'],
+        Rarity.RARE,
+        { type: 'instant_transform_neighbor', pool: 'creatures', filter: { rarity: 'Rare' } },
+        'Value 5, transforme voisin en Rare',
+        CardType.CREATURE,
+        ['Illusion']
+    ),
+
+    new Card(
+        'illusion_polymorphe',
+        'Illusion Polymorphe',
+        6,
+        ['damage', 'block', 'shared', 'state'],
+        Rarity.UNCOMMON,
+        [
+            { type: 'instant_discover', pool: 'creatures', filter: { tag: 'Illusion' }, count: 3 },
+            { type: 'instant_draw', value: 1 }
+        ],
+        'Value 6, discover Illusion, draw 1',
+        CardType.CREATURE,
+        ['Illusion']
+    ),
+
+    new Card(
+        'illusion_gazeuse',
+        'Illusion Gazeuse',
+        8,
+        ['damage', 'block', 'shared', 'state'],
+        Rarity.RARE,
+        [
+            { type: 'maxxer_all', value: 1 },
+            { type: 'on_discard_create_token', tokenId: 'token_illusion' }
+        ],
+        'Value 8, maxxer all +1, crée jeton Illusion à la défausse',
+        CardType.CREATURE,
+        ['Illusion']
+    ),
+
+    new Card(
+        'illusion_perfide',
+        'Illusion Perfide',
+        16,
+        ['damage', 'block', 'shared', 'state'],
+        Rarity.UNCOMMON,
+        { type: 'penalty_neighbors', value: 3 },
+        'Value 16, voisins -3',
+        CardType.CREATURE,
+        ['Illusion']
+    ),
+
+    new Card(
+        'illusion_demultiplicatrice',
+        'Illusion Démultiplicatrice',
+        4,
+        ['damage', 'block', 'shared', 'state'],
+        Rarity.MYTHIQUE,
+        [
+            { type: 'instant_create_token', tokenId: 'token_illusion' },
+            { type: 'instant_create_token', tokenId: 'token_illusion' },
+            { type: 'instant_distribute', value: 12, targetTypes: ['damage', 'block', 'shared', 'state'], onlyOccupied: true }
+        ],
+        'Value 4, crée 2 jetons Illusion, distribue 12',
+        CardType.CREATURE,
+        ['Illusion']
+    ),
+
+    new Card(
+        'illusion_joyeuse',
+        'Illusion Joyeuse',
+        11,
+        ['damage', 'block', 'shared', 'state'],
+        Rarity.RARE,
+        [
+            { type: 'bonus_neighbors', value: 5 },
+            { type: 'on_discard_create_token_same_slot', tokenId: 'token_illusion' }
+        ],
+        'Value 11, voisins +5, laisse jeton Illusion',
         CardType.CREATURE,
         ['Illusion']
     ),

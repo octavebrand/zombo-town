@@ -40,10 +40,8 @@ export class EffectResolver {
             case 'maxxer_any':
                 break;
             case 'bonus_neighbors':
-                this.resolveBonusNeighbors(slot, effect.value);
-                break;
             case 'penalty_neighbors':
-                this.resolveBonusNeighbors(slot, -effect.value);
+                // calculé dynamiquement dans board.getFinalCardValue()
                 break;
             case 'heal':
                 // Sera résolu par bouton Player Resolve
@@ -60,6 +58,11 @@ export class EffectResolver {
                 this.resolveInstantCreateToken(effect);
                 break;
 
+            // Créer jetons sur voisins vides
+            case 'instant_create_token_on_neighbors':
+                this.resolveInstantCreateTokenOnNeighbors();
+                break;
+
             // Discover (popup choix)
             case 'instant_discover':
                 this.resolveInstantDiscover(effect);
@@ -68,6 +71,11 @@ export class EffectResolver {
             // Transform voisin
             case 'instant_transform_neighbor':
                 this.resolveInstantTransformNeighbor(effect, slot);
+                break;
+
+            // Transform créature aléatoire en mythique
+            case 'instant_transform_random_to_mythic':
+                this.resolveInstantTransformRandomToMythic();
                 break;
 
             // Dévorer voisins
@@ -113,6 +121,7 @@ export class EffectResolver {
             // Effets on_discard (gérés à la défausse, pas à la pose)
             case 'on_discard_create_token':
             case 'on_discard_create_token_same_slot':  
+            case 'on_discard_create_creature_same_slot':
             case 'on_discard_heal':
             case 'on_discard_draw':
                 // Ne rien faire à la pose, effet géré dans resolveOnDiscard() ou turnResolver
@@ -269,6 +278,45 @@ export class EffectResolver {
         this.gm.log(`🔄 ${oldCard.name} transformée en ${newCard.name}`);
     }
 
+    // Transform créature aléatoire du board en mythique
+    resolveInstantTransformRandomToMythic() {
+        // Récupérer toutes les créatures sur slots damage/block/shared/state
+        const validSlots = this.gm.board.getAllSlots().filter(s => 
+            (s.type === 'damage' || s.type === 'block' || s.type === 'shared' || s.type === 'state') &&
+            s.card !== null &&
+            s.card.cardType === CardType.CREATURE
+        );
+        
+        if (validSlots.length === 0) {
+            // Silencieux si aucune créature
+            return;
+        }
+        
+        // Choisir créature aléatoire
+        const targetSlot = validSlots[Math.floor(Math.random() * validSlots.length)];
+        const oldCard = targetSlot.card;
+        
+        // Construire pool de mythiques
+        const mythicPool = ALL_CARDS.filter(c => 
+            c.cardType === CardType.CREATURE && 
+            c.rarity === 'Mythique'
+        );
+        
+        if (mythicPool.length === 0) {
+            this.gm.log(`⚠️ Aucune carte mythique disponible`);
+            return;
+        }
+        
+        // Choisir mythique aléatoire
+        const newCard = {...mythicPool[Math.floor(Math.random() * mythicPool.length)]};
+        
+        // Remplacer
+        targetSlot.card = newCard;
+        this.gm.discard.push(oldCard);
+        
+        this.gm.log(`✨ ${oldCard.name} transformée en ${newCard.name} (Mythique)`);
+    }
+
     // Dévorer voisins (gain value ×mult)
     resolveInstantDevour(effect, sourceCard, sourceSlot) {
         const neighbors = this.gm.board.getNeighbors(sourceSlot.id);
@@ -302,6 +350,32 @@ export class EffectResolver {
         
         this.gm.log(`🍽️ Dévore: ${devoured.join(', ')} → +${totalGained} value`);
     }
+
+    // Créer jetons sur slots voisins vides
+    resolveInstantCreateTokenOnNeighbors() {
+        const sourceSlot = this.gm.board.getAllSlots().find(s => s.card && s.card.id === 'ombre_replicante');
+        if (!sourceSlot) return;
+        
+        const neighbors = this.gm.board.getNeighbors(sourceSlot.id);
+        const emptyNeighbors = neighbors.filter(n => n.card === null);
+        
+        if (emptyNeighbors.length === 0) {
+            this.gm.log(`⚠️ Aucun slot voisin vide`);
+            return;
+        }
+        
+        let created = 0;
+        emptyNeighbors.forEach(slot => {
+            const token = createToken('token_ombre');
+            if (token) {
+                slot.card = token;
+                created++;
+            }
+        });
+        
+        this.gm.log(`👻 Créé ${created} jeton(s) Ombre sur voisins`);
+    }
+
     
     // ========================================
     // MAXXER BOOST
@@ -394,7 +468,7 @@ export class EffectResolver {
     // ========================================
     
     resolveBonusNeighbors(slot, bonus) {
-        const neighbors = this.gm.board.getNeighbors(slot.id);
+/*         const neighbors = this.gm.board.getNeighbors(slot.id);
         
         if (neighbors.length === 0) {
             this.gm.log(`Aucun voisin pour ${slot.id}`);
@@ -407,11 +481,11 @@ export class EffectResolver {
             
             const sign = bonus > 0 ? '+' : '';
             this.gm.log(`🔗 ${neighborSlot.id}: bonus ${sign}${bonus} (total: ${neighborSlot.bonus})`);
-        });
+        }); */
     }
 
     // Résoudre effets on_discard (créatures + charmes)
-    resolveOnDiscard(card) {
+    resolveOnDiscard(card, slotId = null) {
         if (!card.effect) return;
         
         const effects = Array.isArray(card.effect) ? card.effect : [card.effect];
@@ -438,7 +512,7 @@ export class EffectResolver {
                         }
                     }
                     break;
-                
+
                 case 'on_discard_draw':
                     this.gm.drawCards(eff.value);
                     this.gm.log(`🔥 ${card.name}: Pioche ${eff.value} (défausse)`);
