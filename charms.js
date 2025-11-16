@@ -245,11 +245,9 @@ export const ALL_CHARMS = [
         Rarity.RARE,
         [
             { type: 'charm_maxxer_slot', value: 1 },  // Pour le slot
-            { type: 'maxxer_dmg', value: 1 },
-            { type: 'maxxer_block', value: 1 },
             { type: 'on_discard_draw', value: 2 }
         ],
-        'Maxxer slot +1, Maxxer ALL +1, pioche 2 on discard',
+        'Maxxer slot +1, pioche 2 on discard',
         CardType.CHARM,
         []
     ),
@@ -297,8 +295,7 @@ export const ALL_CHARMS = [
         ['damage', 'block', 'shared', 'state'],
         Rarity.MYTHIC,
         [
-            { type: 'maxxer_dmg', value: 1 },
-            { type: 'maxxer_block', value: 1 },
+            { type: 'charm_maxxer_slot', value: 1 },
             { type: 'instant_all_slots_bonus', value: 3 }
         ],
         'Maxxer ALL +1, tous les slots +3',

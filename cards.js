@@ -347,11 +347,11 @@ export const ALL_CARDS = [
     new Card(
         'mollusque_joyeux',
         'Mollusque Joyeux',
-        15,
-        ['damage', 'block', 'shared', 'state'],
+        10,
+        ['damage', 'block', 'state'],
         Rarity.RARE,
         { type: 'bonus_neighbors', value: 4 },
-        'Value 15, voisins +4',
+        'Value 10, voisins +4',
         CardType.CREATURE,
         ['Mollusque']
     ),
@@ -527,8 +527,8 @@ export const ALL_CARDS = [
     ),
 
     new Card(
-        'zigouilleur_archiveur',
-        'Zigouilleur Archiveur',
+        'zigouilleur_des_mines',
+        'Zigouilleur des Mines',
         4,
         ['damage', 'block', 'shared', 'state'],
         Rarity.UNCOMMON,
@@ -541,19 +541,6 @@ export const ALL_CARDS = [
         ['Zigouilleur']
     ),
 
-    // TRAFIQUANTS
-    new Card(
-        'trafiquant_legumes',
-        'Trafiquant de Légumes',
-        12,
-        ['damage', 'block', 'shared', 'state'],
-        Rarity.COMMUNE,
-        null,
-        'Value pure tribale',
-        CardType.CREATURE,
-        ['Trafiquant']
-    ),
-    
     new Card(
         'zigouilleur_intello',
         'Zigouilleur Intello',
@@ -614,6 +601,20 @@ export const ALL_CARDS = [
         CardType.CREATURE,
         ['Zigouilleur']
     ),
+
+    // TRAFIQUANTS
+    new Card(
+        'trafiquant_legumes',
+        'Trafiquant de Légumes',
+        12,
+        ['damage', 'block', 'shared', 'state'],
+        Rarity.COMMUNE,
+        null,
+        'Value pure tribale',
+        CardType.CREATURE,
+        ['Trafiquant']
+    ),
+    
 
     new Card(
         'trafiquant_biens',

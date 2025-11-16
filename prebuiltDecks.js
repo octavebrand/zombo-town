@@ -16,23 +16,20 @@ export const PREBUILT_DECKS = [
         cards: [
             // Toutes les créatures Mollusques (12)
             { cardId: 'mollusque_devoue', count: 2 },
-            { cardId: 'mollusque_curieux', count: 1 },
+            { cardId: 'mollusque_curieux', count: 2 },
             { cardId: 'guerrier_mollusque', count: 2 },
-            { cardId: 'commandant_mollusque', count: 1 },
+            { cardId: 'commandant_mollusque', count: 2 },
             { cardId: 'artisan_mollusque', count: 2 },
-            { cardId: 'mollusque_titan', count: 1 },
-            { cardId: 'mollusque_architecte', count: 1 },
-            { cardId: 'mollusque_sage', count: 1 },
-            { cardId: 'mollusque_bouclier', count: 2 },
-            { cardId: 'mollusque_forgeur', count: 1 },
-            { cardId: 'mollusque_nexus', count: 1 },
-            { cardId: 'mollusque_colosse', count: 1 },
+            { cardId: 'mollusque_mutagene', count: 2 },
+            { cardId: 'Mollusque Archiviste', count: 2 },
+            { cardId: 'mollusque_a_mollusque', count: 2 },
+            { cardId: 'mollusque_erudit', count: 2 },
+            { cardId: 'mollusque_joyeux', count: 2 },
+            { cardId: 'mollusque_reproducteur', count: 2 },
             
             // Neutres (5)
-            { cardId: 'Coup_du_chapeau', count: 1 },
             { cardId: 'forteresse', count: 1 },
             { cardId: 'block_boost', count: 1 },
-            { cardId: 'tower_man', count: 1 },
             { cardId: 'deluge', count: 1 },
             
             // Charmes (10)
@@ -41,16 +38,16 @@ export const PREBUILT_DECKS = [
             { cardId: 'massif', count: 1 },
             { cardId: 'charme_vampirique', count: 1 },
             { cardId: 'charme_des_mollusques', count: 2 },
-            { cardId: 'metamorphose_mollusque', count: 1 },
-            { cardId: 'charme_catalyseur', count: 1 },
+            { cardId: 'metamorphose_mollusque', count: 2 },
+            { cardId: 'charme_catalyseur', count: 2 },
             { cardId: 'charme_exploration', count: 1 },
             { cardId: 'charme_cosmique', count: 1 },
 
             // Atouts (2)
-            { cardId: 'usine_mollusques', count: 1 },
+            //{ cardId: 'usine_mollusques', count: 1 },
             { cardId: 'fortification', count: 1 },
-            { cardId: 'arsenal', count: 1 },
-            { cardId: 'stabilisateur', count: 1 }
+            { cardId: 'stabilisateur', count: 1 },
+            { cardId: 'coeur_enchante', count: 1 }
         ]
     },
     
@@ -65,21 +62,22 @@ export const PREBUILT_DECKS = [
         color: '#E74C3C', // Rouge
         cards: [
             // Toutes les créatures Zigouilleurs (11)
-            { cardId: 'zigouilleur_archiviste', count: 2 },
-            { cardId: 'zigouilleur_artificier', count: 1 },
-            { cardId: 'zigouilleur_ingenieur', count: 2 },
+            { cardId: 'archiviste_zigouilleur', count: 2 },
+            { cardId: 'zigouilleur_artificier', count: 2 },
+            { cardId: 'ingenieur_zigouilleur', count: 2 },
             { cardId: 'zigouilleur_affame', count: 1 },
-            { cardId: 'zigouilleur_lanceur', count: 2 },
-            { cardId: 'zigouilleur_distributeur', count: 1 },
-            { cardId: 'zigouilleur_tireur', count: 2 },
-            { cardId: 'zigouilleur_equilibre', count: 1 },
-            { cardId: 'zigouilleur_furtif', count: 1 },
-            { cardId: 'zigouilleur_barrage', count: 1 },
-            { cardId: 'zigouilleur_alpha', count: 1 },
+            { cardId: 'zigouilleur_adroit', count: 2 },
+            { cardId: 'canonnier_zigouilleur', count: 2 },
+            { cardId: 'zigouilleur_de_masse', count: 2 },
+            { cardId: 'zigouilleur_kamikaze', count: 2 },
+            { cardId: 'zigouilleur_des_mines', count: 2 },
+            { cardId: 'zigouilleur_transformiste', count: 2 },
+            { cardId: 'zigouilleur_fanatique', count: 2 },
+            { cardId: 'grand_stratege_zigouilleur', count: 1 },
+            { cardId: 'zigouilleur_intello', count: 2 },
+            
             
             // Neutres (6)
-            { cardId: 'coup_puissant', count: 1 },
-            { cardId: 'dmg_boost', count: 2 },
             { cardId: 'boost_man', count: 1 },
             { cardId: 'all_boost', count: 1 },
             { cardId: 'tempete', count: 1 },
@@ -97,8 +95,9 @@ export const PREBUILT_DECKS = [
             
             // Atouts (2)
             { cardId: 'petit_moteur', count: 1 },
-            { cardId: 'usine_zigouilleurs', count: 1 },
-            { cardId: 'stabilisateur', count: 1 }
+            //{ cardId: 'usine_zigouilleurs', count: 1 },
+            { cardId: 'stabilisateur', count: 1 },
+            { cardId: 'arsenal', count: 1 }
         ]
     },
     
@@ -115,14 +114,14 @@ export const PREBUILT_DECKS = [
             // Toutes les créatures Trafiquants (10)
             { cardId: 'trafiquant_legumes', count: 2 },
             { cardId: 'trafiquant_biens', count: 2 },
-            { cardId: 'trafiquant_genereux', count: 1 },
-            { cardId: 'trafiquant_explorateur', count: 1 },
-            { cardId: 'trafiquant_marchand', count: 2 },
-            { cardId: 'trafiquant_oracle', count: 1 },
-            { cardId: 'trafiquant_negotiateur', count: 2 },
-            { cardId: 'trafiquant_pourvoyeur', count: 1 },
-            { cardId: 'trafiquant_prospere', count: 1 },
-            { cardId: 'trafiquant_prince', count: 1 },
+            { cardId: 'trafiquant_genereux', count: 2 },
+            { cardId: 'trafiquant_reves', count: 2 },
+            { cardId: 'trafiquant_influent', count: 2 },
+            { cardId: 'trafiquant_lourd', count: 2 },
+            { cardId: 'trafiquant_negociateur', count: 2 },
+            { cardId: 'trafiquant_du_four', count: 2 },
+            { cardId: 'trafiquant_de_cartes', count: 2 },
+            { cardId: 'trafiquant_de_livres', count: 2 },
             
             // Neutres (7)
             { cardId: 'botte', count: 2 },
@@ -145,8 +144,9 @@ export const PREBUILT_DECKS = [
             
             // Atouts (2)
             { cardId: 'petit_moteur', count: 1 },
-            { cardId: 'usine_trafiquants', count: 1 },
-            { cardId: 'stabilisateur', count: 1 }
+            //{ cardId: 'usine_trafiquants', count: 1 },
+            { cardId: 'stabilisateur', count: 1 },
+            { cardId: 'coeur_enchante', count: 1 }
         ]
     },
     
@@ -162,15 +162,15 @@ export const PREBUILT_DECKS = [
         cards: [
             // Toutes les créatures Ombres (12)
             { cardId: 'ombre_studieuse', count: 2 },
-            { cardId: 'maitre_ombres', count: 1 },
-            { cardId: 'ombre_amplificatrice', count: 1 },
+            { cardId: 'maitre_ombres', count: 2 },
+            { cardId: 'ombre_amplificatrice', count: 2 },
             { cardId: 'generateur_ombres', count: 2 },
-            { cardId: 'ombre_persistante', count: 1 },
+            { cardId: 'ombre_persistante', count: 2 },
             { cardId: 'collecteur_ombres', count: 2 },
-            { cardId: 'ombre_replicante', count: 1 },
+            { cardId: 'ombre_replicante', count: 2 },
             { cardId: 'ombre_fugace', count: 2 },
-            { cardId: 'ombre_absorbante', count: 1 },
-            { cardId: 'ombre_chercheuse', count: 1 },
+            { cardId: 'ombre_absorbante', count: 2 },
+            { cardId: 'ombre_chercheuse', count: 2 },
             { cardId: 'ombre_de_vie', count: 1 },
             
             // Neutres (5)
@@ -195,7 +195,8 @@ export const PREBUILT_DECKS = [
             // Atouts (2)
             { cardId: 'petit_moteur', count: 1 },
             { cardId: 'usine_ombres', count: 1 },
-            { cardId: 'stabilisateur', count: 1 }
+            { cardId: 'stabilisateur', count: 1 },
+            { cardId: 'arsenal', count: 1 }
         ]
     },
     
@@ -244,7 +245,8 @@ export const PREBUILT_DECKS = [
             // Atouts (2)
             { cardId: 'petit_moteur', count: 1 },
             { cardId: 'usine_illusions', count: 1 },
-            { cardId: 'stabilisateur', count: 1 }
+            { cardId: 'stabilisateur', count: 1 },
+            { cardId: 'coeur_enchante', count: 1 }
         ]
     },
     

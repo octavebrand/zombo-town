@@ -105,6 +105,18 @@ export const ALL_ATOUTS = [
         CardType.ATOUT,
         []
     ),
+
+    new Card(
+        'coeur_enchante',
+        'Cœur Enchanté',
+        0,
+        ['player'],
+        Rarity.RARE,
+        { type: 'atout_heal_on_charm_played', value: 5 },
+        'Heal 5 PV à chaque charme joué',
+        CardType.ATOUT,
+        []
+    ),
     
     new Card(
         'stabilisateur',
@@ -112,8 +124,8 @@ export const ALL_ATOUTS = [
         0,
         ['player'],
         Rarity.RARE,
-        { type: 'atout_maxxer_start', start: 1, max: 2 },
-        'Maxxers débutent à 1, max 2',
+        { type: 'atout_maxxer_start', start: 1, max: 1 },
+        'Maxxers débutent à 1, ne peuvent pas augmenter',
         CardType.ATOUT,
         []
     )

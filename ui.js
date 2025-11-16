@@ -534,7 +534,9 @@ renderHand() {
                     case 'charm_maxxer_slot': return `Maxxer +${eff.value}`;
                     case 'charm_random_boost': return `Créature +${eff.min} à +${eff.max}`;
                     case 'charm_heal_on_discard': return `Heal ${eff.value} à la défausse`;
-                    
+                    case 'atout_damage_eot': return `Dégâts +${eff.value} fin de tour`;
+                    case 'atout_block_eot': return `Blocage +${eff.value} fin de tour`;
+                    case 'atout_heal_on_charm_played' : return `Heal ${eff.value} quand un charme est joué`;
                     // 🆕 Discover / Transform
                     case 'instant_discover':
                         if (eff.filter && eff.filter.tag) {
@@ -556,7 +558,7 @@ renderHand() {
                     case 'atout_token_on_discard': 
                         return `Crée jeton ${eff.tag} quand ${eff.tag} défaussé`;
                     case 'atout_maxxer_start': 
-                        return `Maxxers débutent à ${eff.start}, max ${eff.max}`;
+                        return `Maxxers débutent à ${eff.start}, ne peuvent pas augmenter`;
 
                     default: return eff.type;
                 }
@@ -815,7 +817,10 @@ renderHand() {
                     // Effets atouts
                     case 'atout_draw_eot': return `Pioche ${eff.value} fin de tour (max ${eff.max_hand} main)`;
                     case 'atout_token_on_discard': return `Crée jeton ${eff.tag} quand ${eff.tag} défaussé`;
-                    case 'atout_maxxer_start': return `Maxxers débutent à ${eff.start}, max ${eff.max}`;
+                    case 'atout_maxxer_start': return `Maxxers débutent à ${eff.start}, ne peuvent pas augmenter`;
+                    case 'atout_damage_eot': return `Dégâts +${eff.value} fin de tour`;
+                    case 'atout_block_eot': return `Blocage +${eff.value} fin de tour`;
+                    case 'atout_heal_on_charm_played' : return `Heal ${eff.value} quand un charme est joué`;
                     // Distribution aléatoire
                     case 'instant_missiles':
                         return `${eff.count} missiles ×${eff.value} sur ${eff.targetTypes.join('/')}`;

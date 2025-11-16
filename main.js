@@ -214,6 +214,8 @@ class GameManagerStub {
             
             // Appliquer effets du charme
             this.applyCharmEffects(card, slot);
+            // Trigger atouts "heal_on_charm_played"
+            this.checkAtoutHealOnCharmPlayed();
             this.effectResolver.resolveCardEffects(card, slot.id);
             
             return { success: true };
@@ -357,7 +359,7 @@ class GameManagerStub {
         
         // Reset avec base modifiée si Stabilisateur
         const baseLevel = stabilisateur ? 1 : 0;
-        const maxLevel = stabilisateur ? 2 : Infinity;
+        const maxLevel = stabilisateur ? 1 : Infinity;
         
         this.maxxers.damage.level = baseLevel;
         this.maxxers.block.level = baseLevel;
@@ -393,6 +395,39 @@ class GameManagerStub {
                     }
                 }
             });
+
+        if (slot.equipments && slot.equipments.length > 0) {
+                slot.equipments.forEach(charm => {
+                    if (!charm.effect) return;
+                    
+                    const charmEffects = Array.isArray(charm.effect) ? charm.effect : [charm.effect];
+                    
+                    charmEffects.forEach(eff => {
+                        if (eff.type === 'charm_maxxer_slot') {
+                            // Appliquer maxxer selon type de slot
+                            if (slot.type === 'damage' || slot.type === 'shared') {
+                                this.maxxers.damage.level += eff.value;
+                            }
+                            if (slot.type === 'block' || slot.type === 'shared') {
+                                this.maxxers.block.level += eff.value;
+                            }
+                        }
+                        
+                        // Bonus: gérer aussi maxxer_dmg et maxxer_block des charmes
+                        if (eff.type === 'maxxer_dmg') {
+                            this.maxxers.damage.level += eff.value;
+                        }
+                        if (eff.type === 'maxxer_block') {
+                            this.maxxers.block.level += eff.value;
+                        }
+                        if (eff.type === 'maxxer_all') {
+                            this.maxxers.damage.level += eff.value;
+                            this.maxxers.block.level += eff.value;
+                        }
+                    });
+                });
+            }
+
         });
 
         // Appliquer limite max si Stabilisateur
@@ -401,6 +436,26 @@ class GameManagerStub {
             this.maxxers.block.level = Math.min(this.maxxers.block.level, maxLevel);
         }
 
+    }
+
+    checkAtoutHealOnCharmPlayed() {
+        const playerSlots = this.board.getSlotsByType('player');
+        
+        playerSlots.forEach(slot => {
+            if (!slot.card || slot.card.cardType !== CardType.ATOUT) return;
+            
+            const atout = slot.card;
+            if (!atout.effect || atout.effect.type !== 'atout_heal_on_charm_played') return;
+            
+            // Heal le joueur
+            const oldHp = this.player.currentHp;
+            this.player.currentHp = Math.min(this.player.maxHp, this.player.currentHp + atout.effect.value);
+            const actualHeal = this.player.currentHp - oldHp;
+            
+            if (actualHeal > 0) {
+                this.log(`💚 ${atout.name}: Heal ${actualHeal} PV`);
+            }
+        });
     }
 
     reshuffle() {
