@@ -5,7 +5,7 @@
 import { createToken } from './tokens.js';
 import { ALL_CARDS } from './cards.js';     
 import { ALL_CHARMS } from './charms.js';   
-import { CardType } from './constants.js';  
+import { CardType, Rarity } from './constants.js';  
 
 export class EffectResolver {
     constructor(gameManager) {
@@ -60,7 +60,7 @@ export class EffectResolver {
 
             // Créer jetons sur voisins vides
             case 'instant_create_token_on_neighbors':
-                this.resolveInstantCreateTokenOnNeighbors();
+                this.resolveInstantCreateTokenOnNeighbors(effect, slot);  // Passer effect et slot
                 break;
 
             // Discover (popup choix)
@@ -163,10 +163,15 @@ export class EffectResolver {
             pool = ALL_CHARMS;
         } else if (effect.pool === 'creatures') {
             pool = ALL_CARDS.filter(c => c.cardType === CardType.CREATURE);
-            
-            // Appliquer filtre si présent
-            if (effect.filter && effect.filter.tag) {
+        }
+        
+        // Appliquer filtres si présents (APRÈS avoir construit le pool)
+        if (effect.filter) {
+            if (effect.filter.tag) {
                 pool = pool.filter(c => c.tags && c.tags.includes(effect.filter.tag));
+            }
+            if (effect.filter.rarity) {
+                pool = pool.filter(c => c.rarity === effect.filter.rarity);
             }
         }
         
@@ -351,12 +356,41 @@ export class EffectResolver {
         this.gm.log(`🍽️ Dévore: ${devoured.join(', ')} → +${totalGained} value`);
     }
 
+    // Transformer créature équipée par le charme
+    resolveCharmTransformCreature(effect, slot) {
+        if (!slot.card) {
+            this.gm.log(`⚠️ Aucune créature à transformer`);
+            return;
+        }
+            
+        // Construire pool de créatures
+        let pool = ALL_CARDS.filter(c => c.cardType === CardType.CREATURE);
+            
+        // Appliquer filtres
+        if (effect.filter) {
+            if (effect.filter.tag) {
+                pool = pool.filter(c => c.tags && c.tags.includes(effect.filter.tag));
+            }
+            if (effect.filter.rarity) {
+                pool = pool.filter(c => c.rarity === effect.filter.rarity);
+            }
+        }
+            
+        if (pool.length === 0) {
+            this.gm.log(`⚠️ Aucune créature disponible pour transformation`);
+            return;
+        }
+            
+        const oldCreature = slot.card;
+        const randomCreature = {...pool[Math.floor(Math.random() * pool.length)]};
+        slot.card = randomCreature;
+            
+        this.gm.log(`🔄 ${oldCreature.name} → ${randomCreature.name}`);
+    }
+
     // Créer jetons sur slots voisins vides
-    resolveInstantCreateTokenOnNeighbors() {
-        const sourceSlot = this.gm.board.getAllSlots().find(s => s.card && s.card.id === 'ombre_replicante');
-        if (!sourceSlot) return;
-        
-        const neighbors = this.gm.board.getNeighbors(sourceSlot.id);
+    resolveInstantCreateTokenOnNeighbors(effect, slot) {
+        const neighbors = this.gm.board.getNeighbors(slot.id);
         const emptyNeighbors = neighbors.filter(n => n.card === null);
         
         if (emptyNeighbors.length === 0) {
@@ -365,15 +399,15 @@ export class EffectResolver {
         }
         
         let created = 0;
-        emptyNeighbors.forEach(slot => {
-            const token = createToken('token_ombre');
+        emptyNeighbors.forEach(neighborSlot => {
+            const token = createToken(effect.tokenId);
             if (token) {
-                slot.card = token;
+                neighborSlot.card = token;
                 created++;
             }
         });
         
-        this.gm.log(`👻 Créé ${created} jeton(s) Ombre sur voisins`);
+        this.gm.log(`👻 Créé ${created} jeton(s) sur voisins`);
     }
 
     
@@ -512,11 +546,21 @@ export class EffectResolver {
                         }
                     }
                     break;
+                case 'on_discard_add_rare_card':
+                    // Filtrer cartes Rares du pool
+                    const rareCards = ALL_CARDS.filter(c => c.rarity === Rarity.RARE && c.cardType === CardType.CREATURE);
+                    if (rareCards.length > 0 && this.gm.hand.length < 10) {
+                        const randomRare = {...rareCards[Math.floor(Math.random() * rareCards.length)]};
+                        this.gm.hand.push(randomRare);
+                        this.gm.log(`✨ ${card.name}: ${randomRare.name} (RARE) ajoutée (défausse)`);
+                    }
+                    break;
 
                 case 'on_discard_draw':
                     this.gm.drawCards(eff.value);
                     this.gm.log(`🔥 ${card.name}: Pioche ${eff.value} (défausse)`);
                     break;
+
             }
         });
     }

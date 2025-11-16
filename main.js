@@ -214,6 +214,7 @@ class GameManagerStub {
             
             // Appliquer effets du charme
             this.applyCharmEffects(card, slot);
+            this.effectResolver.resolveCardEffects(card, slot.id);
             
             return { success: true };
         }

@@ -104,6 +104,22 @@ export class TurnResolver {
         if (enemyDamageBoost > 0) {
             this.gm.log(`[A+] 👹 Cartes ennemies: +${enemyDamageBoost} DMG ennemi`);
         }
+
+        // Appliquer bonus atouts damage
+        let atoutDamageBonus = 0;
+        const playerSlots = this.gm.board.getSlotsByType('player');
+        playerSlots.forEach(slot => {
+            if (slot.card && slot.card.cardType === CardType.ATOUT && slot.card.effect) {
+                if (slot.card.effect.type === 'atout_damage_eot') {
+                    atoutDamageBonus += slot.card.effect.value;
+                }
+            }
+        });
+
+        if (atoutDamageBonus > 0) {
+            results.damageBase += atoutDamageBonus;
+            this.gm.log(`[A+] 🔧 Atouts: +${atoutDamageBonus} DMG`);
+        }
         
         // Application maxxer
         results.damageMultiplier = this.gm.maxxers.damage.getMultiplier();
@@ -134,6 +150,22 @@ export class TurnResolver {
                 results.blockBase += slot.rewardBonus;
             }
         });
+
+        // Appliquer bonus atouts block
+        let atoutBlockBonus = 0;
+        const playerSlots = this.gm.board.getSlotsByType('player');
+        playerSlots.forEach(slot => {
+            if (slot.card && slot.card.cardType === CardType.ATOUT && slot.card.effect) {
+                if (slot.card.effect.type === 'atout_block_eot') {
+                    atoutBlockBonus += slot.card.effect.value;
+                }
+            }
+        });
+
+        if (atoutBlockBonus > 0) {
+            results.blockBase += atoutBlockBonus;
+            this.gm.log(`[B+] 🔧 Atouts: +${atoutBlockBonus} BLOCK`);
+        }
         
         // Application maxxer
         results.blockMultiplier = this.gm.maxxers.block.getMultiplier();
@@ -382,7 +414,35 @@ export class TurnResolver {
                 
                 // Défausser charmes + trigger effets on_discard
                 slot.equipments.forEach(charm => {
-                    this.gm.effectResolver.resolveOnDiscard(charm); 
+                    this.gm.effectResolver.resolveOnDiscard(charm, slot.id); 
+                    // Vérifier si le charme doit créer une créature sur le slot
+                    if (charm.effect) {
+                        const charmEffects = Array.isArray(charm.effect) ? charm.effect : [charm.effect];
+                        charmEffects.forEach(eff => {
+                            if (eff.type === 'on_discard_create_creature_same_slot') {
+                                // Construire pool de créatures
+                                let pool = ALL_CARDS.filter(c => c.cardType === CardType.CREATURE);
+                                
+                                // Appliquer filtres
+                                if (eff.filter) {
+                                    if (eff.filter.tag) {
+                                        pool = pool.filter(c => c.tags && c.tags.includes(eff.filter.tag));
+                                    }
+                                    if (eff.filter.rarity) {
+                                        pool = pool.filter(c => c.rarity === eff.filter.rarity);
+                                    }
+                                }
+                                
+                                if (pool.length > 0 && !slot.card) {  // Seulement si slot vide!
+                                    const randomCreature = {...pool[Math.floor(Math.random() * pool.length)]};
+                                    slot.card = randomCreature;
+                                    tokenCreatedOnSlot = true;  // 🔥 IMPORTANT: Marquer qu'une créature a été créée!
+                                    this.gm.log(`🎲 ${charm.name}: ${randomCreature.name} apparaît sur ${slot.id}`);
+                                }
+                            }
+                        });
+                    }
+
                     this.gm.discard.push(charm);
                     discardedCount++;
                 });
@@ -417,6 +477,7 @@ export class TurnResolver {
     // Vérifier si un atout doit créer un jeton
     checkAtoutTokenOnDiscard(discardedCard) {
         if (!discardedCard.tags || discardedCard.tags.length === 0) return;
+        if (discardedCard.cardType === CardType.TOKEN) return;
         
         const playerSlots = this.gm.board.getSlotsByType('player');
         

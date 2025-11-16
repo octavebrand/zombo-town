@@ -30,12 +30,25 @@ export const TOKENS = [
         CardType.TOKEN,
         ['Ombre']
     ),
+
+    // Jeton Trafiquant (créé par charmes)
+    new Card(
+        'token_trafiquant',
+        'Jeton Trafiquant',
+        3,
+        ['damage', 'block', 'shared', 'state'],
+        Rarity.COMMUNE,
+        null,
+        'Jeton créé par effets Trafiquant',
+        CardType.TOKEN,
+        ['Trafiquant']
+    ),
     
     // Jeton Zigouilleur (créé par futurs effets)
     new Card(
         'token_zigouilleur',
         'Jeton Zigouilleur',
-        2,
+        5,
         ['damage', 'block', 'shared', 'state'],
         Rarity.COMMUNE,
         null,
@@ -48,7 +61,7 @@ export const TOKENS = [
     new Card(
         'token_illusion',
         'Jeton Illusion',
-        8,
+        4,
         ['damage', 'block', 'shared', 'state'],
         Rarity.COMMUNE,
         null,

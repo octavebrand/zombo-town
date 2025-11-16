@@ -35,14 +35,21 @@ export const PREBUILT_DECKS = [
             { cardId: 'tower_man', count: 1 },
             { cardId: 'deluge', count: 1 },
             
-            // Charmes (4)
+            // Charmes (10)
             { cardId: 'charme_forgeron', count: 1 },
             { cardId: 'totem_flammes', count: 1 },
             { cardId: 'massif', count: 1 },
             { cardId: 'charme_vampirique', count: 1 },
-            
+            { cardId: 'charme_des_mollusques', count: 2 },
+            { cardId: 'metamorphose_mollusque', count: 1 },
+            { cardId: 'charme_catalyseur', count: 1 },
+            { cardId: 'charme_exploration', count: 1 },
+            { cardId: 'charme_cosmique', count: 1 },
+
             // Atouts (2)
             { cardId: 'usine_mollusques', count: 1 },
+            { cardId: 'fortification', count: 1 },
+            { cardId: 'arsenal', count: 1 },
             { cardId: 'stabilisateur', count: 1 }
         ]
     },
@@ -77,14 +84,20 @@ export const PREBUILT_DECKS = [
             { cardId: 'all_boost', count: 1 },
             { cardId: 'tempete', count: 1 },
             
-            // Charmes (4)
+            // Charmes (10)
             { cardId: 'charme_forgeron', count: 1 },
             { cardId: 'totem_flammes', count: 1 },
             { cardId: 'massif', count: 1 },
             { cardId: 'charme_instabilite', count: 1 },
+            { cardId: 'charme_des_zigouilleurs', count: 2 },
+            { cardId: 'metamorphose_zigouilleur', count: 1 },
+            { cardId: 'charme_catalyseur', count: 1 },
+            { cardId: 'charme_exploration', count: 1 },
+            { cardId: 'charme_cosmique', count: 1 },
             
             // Atouts (2)
             { cardId: 'petit_moteur', count: 1 },
+            { cardId: 'usine_zigouilleurs', count: 1 },
             { cardId: 'stabilisateur', count: 1 }
         ]
     },
@@ -119,14 +132,20 @@ export const PREBUILT_DECKS = [
             { cardId: 'Maintenance', count: 1 },
             { cardId: 'tacticien', count: 1 },
             
-            // Charmes (4)
+            // Charmes (10)
             { cardId: 'charme_forgeron', count: 1 },
             { cardId: 'totem_flammes', count: 1 },
             { cardId: 'charme_vampirique', count: 1 },
             { cardId: 'charme_instabilite', count: 1 },
+            { cardId: 'charme_des_trafiquants', count: 2 },
+            { cardId: 'metamorphose_trafiquant', count: 1 },
+            { cardId: 'charme_catalyseur', count: 1 },
+            { cardId: 'charme_exploration', count: 1 },
+            { cardId: 'charme_cosmique', count: 1 },
             
             // Atouts (2)
             { cardId: 'petit_moteur', count: 1 },
+            { cardId: 'usine_trafiquants', count: 1 },
             { cardId: 'stabilisateur', count: 1 }
         ]
     },
@@ -161,14 +180,21 @@ export const PREBUILT_DECKS = [
             { cardId: 'joie_communicative', count: 1 },
             { cardId: 'all_boost', count: 1 },
             
-            // Charmes (4)
+            // Charmes (10)
             { cardId: 'charme_forgeron', count: 1 },
             { cardId: 'totem_flammes', count: 1 },
             { cardId: 'massif', count: 1 },
             { cardId: 'charme_vampirique', count: 1 },
+            { cardId: 'charme_des_ombres', count: 2 },
+            { cardId: 'metamorphose_ombre', count: 1 },
+            { cardId: 'charme_catalyseur', count: 1 },
+            { cardId: 'charme_exploration', count: 1 },
+            { cardId: 'charme_cosmique', count: 1 },
+            
             
             // Atouts (2)
             { cardId: 'petit_moteur', count: 1 },
+            { cardId: 'usine_ombres', count: 1 },
             { cardId: 'stabilisateur', count: 1 }
         ]
     },
@@ -204,14 +230,20 @@ export const PREBUILT_DECKS = [
             { cardId: 'all_boost', count: 1 },
             { cardId: 'tacticien', count: 1 },
             
-            // Charmes (4)
+            // Charmes (10)
             { cardId: 'charme_forgeron', count: 1 },
             { cardId: 'totem_flammes', count: 1 },
             { cardId: 'charme_instabilite', count: 1 },
             { cardId: 'charme_vampirique', count: 1 },
+            { cardId: 'charme_des_illusions', count: 2 },
+            { cardId: 'metamorphose_illusion', count: 1 },
+            { cardId: 'charme_catalyseur', count: 1 },
+            { cardId: 'charme_exploration', count: 1 },
+            { cardId: 'charme_cosmique', count: 1 },
             
             // Atouts (2)
             { cardId: 'petit_moteur', count: 1 },
+            { cardId: 'usine_illusions', count: 1 },
             { cardId: 'stabilisateur', count: 1 }
         ]
     },

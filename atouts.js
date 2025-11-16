@@ -31,6 +31,80 @@ export const ALL_ATOUTS = [
         CardType.ATOUT,
         []
     ),
+
+    // Dans atouts.js, ajouter après l'Usine à Mollusques:
+
+    new Card(
+        'usine_zigouilleurs',
+        'Usine à Zigouilleurs',
+        0,
+        ['player'],
+        Rarity.RARE,
+        { type: 'atout_token_on_discard', tag: 'Zigouilleur', tokenId: 'token_zigouilleur' },
+        'Crée jeton Zigouilleur quand Zigouilleur défaussé',
+        CardType.ATOUT,
+        []
+    ),
+
+    new Card(
+        'usine_trafiquants',
+        'Usine à Trafiquants',
+        0,
+        ['player'],
+        Rarity.RARE,
+        { type: 'atout_token_on_discard', tag: 'Trafiquant', tokenId: 'token_trafiquant' },
+        'Crée jeton Trafiquant quand Trafiquant défaussé',
+        CardType.ATOUT,
+        []
+    ),
+
+    new Card(
+        'usine_ombres',
+        'Usine à Ombres',
+        0,
+        ['player'],
+        Rarity.RARE,
+        { type: 'atout_token_on_discard', tag: 'Ombre', tokenId: 'token_ombre' },
+        'Crée jeton Ombre quand Ombre défaussé',
+        CardType.ATOUT,
+        []
+    ),
+
+    new Card(
+        'usine_illusions',
+        'Usine à Illusions',
+        0,
+        ['player'],
+        Rarity.RARE,
+        { type: 'atout_token_on_discard', tag: 'Illusion', tokenId: 'token_illusion' },
+        'Crée jeton Illusion quand Illusion défaussé',
+        CardType.ATOUT,
+        []
+    ),
+
+    new Card(
+        'fortification',
+        'Fortification',
+        0,
+        ['player'],
+        Rarity.UNCOMMON,
+        { type: 'atout_block_eot', value: 5 },
+        '+5 block permanent',
+        CardType.ATOUT,
+        []
+    ),
+
+    new Card(
+        'arsenal',
+        'Arsenal',
+        0,
+        ['player'],
+        Rarity.UNCOMMON,
+        { type: 'atout_damage_eot', value: 5 },
+        '+5 damage permanent',
+        CardType.ATOUT,
+        []
+    ),
     
     new Card(
         'stabilisateur',

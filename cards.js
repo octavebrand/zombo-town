@@ -13,7 +13,7 @@ export const ALL_CARDS = [
     // Coup bas 
     new Card(
         'Coup_bas',
-        'Coup bas',
+        'Homme au chapeau',
         10,
         ['damage', 'block', 'shared', 'state'],  
         Rarity.COMMUNE,
@@ -26,7 +26,7 @@ export const ALL_CARDS = [
     // Botte 
     new Card(
         'botte',
-        'Botte',
+        'Intello',
         5,
         ['damage', 'block', 'shared', 'state'],  
         Rarity.COMMUNE,
@@ -38,7 +38,7 @@ export const ALL_CARDS = [
     
     new Card(
         'dmg_boost',
-        'DMG Boost',
+        'Jeune aggressif',
         6,
         ['damage', 'shared'],
         Rarity.COMMUNE,
@@ -50,7 +50,7 @@ export const ALL_CARDS = [
     
     new Card(
         'block_boost',
-        'BLOCK Boost',
+        'Jeune victime',
         6,
         ['block', 'shared'],
         Rarity.COMMUNE,
@@ -62,7 +62,7 @@ export const ALL_CARDS = [
     
     new Card(
         'Coup_du_chapeau',
-        'Coup du chapeau',
+        'Corbeau',
         13,
         ['damage', 'block', 'shared', 'state'],  
         Rarity.COMMUNE,
@@ -79,7 +79,7 @@ export const ALL_CARDS = [
     // Déluge
     new Card(
         'deluge',
-        'Déluge',
+        'Perroquet bavard',
         5,
         ['damage', 'block', 'shared', 'state'],
         Rarity.UNCOMMON,
@@ -92,7 +92,7 @@ export const ALL_CARDS = [
     // Body stretch
     new Card(
         'Body_stretch',
-        'Body stretch',
+        'Préparateur physique',
         5,
         ['damage', 'block', 'shared', 'state'],
         Rarity.UNCOMMON,
@@ -108,7 +108,7 @@ export const ALL_CARDS = [
      // Renaissance
     new Card(
         'Renaissance',
-        'Renaissance',
+        'Maitre nageur',
         0,
         ['damage', 'block', 'shared', 'state'],
         Rarity.UNCOMMON,
@@ -124,7 +124,7 @@ export const ALL_CARDS = [
     // Maintenance
     new Card(
         'Maintenance',
-        'Maintenance',
+        'Ouvrier polyvalent',
         2,
         ['damage', 'block', 'shared', 'state'],
         Rarity.UNCOMMON,
@@ -140,7 +140,7 @@ export const ALL_CARDS = [
     // Joie Communicative
     new Card(
         'joie_communicative',
-        'Joie Communicative',
+        'Jeune euphorique',
         5,
         ['damage', 'block', 'state'],
         Rarity.UNCOMMON,
@@ -165,7 +165,7 @@ export const ALL_CARDS = [
     // Boost Léger
     new Card(
         'boost_man',
-        'Boost Man',
+        'Ingénieur',
         3,
         ['damage', 'block', 'shared', 'state'],
         Rarity.UNCOMMON,
@@ -181,7 +181,7 @@ export const ALL_CARDS = [
     // Tower man
     new Card(
         'tower_man',
-        'Tower Man',
+        'Contremaitre',
         3,
         ['damage', 'block', 'shared', 'state'],
         Rarity.UNCOMMON,
@@ -196,7 +196,7 @@ export const ALL_CARDS = [
 
     new Card(
         'all_boost',
-        'Catalyseur',
+        'Mécanicien',
         4,
         ['damage', 'block', 'shared', 'state'],
         Rarity.UNCOMMON,
@@ -209,7 +209,7 @@ export const ALL_CARDS = [
     // Commune - Cycle peon
     new Card(
         'card_peon_cycle',
-        'Cycle Peon',
+        'Peon',
         5,
         ['damage', 'block', 'shared', 'state'],
         Rarity.UNCOMMON,
@@ -225,7 +225,7 @@ export const ALL_CARDS = [
     
     new Card(
         'coup_puissant',
-        'Coup Puissant',
+        'Horacio',
         15,
         ['damage'],
         Rarity.RARE,
@@ -237,7 +237,7 @@ export const ALL_CARDS = [
     
     new Card(
         'forteresse',
-        'Forteresse',
+        'Humain',
         15,
         ['block'],
         Rarity.RARE,
@@ -250,7 +250,7 @@ export const ALL_CARDS = [
     // Résonance Parfaite
     new Card(
         'resonance_parfaite',
-        'Résonance Parfaite',
+        'Cuisinier généreux',
         4,
         ['damage', 'block', 'state'],
         Rarity.RARE,
@@ -266,7 +266,7 @@ export const ALL_CARDS = [
     
     new Card(
         'tempete',
-        'Tempête',
+        'Maestro',
         2,
         ['damage', 'block', 'shared', 'state'],
         Rarity.MYTHIQUE,
@@ -820,7 +820,7 @@ export const ALL_CARDS = [
         6,
         ['damage', 'block', 'shared', 'state'],
         Rarity.UNCOMMON,
-        { type: 'instant_create_token_on_neighbors' },
+        { type: 'instant_create_token_on_neighbors', tokenId: 'token_ombre' },
         'Value 6, crée jetons Ombre sur slots voisins vides',
         CardType.CREATURE,
         ['Ombre']

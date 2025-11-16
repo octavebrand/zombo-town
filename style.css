@@ -276,7 +276,7 @@ body::after {
     background: transparent;
     border: none;
     border-radius: 0;
-    max-width: 90vw;
+    max-width: 60vw;
     overflow-x: auto;
     overflow-y: hidden;
     box-shadow: none;
