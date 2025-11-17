@@ -122,7 +122,7 @@ export const PREBUILT_DECKS = [
             { cardId: 'trafiquant_du_four', count: 2 },
             { cardId: 'trafiquant_de_cartes', count: 2 },
             { cardId: 'trafiquant_de_livres', count: 2 },
-            { cardId: 'trafiquant_econome', count: 20 },
+            { cardId: 'trafiquant_econome', count: 10 },
             
             // Neutres (7)
             { cardId: 'botte', count: 2 },

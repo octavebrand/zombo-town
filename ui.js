@@ -4,6 +4,7 @@
 
 import { BoardLinesRenderer } from './boardLines.js';
 import { CardType } from './constants.js';
+import { SHOP_REWARDS } from './shopRewards.js';
 
 export class UIManager {
     constructor(gameManager) {
@@ -470,6 +471,7 @@ export class UIManager {
 
     renderShopTier(tier, price) {
         const canAfford = this.gm.marchandises >= price;
+        const rewards = SHOP_REWARDS[tier];
         
         return `
             <div style="
@@ -477,7 +479,8 @@ export class UIManager {
                 background: ${canAfford ? 'rgba(255, 215, 0, 0.15)' : 'rgba(128, 128, 128, 0.15)'};
                 border: 2px solid ${canAfford ? '#FFD700' : '#666'};
                 border-radius: 10px;
-                min-width: 200px;
+                min-width: 220px;
+                max-width: 250px;
                 text-align: center;
             ">
                 <h3 style="color: ${canAfford ? '#FFD700' : '#888'}; margin-bottom: 10px;">
@@ -486,6 +489,42 @@ export class UIManager {
                 <div style="color: #FFD700; font-size: 18px; margin-bottom: 15px;">
                     💰 ${price} marchandises
                 </div>
+                
+                <!-- Liste des cartes disponibles -->
+                <div style="
+                    text-align: left;
+                    margin-bottom: 15px;
+                    max-height: 200px;
+                    overflow-y: auto;
+                    padding: 10px;
+                    background: rgba(0,0,0,0.3);
+                    border-radius: 5px;
+                ">
+                    ${rewards.map(card => `
+                        <div style="
+                            margin-bottom: 10px;
+                            padding: 8px;
+                            background: rgba(255,255,255,0.05);
+                            border-radius: 5px;
+                            border-left: 3px solid ${this.getRarityColor(card.rarity)};
+                        ">
+                            <div style="font-weight: bold; color: ${this.getRarityColor(card.rarity)}; font-size: 13px;">
+                                ${card.name}
+                            </div>
+                            <div style="font-size: 11px; color: #aaa; margin-top: 3px;">
+                                Value: ${card.value}
+                            </div>
+                            <div style="font-size: 10px; color: #888; margin-top: 3px;">
+                                ${card.description}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+                
+                <div style="font-size: 11px; color: #888; margin-bottom: 10px;">
+                    Carte aléatoire parmi ${rewards.length}
+                </div>
+                
                 <button id="buy-${tier}" ${!canAfford ? 'disabled' : ''} style="
                     padding: 10px 20px;
                     background: ${canAfford ? 'linear-gradient(135deg, #FFD700, #FFA500)' : '#444'};
@@ -494,11 +533,22 @@ export class UIManager {
                     color: ${canAfford ? '#000' : '#666'};
                     font-weight: bold;
                     cursor: ${canAfford ? 'pointer' : 'not-allowed'};
+                    width: 100%;
                 ">
                     Acheter
                 </button>
             </div>
         `;
+    }
+
+    getRarityColor(rarity) {
+        switch(rarity) {
+            case 'Commune': return '#aaa';
+            case 'Uncommon': return '#4CAF50';
+            case 'Rare': return '#2196F3';
+            case 'Mythique': return '#9C27B0';
+            default: return '#fff';
+        }
     }
 
     buyShopReward(tier) {
@@ -624,6 +674,8 @@ renderHand() {
                         } else {
                             return `Autres ${eff.tag}s +${eff.value}`;
                         }
+
+                    case 'gain_goods': return `+${eff.value} marchandises`;
 
                     // Distribution aléatoire
                     case 'instant_missiles':
@@ -972,6 +1024,8 @@ renderHand() {
                             return `Autres ${eff.tag}s +${eff.value}`;
                         }
                     default: return eff.type;
+
+                    case 'gain_goods': return `+${eff.value} marchandises`;
 
                     // Count tribal (self-scaling)
                     case 'count_tribal':
