@@ -466,7 +466,7 @@ body::after {
 
 #controls {
     position: fixed;
-    bottom: 670px;
+    bottom: 82vh;
     right: 40px;
     display: flex;
     flex-direction: column;
