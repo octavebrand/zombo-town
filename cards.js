@@ -614,6 +614,19 @@ export const ALL_CARDS = [
         CardType.CREATURE,
         ['Trafiquant']
     ),
+
+    // Dans cards.js, ajouter temporairement:
+    new Card(
+        'trafiquant_econome',
+        'Trafiquant Econome',
+        5,
+        ['damage', 'block', 'shared', 'state'],
+        Rarity.COMMUNE,
+        { type: 'gain_goods', value: 2 },
+        'Value 5, gagne 2 marchandises',
+        CardType.CREATURE,
+        ['Trafiquant']
+    ),
     
 
     new Card(

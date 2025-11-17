@@ -52,6 +52,10 @@ export class EffectResolver {
             case 'instant_draw':  
                 this.resolveInstantDraw(effect.value);
                 break;
+            
+            case 'gain_goods':
+                this.resolveGainGoods(effect.value);
+                break;
 
             // Création de jeton immédiate
             case 'instant_create_token':
@@ -124,6 +128,9 @@ export class EffectResolver {
             case 'on_discard_create_creature_same_slot':
             case 'on_discard_heal':
             case 'on_discard_draw':
+            case 'charm_maxxer_slot':
+            case 'charm_boost_neighbors':
+            case 'charm_penalty_neighbors':
                 // Ne rien faire à la pose, effet géré dans resolveOnDiscard() ou turnResolver
                 break;
 
@@ -135,6 +142,11 @@ export class EffectResolver {
     resolveInstantDraw(count) {
         this.gm.drawCards(count);
         this.gm.log(`📥 Instant Draw: ${count} carte(s) piochée(s)`);
+    }
+
+    resolveGainGoods(amount) {
+        this.gm.marchandises += amount;
+        this.gm.log(`🛒 +${amount} marchandises (Total: ${this.gm.marchandises})`);
     }
 
     // Créer jeton en main immédiatement

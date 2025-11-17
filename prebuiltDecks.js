@@ -21,7 +21,7 @@ export const PREBUILT_DECKS = [
             { cardId: 'commandant_mollusque', count: 2 },
             { cardId: 'artisan_mollusque', count: 2 },
             { cardId: 'mollusque_mutagene', count: 2 },
-            { cardId: 'Mollusque Archiviste', count: 2 },
+            { cardId: 'mollusque_archiviste', count: 2 },
             { cardId: 'mollusque_a_mollusque', count: 2 },
             { cardId: 'mollusque_erudit', count: 2 },
             { cardId: 'mollusque_joyeux', count: 2 },
@@ -122,6 +122,7 @@ export const PREBUILT_DECKS = [
             { cardId: 'trafiquant_du_four', count: 2 },
             { cardId: 'trafiquant_de_cartes', count: 2 },
             { cardId: 'trafiquant_de_livres', count: 2 },
+            { cardId: 'trafiquant_econome', count: 20 },
             
             // Neutres (7)
             { cardId: 'botte', count: 2 },
@@ -213,18 +214,18 @@ export const PREBUILT_DECKS = [
             // Toutes les créatures Illusions (11)
             { cardId: 'illusion_simple', count: 2 },
             { cardId: 'illusion_fouineuse', count: 2 },
-            { cardId: 'illusion_feu', count: 1 },
-            { cardId: 'illusion_genante', count: 1 },
+            { cardId: 'illusion_feu', count: 2 },
+            { cardId: 'illusion_genante', count: 2 },
             { cardId: 'illusion_changeante_v1', count: 2 },
-            { cardId: 'illusion_miroir', count: 1 },
-            { cardId: 'illusion_polymorphe', count: 1 },
-            { cardId: 'illusion_gazeuse', count: 1 },
+            { cardId: 'illusion_miroir', count: 2 },
+            { cardId: 'illusion_polymorphe', count: 2 },
+            { cardId: 'illusion_gazeuse', count: 2 },
             { cardId: 'illusion_perfide', count: 2 },
-            { cardId: 'illusion_demultiplicatrice', count: 1 },
-            { cardId: 'illusion_joyeuse', count: 1 },
+            { cardId: 'illusion_demultiplicatrice', count: 2 },
+            { cardId: 'illusion_joyeuse', count: 2 },
             
             // Neutres (6)
-            { cardId: 'botte', count: 1 },
+            //{ cardId: 'botte', count: 1 },
             { cardId: 'Renaissance', count: 1 },
             { cardId: 'resonance_parfaite', count: 1 },
             { cardId: 'deluge', count: 1 },
@@ -244,7 +245,7 @@ export const PREBUILT_DECKS = [
             
             // Atouts (2)
             { cardId: 'petit_moteur', count: 1 },
-            { cardId: 'usine_illusions', count: 1 },
+            //{ cardId: 'usine_illusions', count: 1 },
             { cardId: 'stabilisateur', count: 1 },
             { cardId: 'coeur_enchante', count: 1 }
         ]

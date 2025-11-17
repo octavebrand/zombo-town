@@ -388,7 +388,144 @@ export class UIManager {
             <div style="font-size: 12px; color: #aaa; margin-top: 5px;">
                 Tour ${this.gm.turnNumber} | 📚 Deck: ${this.gm.deck.length} | 🗑️ Défausse: ${this.gm.discard.length}
             </div>
+            <div style="font-size: 13px; color: #FFD700; margin-top: 8px; font-weight: bold;">
+                🛒 Marchandises: ${this.gm.marchandises}
+            </div>
+            ${this.gm.marchandises > 0 ? `
+                <button id="shop-button" style="
+                    margin-top: 10px;
+                    padding: 8px 16px;
+                    background: linear-gradient(135deg, #FFD700, #FFA500);
+                    border: 2px solid #FFD700;
+                    border-radius: 8px;
+                    color: #000;
+                    font-weight: bold;
+                    cursor: pointer;
+                    font-size: 13px;
+                ">
+                    🛒 Ouvrir la Boutique
+                </button>
+            ` : ''}
         `;
+        
+        // Attacher l'event listener au bouton
+        const shopButton = document.getElementById('shop-button');
+        if (shopButton) {
+            shopButton.onclick = () => this.showShopPopup();
+        }
+    }
+
+    //boutique
+
+    showShopPopup() {
+        const popup = document.getElementById('popup');
+        if (!popup) return;
+        
+        popup.style.display = 'flex';
+        
+        popup.innerHTML = `
+            <div style="background: rgba(0,0,0,0.95); padding: 30px; border-radius: 15px; max-width: 800px; border: 3px solid #FFD700;">
+                <h2 style="text-align: center; color: #FFD700; margin-bottom: 25px;">
+                    🛒 BOUTIQUE DU TRAFIQUANT
+                </h2>
+                <div style="text-align: center; margin-bottom: 20px; font-size: 16px; color: #FFD700;">
+                    Marchandises disponibles: <strong>${this.gm.marchandises}</strong>
+                </div>
+                
+                <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
+                    ${this.renderShopTier('tier1', 5)}
+                    ${this.renderShopTier('tier2', 10)}
+                    ${this.renderShopTier('tier3', 15)}
+                </div>
+                
+                <button id="close-shop" style="
+                    margin-top: 25px;
+                    padding: 10px 20px;
+                    background: #666;
+                    border: 2px solid #888;
+                    border-radius: 8px;
+                    color: white;
+                    cursor: pointer;
+                    display: block;
+                    margin-left: auto;
+                    margin-right: auto;
+                ">
+                    Fermer
+                </button>
+            </div>
+        `;
+        
+        // Event listener pour fermer
+        document.getElementById('close-shop').onclick = () => {
+            popup.style.display = 'none';
+        };
+        // Event listeners pour les boutons d'achat
+        ['tier1', 'tier2', 'tier3'].forEach(tier => {
+            const buyButton = document.getElementById(`buy-${tier}`);
+            if (buyButton && !buyButton.disabled) {
+                buyButton.onclick = () => this.buyShopReward(tier);
+            }
+        });
+    }
+
+    renderShopTier(tier, price) {
+        const canAfford = this.gm.marchandises >= price;
+        
+        return `
+            <div style="
+                padding: 20px;
+                background: ${canAfford ? 'rgba(255, 215, 0, 0.15)' : 'rgba(128, 128, 128, 0.15)'};
+                border: 2px solid ${canAfford ? '#FFD700' : '#666'};
+                border-radius: 10px;
+                min-width: 200px;
+                text-align: center;
+            ">
+                <h3 style="color: ${canAfford ? '#FFD700' : '#888'}; margin-bottom: 10px;">
+                    ${tier === 'tier1' ? '⭐ Tier 1' : tier === 'tier2' ? '⭐⭐ Tier 2' : '⭐⭐⭐ Tier 3'}
+                </h3>
+                <div style="color: #FFD700; font-size: 18px; margin-bottom: 15px;">
+                    💰 ${price} marchandises
+                </div>
+                <button id="buy-${tier}" ${!canAfford ? 'disabled' : ''} style="
+                    padding: 10px 20px;
+                    background: ${canAfford ? 'linear-gradient(135deg, #FFD700, #FFA500)' : '#444'};
+                    border: 2px solid ${canAfford ? '#FFD700' : '#666'};
+                    border-radius: 8px;
+                    color: ${canAfford ? '#000' : '#666'};
+                    font-weight: bold;
+                    cursor: ${canAfford ? 'pointer' : 'not-allowed'};
+                ">
+                    Acheter
+                </button>
+            </div>
+        `;
+    }
+
+    buyShopReward(tier) {
+        const prices = { tier1: 5, tier2: 10, tier3: 15 };
+        const price = prices[tier];
+        
+        // Vérifier si le joueur a assez de marchandises
+        if (this.gm.marchandises < price) {
+            this.gm.log(`⚠️ Pas assez de marchandises (besoin de ${price})`);
+            return;
+        }
+        
+        // Vérifier si la main n'est pas pleine
+        if (this.gm.hand.length >= 10) {
+            this.gm.log(`⚠️ Main pleine ! Impossible d'acheter.`);
+            return;
+        }
+        
+        // Déduire le coût
+        this.gm.marchandises -= price;
+        
+        // Donner une carte aléatoire du tier
+        this.gm.giveRandomShopReward(tier);
+        
+        // Fermer et rafraîchir
+        document.getElementById('popup').style.display = 'none';
+        this.render();
     }
     
     // ========================================

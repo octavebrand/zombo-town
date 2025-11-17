@@ -15,6 +15,7 @@ import { ALL_CHARMS } from './charms.js';
 import { ALL_ATOUTS } from './atouts.js';
 import { getDeckById } from './prebuiltDecks.js';
 import { DeckSelectionUI } from './deckSelection.js';
+import { SHOP_REWARDS, SHOP_PRICES } from './shopRewards.js';
 
 // ========================================
 // CONSTANTES DE JEU
@@ -120,15 +121,13 @@ class GameManagerStub {
 
         this.discard = [];
         this.shuffleDeck();
-
-        // Main (quelques cartes de test)
-       this.hand = this.drawInitialHand(6);
-        
-        
+        this.hand = this.drawInitialHand(6);
         // State
         this.playerResolved = false;
 
         this.turnNumber = 1;
+
+        this.marchandises = 0;
 
         // Ciblage
         this.currentTarget = 'enemy';
@@ -661,6 +660,25 @@ class GameManagerStub {
         } else {
             this.log(`⚠️ Impossible de piocher (deck vide)`);
         }
+    }
+
+    //shop reward purchase
+
+    giveRandomShopReward(tier) {
+        const rewards = SHOP_REWARDS[tier];
+        if (!rewards || rewards.length === 0) {
+            this.log(`❌ Aucune récompense disponible pour ${tier}`);
+            return;
+        }
+        
+        // Choisir une carte aléatoire
+        const randomCard = rewards[Math.floor(Math.random() * rewards.length)];
+        
+        // Créer une copie et l'ajouter à la main
+        const cardCopy = {...randomCard};
+        this.hand.push(cardCopy);
+        
+        this.log(`✨ Acheté: ${cardCopy.name} (${tier})`);
     }
 
     // Ajouter un jeton en main
