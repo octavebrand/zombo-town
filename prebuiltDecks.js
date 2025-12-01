@@ -13,6 +13,13 @@ export const PREBUILT_DECKS = [
         tribe: 'Mollusque',
         description: 'Un pour tous, tous pour un.',
         color: '#4A90E2', // Bleu
+
+        atouts: [
+            'fortification',
+            'stabilisateur',
+            'coeur_enchante'
+        ],
+
         cards: [
             // Toutes les créatures Mollusques (12)
             { cardId: 'mollusque_devoue', count: 2 },
@@ -27,10 +34,13 @@ export const PREBUILT_DECKS = [
             { cardId: 'mollusque_joyeux', count: 2 },
             { cardId: 'mollusque_reproducteur', count: 2 },
             
+            
             // Neutres (5)
             { cardId: 'forteresse', count: 1 },
             { cardId: 'block_boost', count: 1 },
             { cardId: 'deluge', count: 1 },
+            { cardId: 'moine_reveur', count: 2 },
+            { cardId: 'assassin_gentil', count: 2 },
             
             // Charmes (10)
             { cardId: 'charme_forgeron', count: 1 },
@@ -43,11 +53,6 @@ export const PREBUILT_DECKS = [
             { cardId: 'charme_exploration', count: 1 },
             { cardId: 'charme_cosmique', count: 1 },
 
-            // Atouts (2)
-            //{ cardId: 'usine_mollusques', count: 1 },
-            { cardId: 'fortification', count: 1 },
-            { cardId: 'stabilisateur', count: 1 },
-            { cardId: 'coeur_enchante', count: 1 }
         ]
     },
     
@@ -60,6 +65,13 @@ export const PREBUILT_DECKS = [
         tribe: 'Zigouilleur',
         description: 'Gné, zigouiller, bombarder...',
         color: '#E74C3C', // Rouge
+
+        atouts: [
+            'petit_moteur',
+            'stabilisateur',
+            'arsenal'
+        ],
+
         cards: [
             // Toutes les créatures Zigouilleurs (11)
             { cardId: 'archiviste_zigouilleur', count: 2 },
@@ -81,6 +93,8 @@ export const PREBUILT_DECKS = [
             { cardId: 'boost_man', count: 1 },
             { cardId: 'all_boost', count: 1 },
             { cardId: 'tempete', count: 1 },
+            { cardId: 'moine_reveur', count: 2 },
+            { cardId: 'assassin_gentil', count: 2 },
             
             // Charmes (10)
             { cardId: 'charme_forgeron', count: 1 },
@@ -93,11 +107,6 @@ export const PREBUILT_DECKS = [
             { cardId: 'charme_exploration', count: 1 },
             { cardId: 'charme_cosmique', count: 1 },
             
-            // Atouts (2)
-            { cardId: 'petit_moteur', count: 1 },
-            //{ cardId: 'usine_zigouilleurs', count: 1 },
-            { cardId: 'stabilisateur', count: 1 },
-            { cardId: 'arsenal', count: 1 }
         ]
     },
     
@@ -110,6 +119,13 @@ export const PREBUILT_DECKS = [
         tribe: 'Trafiquant',
         description: 'Contrôlez les flux.',
         color: '#F39C12', // Orange
+
+        atouts: [
+            'petit_moteur',
+            'fortification',
+            'arsenal'
+        ],
+
         cards: [
             // Toutes les créatures Trafiquants (10)
             { cardId: 'trafiquant_legumes', count: 2 },
@@ -122,7 +138,8 @@ export const PREBUILT_DECKS = [
             { cardId: 'trafiquant_du_four', count: 2 },
             { cardId: 'trafiquant_de_cartes', count: 2 },
             { cardId: 'trafiquant_de_livres', count: 2 },
-            { cardId: 'trafiquant_econome', count: 10 },
+            { cardId: 'trafiquant_econome', count: 2 },
+            { cardId: 'trafiquant_de_la_bourse', count: 2 },
             
             // Neutres (7)
             { cardId: 'botte', count: 2 },
@@ -131,6 +148,8 @@ export const PREBUILT_DECKS = [
             { cardId: 'Renaissance', count: 1 },
             { cardId: 'Maintenance', count: 1 },
             { cardId: 'tacticien', count: 1 },
+            { cardId: 'moine_reveur', count: 2 },
+            { cardId: 'assassin_gentil', count: 2 },
             
             // Charmes (10)
             { cardId: 'charme_forgeron', count: 1 },
@@ -143,11 +162,6 @@ export const PREBUILT_DECKS = [
             { cardId: 'charme_exploration', count: 1 },
             { cardId: 'charme_cosmique', count: 1 },
             
-            // Atouts (2)
-            { cardId: 'petit_moteur', count: 1 },
-            //{ cardId: 'usine_trafiquants', count: 1 },
-            { cardId: 'stabilisateur', count: 1 },
-            { cardId: 'coeur_enchante', count: 1 }
         ]
     },
     
@@ -160,6 +174,13 @@ export const PREBUILT_DECKS = [
         tribe: 'Ombre',
         description: 'Shadow submersion.',
         color: '#8E44AD', // Violet
+
+        atouts: [
+            'petit_moteur',
+            'usine_ombres',
+            'arsenal'
+        ],
+
         cards: [
             // Toutes les créatures Ombres (12)
             { cardId: 'ombre_studieuse', count: 2 },
@@ -180,6 +201,8 @@ export const PREBUILT_DECKS = [
             { cardId: 'Renaissance', count: 1 },
             { cardId: 'joie_communicative', count: 1 },
             { cardId: 'all_boost', count: 1 },
+            { cardId: 'moine_reveur', count: 2 },
+            { cardId: 'assassin_gentil', count: 2 },
             
             // Charmes (10)
             { cardId: 'charme_forgeron', count: 1 },
@@ -192,12 +215,6 @@ export const PREBUILT_DECKS = [
             { cardId: 'charme_exploration', count: 1 },
             { cardId: 'charme_cosmique', count: 1 },
             
-            
-            // Atouts (2)
-            { cardId: 'petit_moteur', count: 1 },
-            { cardId: 'usine_ombres', count: 1 },
-            { cardId: 'stabilisateur', count: 1 },
-            { cardId: 'arsenal', count: 1 }
         ]
     },
     
@@ -210,6 +227,13 @@ export const PREBUILT_DECKS = [
         tribe: 'Illusion',
         description: 'Transformation, illusion, adaptation.',
         color: '#1ABC9C', // Turquoise
+
+        atouts: [
+            'petit_moteur',
+            'coeur_enchante',
+            'arsenal'
+        ],
+
         cards: [
             // Toutes les créatures Illusions (11)
             { cardId: 'illusion_simple', count: 2 },
@@ -231,6 +255,8 @@ export const PREBUILT_DECKS = [
             { cardId: 'deluge', count: 1 },
             { cardId: 'all_boost', count: 1 },
             { cardId: 'tacticien', count: 1 },
+            { cardId: 'moine_reveur', count: 2 },
+            { cardId: 'assassin_gentil', count: 2 },
             
             // Charmes (10)
             { cardId: 'charme_forgeron', count: 1 },
@@ -243,11 +269,6 @@ export const PREBUILT_DECKS = [
             { cardId: 'charme_exploration', count: 1 },
             { cardId: 'charme_cosmique', count: 1 },
             
-            // Atouts (2)
-            { cardId: 'petit_moteur', count: 1 },
-            //{ cardId: 'usine_illusions', count: 1 },
-            { cardId: 'stabilisateur', count: 1 },
-            { cardId: 'coeur_enchante', count: 1 }
         ]
     },
     

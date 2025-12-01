@@ -72,7 +72,7 @@ export const TOKENS = [
 ];
 
 // Helper pour créer un jeton (copie profonde)
-export function createToken(tokenId) {
+export function createToken(tokenId, gameManager = null) {
     const template = TOKENS.find(t => t.id === tokenId);
     if (!template) {
         console.error(`❌ Token ${tokenId} introuvable`);
@@ -80,7 +80,7 @@ export function createToken(tokenId) {
     }
     
     // Créer copie profonde
-    return new Card(
+    const token = new Card(
         template.id,
         template.name,
         template.value,
@@ -91,4 +91,12 @@ export function createToken(tokenId) {
         template.cardType,
         [...template.tags]
     );
+
+    
+    /* if (gameManager && tokenId === 'token_ombre') {
+        const bonus = gameManager.fusionSystem.getTokenValueBonus();
+        token.value += bonus;
+    } */
+    
+    return token;
 }

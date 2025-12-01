@@ -8,8 +8,8 @@ import { Slot } from './constants.js';
 const SLOT_POSITIONS = {
     // BLOCK (left side)
     block_left:   { x: 15, y: 35 },
-    block_top:    { x: 26, y: 23 },
-    block_bottom: { x: 26, y: 48 },
+    block_top:    { x: 26, y: 19 },
+    block_bottom: { x: 26, y: 52 },
     
     // DAMAGE (center)
     damage_top:    { x: 50, y: 23 },
@@ -30,8 +30,8 @@ const SLOT_POSITIONS = {
     enemy_3: { x: 65, y: 10 },
     
     // PLAYER (bottom)
-    player_1: { x: 10, y: 80 },
-    player_2: { x: 10, y: 70 },
+    player_1: { x: 10, y: 70 },
+    player_2: { x: 10, y: 80 },
     player_3: { x: 10, y: 90 }
 };
 
@@ -295,6 +295,11 @@ export class BoardState {
         
         // Appliquer bonus neighbors/rewards
         total += slot.neighborBonus + slot.rewardBonus;
+
+        // Appliquer bonus token Ombre
+        if (slot.card.id === 'token_ombre') {
+            total += this.gm.fusionSystem.getTokenValueBonus();
+        }
         
         return total;
     }

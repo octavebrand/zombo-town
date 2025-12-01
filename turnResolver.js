@@ -24,6 +24,7 @@ export class TurnResolver {
             blockMultiplier: 0,
             blockTotal: 0,
             enemyAttack: 0,
+            enemyBlock: 0,
             playerDamageTaken: 0,
             enemyDamageTaken: 0
         };
@@ -36,6 +37,10 @@ export class TurnResolver {
         
         // B) Calculer BLOCK
         this.calculateBlock(results);
+        const totalBlock = results.blockTotal;
+        this.gm.fortressSystem.addBlock(totalBlock);
+        this.gm.log(`🛡️ BLOCK ce tour: ${totalBlock}`);
+        this.gm.log(`🛡️ Shield total: ${this.gm.fortressSystem.shield}`);
         
         // C) Calculer attaque ENEMY
         this.calculateEnemyAttack(results);
@@ -44,13 +49,23 @@ export class TurnResolver {
         this.applyDamageToEnemy(results);
         
         // E) Appliquer (enemy attack - block) → player
-        this.applyDamageToPlayer(results);
+        //this.applyDamageToPlayer(results);
+        //commenté car appliqué en E4
         
         // E2) Appliquer effets STATE (draw/heal)
         this.applyStateEffects(results);
 
         // E3) Vérifier timers cartes ennemies
         this.checkTimers(results);
+
+        // E4) FORTRESS CACULATIONS
+        const enemyAttack = results.enemyAttack;
+        const fortressResults = this.gm.fortressSystem.processAfterCombat(enemyAttack);
+
+        const actualDamage = Math.max(0, enemyAttack - fortressResults.blocked);
+        const oldHp = this.gm.player.currentHp;
+        this.gm.player.currentHp = Math.max(0, oldHp - actualDamage);
+        results.playerDamageTaken = actualDamage;
 
         // F) Reset compteurs
         this.resetCounters();
@@ -60,8 +75,24 @@ export class TurnResolver {
         
         // G) Défausser cartes temporaires
         this.discardTemporaryCards();
+
+        // H) Déverrouillage slots atouts (tours 3, 6, 9)
+        if (this.gm.turnNumber === 3 || this.gm.turnNumber === 6 || this.gm.turnNumber === 9) {
+            if (this.gm.unlockedPlayerSlots < 3) {
+                this.gm.unlockedPlayerSlots++;
+                this.gm.log(`🔓 Slot atout ${this.gm.unlockedPlayerSlots} déverrouillé !`);
+            }
+        }
         
-        
+        // Plus de logs, a voir si nécessaire
+        this.gm.log(`💀 Enemy attaque: ${enemyAttack}`);
+        this.gm.log(`🛡️ Shield bloque: ${fortressResults.blocked}`);
+        this.gm.log(`❤️ Dégâts reçus: ${actualDamage}`);
+
+        if (fortressResults.meterGain > 0) {
+            this.gm.log(`⚡ Fortress: +${fortressResults.meterGain}`);
+        }
+
         return results;
     }
     
@@ -179,7 +210,7 @@ export class TurnResolver {
     // ========================================
     
     calculateEnemyAttack(results) {
-        let baseDamage = this.gm.enemy.attackDamage;
+        let baseDamage = Math.floor(Math.random() * 50) +5;
         
         // Appliquer boost des cartes ennemies
         let damageBoost = 0;
@@ -195,11 +226,33 @@ export class TurnResolver {
         });
         
         results.enemyAttack = baseDamage + damageBoost;
+
+        let baseBlock = Math.floor(Math.random() * 26); // 0-25
+        // Appliquer boost block des cartes ennemies
+        let blockBoost = 0;
+        this.gm.board.slots.enemy.forEach(slot => {
+            if (slot.card && slot.card.effect) {
+                const effects = Array.isArray(slot.card.effect) ? slot.card.effect : [slot.card.effect];
+                effects.forEach(eff => {
+                    if (eff.type === 'boost_block') {
+                        blockBoost += eff.value;
+                    }
+                });
+            }
+        });
+
+        results.enemyBlock = baseBlock + blockBoost;
         
         if (damageBoost > 0) {
             this.gm.log(`[C] ⚔️ Attaque ennemie: ${baseDamage} + ${damageBoost} (cartes) = ${results.enemyAttack}`);
         } else {
             this.gm.log(`[C] ⚔️ Attaque ennemie: ${results.enemyAttack}`);
+        }
+        
+        if (blockBoost > 0) {
+            this.gm.log(`[C] 🛡️ Block ennemi: ${baseBlock} + ${blockBoost} (cartes) = ${results.enemyBlock}`);
+        } else {
+            this.gm.log(`[C] 🛡️ Block ennemi: ${results.enemyBlock}`);
         }
     }
     
@@ -210,22 +263,10 @@ export class TurnResolver {
     applyDamageToEnemy(results) {
         const target = this.gm.currentTarget;
         
-        // Calculer block de l'ennemi (depuis cartes ennemies)
-        let enemyBlock = 0;
-        this.gm.board.slots.enemy.forEach(slot => {
-            if (slot.card && slot.card.effect) {
-                const effects = Array.isArray(slot.card.effect) ? slot.card.effect : [slot.card.effect];
-                effects.forEach(eff => {
-                    if (eff.type === 'boost_block') {
-                        enemyBlock += eff.value;
-                    }
-                });
-            }
-        });
+        const enemyBlock = results.enemyBlock || 0;
         
         // Dégâts nets après block ennemi
         const netDamage = Math.max(0, results.damageTotal - enemyBlock);
-        results.enemyBlock = enemyBlock;
         
         if (enemyBlock > 0) {
             this.gm.log(`[D] 🛡️ BLOCK ennemi: ${enemyBlock} (${results.damageTotal} → ${netDamage} dégâts nets)`);
@@ -349,7 +390,7 @@ export class TurnResolver {
         let discardedCount = 0;
         
         const allSlots = this.gm.board.getAllSlots();
-        
+
         allSlots.forEach(slot => {
             // Reset TOUS les bonus (slots vides ou pleins)
             if (slot.type !== 'enemy' && slot.type !== 'player') {
@@ -359,6 +400,11 @@ export class TurnResolver {
             
             // Défausser cartes
             if (slot.card && slot.type !== 'player' && slot.type !== 'enemy') {
+                if (this.gm.fortressSystem.isCardProtected(slot.id)) {
+                    this.gm.log(`🛡️ ${slot.card.name} protégée`);
+                    return; // Skip cette itération, ne pas défausser
+                }
+
                 const discardedCard = slot.card;  // Stocker AVANT de défausser
                 this.gm.discard.push(discardedCard);
 
@@ -375,7 +421,7 @@ export class TurnResolver {
                     const effects = Array.isArray(discardedCard.effect) ? discardedCard.effect : [discardedCard.effect];
                     effects.forEach(eff => {
                         if (eff.type === 'on_discard_create_token_same_slot') {
-                            const token = createToken(eff.tokenId);
+                            const token = createToken(eff.tokenId, this.gm);
                             if (token) {
                                 slot.card = token;  // Remettre jeton sur le slot
                                 tokenCreatedOnSlot = true;
@@ -470,6 +516,8 @@ export class TurnResolver {
                 // Sinon (ATOUT) → on ne fait rien, il reste
             }
         });
+
+        this.gm.fortressSystem.resetProtection();
         
         this.gm.log(`[G] 🗑️ ${discardedCount} carte(s) défaussée(s) + Reset bonus`);
     }
@@ -490,7 +538,7 @@ export class TurnResolver {
             // Vérifier si le tag correspond
             if (discardedCard.tags.includes(atout.effect.tag)) {
                 // Créer jeton
-                const token = createToken(atout.effect.tokenId);
+                const token = createToken(atout.effect.tokenId, this.gm);
                 if (token && this.gm.hand.length < 10) {
                     this.gm.hand.push(token);
                     this.gm.log(`🏭 ${atout.name}: Crée jeton ${token.name}`);

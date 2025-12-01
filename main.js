@@ -15,7 +15,9 @@ import { ALL_CHARMS } from './charms.js';
 import { ALL_ATOUTS } from './atouts.js';
 import { getDeckById } from './prebuiltDecks.js';
 import { DeckSelectionUI } from './deckSelection.js';
-import { SHOP_REWARDS, SHOP_PRICES } from './shopRewards.js';
+import { SHOP_REWARDS } from './shopRewards.js';
+import { FortressSystem } from './fortressSystem.js';
+import { FusionSystem } from './fusionsystem.js';
 
 // ========================================
 // CONSTANTES DE JEU
@@ -35,8 +37,7 @@ function buildDeckFromConfig(deckConfig) {
     if (deckConfig.cards === 'all') {
         return [
             ...ALL_CARDS.map(card => ({...card})),
-            ...ALL_CHARMS.map(card => ({...card})),
-            ...ALL_ATOUTS.map(card => ({...card}))
+            ...ALL_CHARMS.map(card => ({...card}))
         ];
     }
     
@@ -46,8 +47,7 @@ function buildDeckFromConfig(deckConfig) {
     // Pool complet de cartes disponibles
     const allAvailableCards = [
         ...ALL_CARDS,
-        ...ALL_CHARMS,
-        ...ALL_ATOUTS
+        ...ALL_CHARMS
     ];
     
     // Pour chaque entrée dans le deck config
@@ -71,7 +71,7 @@ function buildDeckFromConfig(deckConfig) {
 
 
 // ========================================
-// GAME MANAGER MINIMAL (pour test Jour 1)
+// GAME MANAGER MINIMAL 
 // ========================================
 
 class GameManagerStub {
@@ -104,6 +104,9 @@ class GameManagerStub {
             'Board initialisé avec 2 slots permanents aléatoires',
             'Prêt pour les tests !'
         ];
+
+        // selection mode for fortress system rewards
+        this.selectionMode = null; // 'protect_card', 'destroy_enemy', ou null
         
         // Deck/Défausse - Construction depuis config ou all cards
         if (deckConfig) {
@@ -113,8 +116,7 @@ class GameManagerStub {
             // Fallback: toutes les cartes
             this.deck = [
                 ...ALL_CARDS.map(card => ({...card})),
-                ...ALL_CHARMS.map(card => ({...card})),
-                ...ALL_ATOUTS.map(card => ({...card}))
+                ...ALL_CHARMS.map(card => ({...card}))
             ];
             this.log('🎴 Deck par défaut: Collection Complète');
         }
@@ -129,6 +131,32 @@ class GameManagerStub {
 
         this.marchandises = 0;
 
+        //FORTRESS SYSYTEM BLOCK ENTITY
+        this.fortressSystem = new FortressSystem(this);
+
+        this.fusionSystem = new FusionSystem(this);
+
+        // NOUVEAU: Système d'atouts
+        this.unlockedPlayerSlots = 0; // 0, 1, 2, ou 3
+        this.availableAtouts = []; // Pool d'atouts disponibles
+        this.placedAtouts = []; // Atouts déjà placés
+
+        // Charger atouts depuis deck config
+        if (deckConfig && deckConfig.atouts) {
+            deckConfig.atouts.forEach(atoutId => {
+                const atout = ALL_ATOUTS.find(a => a.id === atoutId);
+                if (atout) {
+                    this.availableAtouts.push({...atout});
+                }
+            });
+            this.log(`🏛️ Atouts disponibles: ${this.availableAtouts.length}`);
+        } else {
+            // Fallback: 3 atouts aléatoires
+            const shuffled = [...ALL_ATOUTS].sort(() => Math.random() - 0.5);
+            this.availableAtouts = shuffled.slice(0, 3).map(a => ({...a}));
+            this.log('🏛️ Atouts aléatoires sélectionnés');
+        }
+
         // Ciblage
         this.currentTarget = 'enemy';
         
@@ -139,15 +167,14 @@ class GameManagerStub {
         this.ui = null;
 
         this.turnResolver = new TurnResolver(this);
-        
-        // Test : Mettre une carte sur un slot aléatoire
-        this.placeTestCard();
 
         // STATE rewards
         this.stateValue = 0;
         this.stateTier = 0;
         this.pendingStateRewards = [];  // Rewards à appliquer en fin de tour
         this.pendingSlotBonuses = [];   // bonus a appliquer au tour suivant
+
+        this.gameOver = false;
     }
     
     shuffleDeck() {
@@ -167,11 +194,6 @@ class GameManagerStub {
         }
         this.log(`🎴 Main initiale: ${count} cartes`);
         return hand;
-    }
-
-    placeTestCard() {
-        // Plus besoin de carte de test, on a un vrai deck maintenant
-        // this.log('Deck complet chargé');
     }
 
     placeCardOnSlot(cardIndex, slotId) {
@@ -253,8 +275,6 @@ class GameManagerStub {
             // Résoudre les effets de la carte
             this.effectResolver.resolveCardEffects(card, slotId);
 
-            //this.applyNeighborBonusesToCard(slotId);
-
             this.recalculateMaxxers();
 
             this.ui.render();
@@ -263,6 +283,34 @@ class GameManagerStub {
         }
         
         return { success: false, reason: "Placement impossible" };
+    }
+
+    placeAtoutOnSlot(atoutIndex, slotId) {
+        const atout = this.availableAtouts[atoutIndex];
+        const slot = this.board.getSlot(slotId);
+        
+        if (!atout || !slot || slot.type !== 'player') {
+            return { success: false };
+        }
+        
+        // Vérifier si slot déjà occupé
+        if (slot.card) {
+            return { success: false, reason: "Slot déjà occupé" };
+        }
+        
+        // Placer atout
+        slot.card = atout;
+        this.placedAtouts.push(atout);
+        
+        // Retirer du pool
+        this.availableAtouts.splice(atoutIndex, 1);
+        
+        this.log(`✅ ${atout.name} placé sur ${slotId}`);
+        
+        // Recalculer maxxers si stabilisateur
+        this.recalculateMaxxers();
+        
+        return { success: true };
     }
 
     applyCharmEffects(charm, slot) {
@@ -274,11 +322,15 @@ class GameManagerStub {
             switch(eff.type) {
                 case 'charm_maxxer_slot':
                     // Maxxer du slot
-                    if (slot.type === 'damage' || slot.type === 'shared') {
+                    if (slot.type === 'damage') {
                         this.maxxers.damage.level += eff.value;
-                    }
-                    if (slot.type === 'block' || slot.type === 'shared') {
+                    } else if (slot.type === 'block') {
                         this.maxxers.block.level += eff.value;
+                    } else if (slot.id === 'shared_1') {
+                        this.maxxers.damage.level += eff.value;
+                        this.maxxers.block.level += eff.value;
+                    } else if (slot.id === 'shared_2') {
+                        this.maxxers.damage.level += eff.value;
                     }
                     this.log(`🔧 Maxxer +${eff.value}`);
                     break;
@@ -319,36 +371,6 @@ class GameManagerStub {
         });
     }
 
-    /* applyNeighborBonusesToCard(slotId) {
-        const slot = this.board.getSlot(slotId);
-        if (!slot || !slot.card) return;
-        
-        const neighbors = this.board.getNeighbors(slotId);
-        let totalBonus = 0;
-        
-        neighbors.forEach(neighborSlot => {
-            if (neighborSlot.card && neighborSlot.card.effect) {
-                const effects = Array.isArray(neighborSlot.card.effect) ? neighborSlot.card.effect : [neighborSlot.card.effect];
-                
-                effects.forEach(eff => {
-                    if (eff.type === 'bonus_neighbors') {
-                        totalBonus += eff.value;
-                    }
-                    if (eff.type === 'penalty_neighbors') {
-                        totalBonus += eff.value;
-                    }
-                });
-            }
-        });
-        
-        slot.neighborBonus += totalBonus;
-        
-        if (totalBonus !== 0) {
-            const sign = totalBonus > 0 ? '+' : '';
-            this.log(`💫 ${slot.id}: bonus ${sign}${totalBonus} des voisins`);
-        }
-    } */
-
     recalculateMaxxers() {
         // Check si Stabilisateur actif
         const playerSlots = this.board.getSlotsByType('player');
@@ -387,10 +409,11 @@ class GameManagerStub {
                         this.maxxers.damage.level += eff.value;
                     } else if (slot.type === 'block') {
                         this.maxxers.block.level += eff.value;
-                    } else if (slot.type === 'shared') {
-                        // Shared compte pour les 2
+                    } else if (slot.id === 'shared_1') {
                         this.maxxers.damage.level += eff.value;
                         this.maxxers.block.level += eff.value;
+                    } else if (slot.id === 'shared_2') {
+                        this.maxxers.damage.level += eff.value;
                     }
                 }
             });
@@ -404,11 +427,15 @@ class GameManagerStub {
                     charmEffects.forEach(eff => {
                         if (eff.type === 'charm_maxxer_slot') {
                             // Appliquer maxxer selon type de slot
-                            if (slot.type === 'damage' || slot.type === 'shared') {
+                            if (slot.type === 'damage') {
                                 this.maxxers.damage.level += eff.value;
-                            }
-                            if (slot.type === 'block' || slot.type === 'shared') {
+                            } else if (slot.type === 'block') {
                                 this.maxxers.block.level += eff.value;
+                            } else if (slot.id === 'shared_1') {
+                                this.maxxers.damage.level += eff.value;
+                                this.maxxers.block.level += eff.value;
+                            } else if (slot.id === 'shared_2') {
+                                this.maxxers.damage.level += eff.value;
                             }
                         }
                         
@@ -435,6 +462,17 @@ class GameManagerStub {
             this.maxxers.block.level = Math.min(this.maxxers.block.level, maxLevel);
         }
 
+    }
+
+    getCardDisplayValue(card) {
+        let value = card.value;
+        
+        // Bonus fusionLevel pour tokens Ombre
+        if (card.id === 'token_ombre') {
+            value += this.fusionSystem.getTokenValueBonus();
+        }
+        
+        return value;
     }
 
     checkAtoutHealOnCharmPlayed() {
@@ -531,6 +569,8 @@ class GameManagerStub {
         this.pendingSlotBonuses = [];
     }
 
+    
+
     showStateRewardsPopup(tier, callback) {
         const rewards = getRandomRewards(tier, 2);
         
@@ -574,6 +614,51 @@ class GameManagerStub {
         });
     }
 
+    checkGameOver() {
+        if (this.enemy.currentHp <= 0) {
+            this.gameOver = true;
+            return 'victory';
+        } else if (this.player.currentHp <= 0) {
+            this.gameOver = true;
+            return 'defeat';
+        }
+        return null;
+    }
+
+    showGameOverScreen(result) {
+        const popup = document.getElementById('popup');
+        popup.style.display = 'flex';
+        
+        const isVictory = result === 'victory';
+        
+        popup.innerHTML = `
+            <div style="text-align: center; padding: 40px;">
+                <h1 style="font-size: 60px; margin-bottom: 30px;">
+                    ${isVictory ? '🎉 VICTOIRE !' : '💀 DÉFAITE !'}
+                </h1>
+                <p style="font-size: 24px; margin-bottom: 40px; color: ${isVictory ? '#4CAF50' : '#F44336'};">
+                    ${isVictory ? 'Vous avez vaincu l\'ennemi !' : 'Vous avez été vaincu...'}
+                </p>
+                <button id="restartBtn" style="
+                    padding: 20px 60px;
+                    font-size: 24px;
+                    background: ${isVictory ? '#4CAF50' : '#8B0000'};
+                    border: 3px solid ${isVictory ? '#2E7D32' : '#FF0000'};
+                    border-radius: 15px;
+                    color: white;
+                    cursor: pointer;
+                    font-weight: bold;
+                ">
+                    Rejouer
+                </button>
+            </div>
+        `;
+        
+        document.getElementById('restartBtn').onclick = () => {
+            location.reload(); // Recharger la page
+        };
+    }
+
     startNewTurn() {
         this.turnNumber++;
         this.playerResolved = false;
@@ -584,10 +669,10 @@ class GameManagerStub {
         
         this.applyPendingSlotBonuses();
 
-        // Ennemi pose 1 carte aléatoire
-        if (this.turnNumber % 3 === 0) {
+        // 1/3 chances pour que l'Ennemi pose 1 carte aléatoire
+        if (Math.random() < 1/3) {
             this.enemyPlaceCard();
-        }  
+        }
         // Pioche automatique
         //this.drawCards(GAME_CONFIG.DRAW_PER_TURN);
     }
@@ -690,7 +775,7 @@ class GameManagerStub {
             return false;
         }
         
-        const token = createToken(tokenId);
+        const token = createToken(tokenId, this.gm);
         if (!token) {
             this.log(`❌ Impossible de créer jeton ${tokenId}`);
             return false;
@@ -747,6 +832,8 @@ function initGameWithDeck(deckId) {
  */
 function setupEndTurnButton() {
     document.getElementById('endTurnBtn').onclick = () => {
+
+        if (game.gameOver) return;
         game.log('═══════════════════════════════════');
         game.log('🔚 FIN DE TOUR - Résolution...');
         game.log('═══════════════════════════════════');
@@ -761,21 +848,15 @@ function setupEndTurnButton() {
                     game.pendingStateRewards.push(chosenReward);
                     game.log(`✨ Reward choisi: ${chosenReward.name}`);
                 }
-                
                 // Résolution A→H
                 const results = game.turnResolver.resolve();
-                
-                // Popup récap
                 showResultsPopup(results, game, ui);
-                
-                // Re-render
                 ui.render();
                 
                 // Vérifier victoire/défaite
-                if (game.enemy.currentHp <= 0) {
-                    setTimeout(() => alert('🎉 VICTOIRE !'), 500);
-                } else if (game.player.currentHp <= 0) {
-                    setTimeout(() => alert('💀 DÉFAITE !'), 500);
+                const gameResult = game.checkGameOver();
+                if (gameResult) {
+                    setTimeout(() => game.showGameOverScreen(gameResult), 500);
                 }
             });
         } else {
@@ -784,15 +865,17 @@ function setupEndTurnButton() {
             showResultsPopup(results, game, ui);
             ui.render();
             
-            if (game.enemy.currentHp <= 0) {
-                setTimeout(() => alert('🎉 VICTOIRE !'), 500);
-            } else if (game.player.currentHp <= 0) {
-                setTimeout(() => alert('💀 DÉFAITE !'), 500);
+            const gameResult = game.checkGameOver();
+            if (gameResult) {
+                setTimeout(() => game.showGameOverScreen(gameResult), 500);
             }
         }
     };
 }
 
+/**
+ * Affiche popup résultats du tour
+ */
 /**
  * Affiche popup résultats du tour
  */
@@ -804,50 +887,125 @@ function showResultsPopup(results, game, ui) {
         left: 50%;
         transform: translate(-50%, -50%);
         background: rgba(0, 0, 0, 0.95);
-        border: 4px solid #FFD700;
-        border-radius: 15px;
-        padding: 30px;
+        padding: 0;
         z-index: 1000;
-        min-width: 400px;
-        color: white;
-        font-family: Arial;
-        box-shadow: 0 0 50px rgba(255, 215, 0, 0.8);
+        border-radius: 20px;
     `;
     
+    const playerDmg = results.playerDamageTaken;
+    const enemyDmg = results.enemyDamageTaken;
+    
     popup.innerHTML = `
-        <h2 style="text-align: center; color: #FFD700; margin-bottom: 20px;">📊 RÉSULTATS DU TOUR ${game.turnNumber}</h2>
-        <div style="font-size: 16px; line-height: 1.8;">
-                    <div>🎯 <strong>Cible:</strong> ${results.targetName}</div>
-                    <div>💥 <strong>Dégâts bruts:</strong> ${results.damageTotal}</div>
-                    ${results.enemyBlock > 0 ? `<div>🛡️ <strong>BLOCK ennemi:</strong> ${results.enemyBlock}</div>` : ''}
-                    ${results.enemyBlock > 0 ? `<div style="color: #FFD700;">⚔️ <strong>Dégâts nets:</strong> ${results.damageTotal - results.enemyBlock}</div>` : ''}
-                    <hr style="border-color: #FFD700; margin: 10px 0;">
-                    <div>🛡️ <strong>Votre blocage:</strong> ${results.blockTotal}</div>
-                    <div>⚔️ <strong>Attaque ennemie:</strong> ${results.enemyAttack}</div>
-                    <hr style="border-color: #FFD700; margin: 15px 0;">
-                    <div style="color: #FF6347;">💀 <strong>${results.targetName}:</strong> -${results.enemyDamageTaken} HP</div>
-                    <div style="color: ${results.playerDamageTaken > 0 ? '#FF6347' : '#32CD32'};">
-                        ❤️ <strong>Vous:</strong> ${results.playerDamageTaken > 0 ? '-' : ''}${results.playerDamageTaken} HP
+        <div style="
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            padding: 30px;
+            border-radius: 20px;
+            border: 3px solid #0f3460;
+            max-width: 600px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        ">
+            <!-- Header -->
+            <div style="text-align: center; margin-bottom: 25px;">
+                <h2 style="font-size: 28px; color: #FFD700; margin: 0;">⚔️ RÉSULTAT DU TOUR ${game.turnNumber} ⚔️</h2>
+            </div>
+            
+            <!-- Battle Cards -->
+            <div style="display: grid; grid-template-columns: 1fr auto 1fr; gap: 20px; margin-bottom: 25px;">
+                
+                <!-- JOUEUR -->
+                <div style="
+                    background: linear-gradient(135deg, #0f4c75 0%, #1b6ca8 100%);
+                    padding: 20px;
+                    border-radius: 15px;
+                    border: 2px solid #3282b8;
+                    text-align: center;
+                ">
+                    <div style="font-size: 18px; color: #FFD700; margin-bottom: 15px; font-weight: bold;">
+                        JOUEUR
                     </div>
+                    <div style="font-size: 48px; margin-bottom: 10px;">
+                        ⚔️
+                    </div>
+                    <div style="font-size: 20px; color: #FF6347; font-weight: bold; margin-bottom: 5px;">
+                        ${results.damageTotal} DMG
+                    </div>
+                    <div style="font-size: 20px; color: #4CAF50; font-weight: bold;">
+                        ${results.blockTotal} BLOCK
+                    </div>
+                    <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.2);">
+                        <div style="font-size: 20px; color: ${playerDmg > 0 ? '#FF6347' : '#4CAF50'};">
+                            ❤️ ${playerDmg > 0 ? `-${playerDmg}` : 'Aucun dégât'}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- VS -->
+                <div style="
+                    display: flex;
+                    align-items: center;
+                    font-size: 32px;
+                    color: #FFD700;
+                    font-weight: bold;
+                ">
+                    VS
+                </div>
+                
+                <!-- ENNEMI -->
+                <div style="
+                    background: linear-gradient(135deg, #8B0000 0%, #DC143C 100%);
+                    padding: 20px;
+                    border-radius: 15px;
+                    border: 2px solid #FF6347;
+                    text-align: center;
+                ">
+                    <div style="font-size: 18px; color: #FFD700; margin-bottom: 15px; font-weight: bold;">
+                        ENNEMI
+                    </div>
+                    <div style="font-size: 48px; margin-bottom: 10px;">
+                        💀
+                    </div>
+                    <div style="font-size: 20px; color: #FF6347; font-weight: bold; margin-bottom: 5px;">
+                        ${results.enemyAttack} ATK
+                    </div>
+                    <div style="font-size: 20px; color: #4CAF50; font-weight: bold;">
+                        ${results.enemyBlock || 0} BLOCK
+                    </div>
+                    <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.2);">
+                        <div style="font-size: 20px; color: ${enemyDmg > 0 ? '#4CAF50' : '#aaa'};">
+                            💀 ${enemyDmg > 0 ? `-${enemyDmg}` : 'Aucun dégât'}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Bouton -->
+            <button id="nextTurnBtn" style="
+                width: 100%;
+                padding: 15px;
+                font-size: 20px;
+                background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+                border: none;
+                border-radius: 10px;
+                color: #1a1a2e;
+                font-weight: bold;
+                cursor: pointer;
+                box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+                transition: all 0.2s;
+            ">
+                CONTINUER ⚡
+            </button>
         </div>
-        <button id="nextTurnBtn" style="
-            width: 100%;
-            margin-top: 20px;
-            padding: 15px;
-            background: linear-gradient(135deg, #FFD700, #FFA500);
-            border: none;
-            border-radius: 10px;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            color: #000;
-        ">➡️ Tour suivant</button>
     `;
     
     document.body.appendChild(popup);
     
+    // Effet hover sur bouton
+    const btn = document.getElementById('nextTurnBtn');
+    btn.onmouseover = () => btn.style.transform = 'scale(1.05)';
+    btn.onmouseout = () => btn.style.transform = 'scale(1)';
+    
     // Handler bouton nouveau tour
-    document.getElementById('nextTurnBtn').onclick = () => {
+    btn.onclick = () => {
         popup.remove();
         game.startNewTurn();
         ui.render();

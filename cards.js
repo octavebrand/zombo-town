@@ -615,7 +615,6 @@ export const ALL_CARDS = [
         ['Trafiquant']
     ),
 
-    // Dans cards.js, ajouter temporairement:
     new Card(
         'trafiquant_econome',
         'Trafiquant Econome',
@@ -628,6 +627,17 @@ export const ALL_CARDS = [
         ['Trafiquant']
     ),
     
+    new Card(
+        'trafiquant_de_la_bourse',
+        'Trafiquant de la Bourse',
+        15,
+        ['state'],
+        Rarity.RARE,
+        { type: 'gain_goods', value: 3 },
+        'Value 15, gagne 3 marchandises, State slots only',
+        CardType.CREATURE,
+        ['Trafiquant']
+    ),
 
     new Card(
         'trafiquant_biens',
@@ -637,9 +647,10 @@ export const ALL_CARDS = [
         Rarity.UNCOMMON,
         [
             { type: 'maxxer_any', value: 1 },
+            {type: 'gain_goods', value: 1 },
             { type: 'instant_draw', value: 1 }
         ],
-        'Value 5, Maxxer +1, draw 1',
+        'Value 5, Maxxer +1, draw 1, gagne 1 marchandise',
         CardType.CREATURE,
         ['Trafiquant']
     ),
@@ -650,8 +661,9 @@ export const ALL_CARDS = [
         2,
         ['damage', 'block', 'shared', 'state'],
         Rarity.UNCOMMON,
+        {type: 'gain_goods', value: 1 },
         { type: 'instant_distribute', value: 13, targetTypes: ['damage', 'block', 'shared', 'state'], onlyOccupied: true },
-        'Value 2, distribue 13 sur slots occupés',
+        'Value 2, distribue 13 sur slots occupés, gagne 1 marchandise',
         CardType.CREATURE,
         ['Trafiquant']
     ),
@@ -677,8 +689,9 @@ export const ALL_CARDS = [
         7,
         ['damage', 'block', 'shared', 'state'],
         Rarity.UNCOMMON,
+        {type: 'gain_goods', value: 1 },
         { type: 'instant_transform_random_to_mythic' },
-        'Value 7, transforme crÃ©ature alÃ©atoire en Mythique',
+        'Value 7, transforme crÃ©ature alÃ©atoire en Mythique, gagne 1 marchandise',
         CardType.CREATURE,
         ['Trafiquant']
     ),
@@ -1051,6 +1064,31 @@ export const ALL_CARDS = [
     ),
     
     // NEUTRES (pour équilibrer le deck)
+
+    new Card(
+            'assassin_gentil',
+            'Assassin Gentil',
+            3,
+            ['damage', 'block', 'shared', 'state'],
+            Rarity.UNCOMMON,
+            { type: 'instant_destroy_enemy' },
+            'Value 3, détruit un enemy',
+            CardType.CREATURE,
+            []
+        ),
+
+        new Card(
+            'moine_reveur',
+            'Moine Rêveur',
+            8,
+            ['damage', 'block', 'shared', 'state'],
+            Rarity.UNCOMMON,
+            { type: 'instant_protect_ally' },
+            'Value 8, protège un allié de la défausse ce tour ci',
+            CardType.CREATURE,
+            []
+        ),
+
     new Card(
         'tacticien',
         'Tacticien',

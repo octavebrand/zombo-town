@@ -56,7 +56,14 @@ export class EffectResolver {
             case 'gain_goods':
                 this.resolveGainGoods(effect.value);
                 break;
+            // Détruire carte enemy et protect card one turn
+            case 'instant_protect_ally':
+                this.gm.ui.selectCardToProtect();
+                break;
 
+            case 'instant_destroy_enemy':
+                this.gm.ui.selectEnemyToDestroy();
+                break;
             // Création de jeton immédiate
             case 'instant_create_token':
                 this.resolveInstantCreateToken(effect);
@@ -156,7 +163,7 @@ export class EffectResolver {
             return;
         }
         
-        const token = createToken(effect.tokenId);
+        const token = createToken(effect.tokenId, this.gm);
         if (!token) {
             this.gm.log(`❌ Impossible de créer jeton ${effect.tokenId}`);
             return;
@@ -412,7 +419,7 @@ export class EffectResolver {
         
         let created = 0;
         emptyNeighbors.forEach(neighborSlot => {
-            const token = createToken(effect.tokenId);
+            const token = createToken(effect.tokenId, this.gm);
             if (token) {
                 neighborSlot.card = token;
                 created++;
@@ -551,7 +558,7 @@ export class EffectResolver {
                 case 'on_discard_create_token':
                 case 'charm_create_token_on_discard':
                     if (this.gm.hand.length < 10) {
-                        const token = createToken(eff.tokenId);
+                        const token = createToken(eff.tokenId, this.gm);
                         if (token) {
                             this.gm.hand.push(token);
                             this.gm.log(`✨ ${card.name}: Jeton ${token.name} créé (défausse)`);
