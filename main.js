@@ -19,6 +19,7 @@ import { SHOP_REWARDS } from './shopRewards.js';
 import { FortressSystem } from './fortressSystem.js';
 import { FusionSystem } from './fusionsystem.js';
 import { LotterySystem } from './lotterySystem.js';
+import { MirrorSystem } from './mirrorSystem.js';
 
 // ========================================
 // CONSTANTES DE JEU
@@ -125,7 +126,6 @@ class GameManagerStub {
         this.discard = [];
         this.shuffleDeck();
         this.hand = this.drawInitialHand(6);
-        // State
         this.playerResolved = false;
 
         this.turnNumber = 1;
@@ -134,15 +134,16 @@ class GameManagerStub {
         this.munitions = 0;
         this.lastLotteryWasLoss = false;
 
-
-        //FORTRESS SYSYTEM BLOCK ENTITY
         this.fortressSystem = new FortressSystem(this);
 
         this.fusionSystem = new FusionSystem(this);
 
         this.lotterySystem = new LotterySystem(this);
 
-        // NOUVEAU: Système d'atouts
+        this.mirrorSystem = new MirrorSystem(this);
+        this.mirrorSystem.checkActivation();
+
+        // Système d'atouts
         this.unlockedPlayerSlots = 0; // 0, 1, 2, ou 3
         this.availableAtouts = []; // Pool d'atouts disponibles
         this.placedAtouts = []; // Atouts déjà placés
@@ -678,6 +679,7 @@ class GameManagerStub {
     startNewTurn() {
         this.turnNumber++;
         this.playerResolved = false;
+        this.mirrorSystem.canInvokeThisTurn = true;
         
         this.log('═══════════════════════════════════');
         this.log(` TOUR ${this.turnNumber}`);

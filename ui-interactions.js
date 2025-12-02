@@ -237,6 +237,15 @@ export class UIInteractions {
                             this.ui.render();
                             return;
                         }
+
+                        // MIROIR : Copier carte
+                        if (this.gm.selectionMode === 'mirror_copy') {
+                            this.gm.mirrorSystem.copyCard(slot.id);
+                            this.gm.selectionMode = null;
+                            this.clearHighlights();
+                            this.ui.render();
+                            return;
+                        }
                         
                         // Si carte sélectionnée en main → placer carte
                         if (this.ui.selectedCardIndex !== null && this.ui.highlightedSlots.includes(slot.id)) {
@@ -248,11 +257,30 @@ export class UIInteractions {
                         this.removeCardFromSlot(slot.id);
                     };
                     
-                    // Highlight si mode protect_card actif
-                    if (this.gm.selectionMode === 'protect_card' || this.gm.selectionMode === 'protect_card_fortress') {
+                    // Highlight si mode protect_card OU mirror_copy actif
+                    if (this.gm.selectionMode === 'protect_card' || 
+                        this.gm.selectionMode === 'protect_card_fortress' ||
+                        this.gm.selectionMode === 'mirror_copy') {
                         slotElement.classList.add('highlighted');
                         slotElement.style.border = '4px solid #00FF00';
                         slotElement.style.boxShadow = '0 0 20px #00FF00';
+                    }
+                } else if (slotElement && !slot.card) {
+                    // ← NOUVEAU : Gestion slots VIDES
+                    
+                    if (this.gm.selectionMode === 'mirror_invoke') {
+                        slotElement.style.cursor = 'pointer';
+                        slotElement.classList.add('highlighted');
+                        slotElement.style.border = '4px solid #00D9FF';
+                        slotElement.style.boxShadow = '0 0 20px #00D9FF';
+                        
+                        slotElement.onclick = (e) => {
+                            e.stopPropagation();
+                            this.gm.mirrorSystem.invokeReflection(slot.id);
+                            this.gm.selectionMode = null;
+                            this.clearHighlights();
+                            this.ui.render();
+                        };
                     }
                 }
             });
@@ -284,6 +312,22 @@ export class UIInteractions {
     selectEnemyToDestroyFortress() {
         this.gm.log('💀 Cliquer sur un enemy à détruire');
         this.gm.selectionMode = 'destroy_enemy_fortress';
+        this.setupTargeting();
+    }
+
+    // ========================================
+    // MIRROR SYSTEM SELECTION
+    // ========================================
+
+    selectCardToCopyMirror() {
+        this.gm.log('🪞 Cliquez sur une carte du board à copier');
+        this.gm.selectionMode = 'mirror_copy';
+        this.setupTargeting();
+    }
+
+    selectSlotToInvokeMirror() {
+        this.gm.log('✨ Cliquez sur un slot vide pour invoquer le reflet');
+        this.gm.selectionMode = 'mirror_invoke';
         this.setupTargeting();
     }
 

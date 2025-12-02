@@ -356,6 +356,39 @@ export class UIRenderer {
                     </button>
                 ` : ''}
             ` : ''}
+
+            <!-- Affichage Miroir Illusions -->
+            ${this.gm.mirrorSystem.isActive ? `
+                <div style="font-size: 13px; color: #00D9FF; margin-top: 8px; font-weight: bold;">
+                    🪞 Miroir: ${this.gm.mirrorSystem.state === 'empty' ? 'VIDE' : 'PLEIN'}
+                    ${this.gm.mirrorSystem.state === 'full' ? `<br><span id="mirror-stored-card" style="cursor: pointer; color: rgba(255, 166, 0, 1); text-decoration: none;"> ${this.gm.mirrorSystem.storedCard.name}</span>` : ''}
+                </div>
+                <div style="font-size: 12px; color: #AAA; margin-top: 5px;">
+                    Niveau: ${this.gm.mirrorSystem.mirrorLevel} | 
+                    État: ${this.gm.mirrorSystem.fragility > 70 ? '⚠️ INSTABLE' : '✅ STABLE'}
+                </div>
+                ${!this.gm.mirrorSystem.isBroken ? `
+                    <button id="mirror-button" style="
+                        margin-top: 10px; 
+                        padding: 8px 16px;
+                        background: linear-gradient(135deg, #00D9FF, #0080FF);
+                        border: 2px solid #00D9FF;
+                        border-radius: 8px;
+                        color: white;
+                        font-weight: bold;
+                        cursor: pointer;
+                        font-size: 13px;
+                        box-shadow: 0 0 10px rgba(0, 217, 255, 0.3);
+                    ">
+                        ${this.gm.mirrorSystem.state === 'empty' ? '🪞 Copier Carte' : '✨ Invoquer Reflet'}
+                    </button>
+                ` : `
+                    <div style="color: #FF4500; font-size: 12px; margin-top: 10px; font-weight: bold;">
+                        💥 Miroir Brisé
+                    </div>
+                `}
+            ` : ''}
+
         `;
         
         // Event listener boutique
@@ -364,7 +397,7 @@ export class UIRenderer {
             shopButton.onclick = () => this.ui.popups.showShopPopup();
         }
         
-        // ⬇️ NOUVEAU : Event listener fusion
+        // Event listener fusion
         const fusionButton = document.getElementById('fusion-button');
         if (fusionButton) {
             fusionButton.onclick = () => this.ui.popups.showFusionPopup();
@@ -374,6 +407,41 @@ export class UIRenderer {
         const casinoButton = document.getElementById('casino-button');
         if (casinoButton) {
             casinoButton.onclick = () => this.ui.popups.showLotteryPopup();
+        }
+
+        // Event listener miroir
+        const mirrorButton = document.getElementById('mirror-button');
+        if (mirrorButton) {
+            mirrorButton.onclick = () => {
+                if (this.gm.mirrorSystem.state === 'empty') {
+                    // Mode copie
+                    this.ui.interactions.selectCardToCopyMirror();
+                } else {
+                    // Mode invocation
+                    this.ui.interactions.selectSlotToInvokeMirror();
+                }
+            };
+        }
+        // Event listener tooltip carte miroir
+        const mirrorStoredCard = document.getElementById('mirror-stored-card');
+        if (mirrorStoredCard && this.gm.mirrorSystem.storedCard) {
+            const card = this.gm.mirrorSystem.storedCard;
+            
+            mirrorStoredCard.onmouseenter = (e) => {
+                this.ui.popups.showCardTooltip(card, e.clientX, e.clientY, null);
+            };
+            
+            mirrorStoredCard.onmouseleave = () => {
+                this.ui.popups.hideCardTooltip();
+            };
+            
+            mirrorStoredCard.onmousemove = (e) => {
+                const tooltip = document.getElementById('tooltip');
+                if (tooltip) {
+                    tooltip.style.left = (e.clientX + 15) + 'px';
+                    tooltip.style.top = (e.clientY + 15) + 'px';
+                }
+            };
         }
     }
 

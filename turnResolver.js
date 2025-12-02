@@ -41,7 +41,7 @@ export class TurnResolver {
         this.gm.fortressSystem.addBlock(totalBlock);
         this.gm.log(`🛡️ BLOCK ce tour: ${totalBlock}`);
         this.gm.log(`🛡️ Shield total: ${this.gm.fortressSystem.shield}`);
-        
+
         // C) Calculer attaque ENEMY
         this.calculateEnemyAttack(results);
         
