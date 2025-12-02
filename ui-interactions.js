@@ -230,6 +230,11 @@ export class UIInteractions {
 
                         // protect card pour cartes
                         if (this.gm.selectionMode === 'protect_card') {
+                            // Vérifier que l'array existe (sécurité)
+                            if (!this.gm.fortressSystem.protectedCardSlotIds) {
+                                this.gm.fortressSystem.protectedCardSlotIds = [];
+                            }
+                            
                             this.gm.fortressSystem.protectedCardSlotIds.push(slot.id);
                             this.gm.selectionMode = null;
                             this.clearHighlights();

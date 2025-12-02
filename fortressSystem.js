@@ -3,7 +3,7 @@ export class FortressSystem {
         this.gm = gameManager;
         this.shield = 0;
         this.meter = 0;
-        this.protectedCardSlotId = [];
+        this.protectedCardSlotIds = [];
         
         this.DECAY_RATE = 0.2;
         this.METER_FILL_RATE = 1;
@@ -76,7 +76,7 @@ export class FortressSystem {
                 this.gm.maxxers.block.level += 1;
                 break;
             case 'lv4':
-                this.protectedCardSlotId.push(choice);
+                this.protectedCardSlotIds.push(choice);
                 break;
             case 'lv5':
                 const slot = this.gm.board.getSlot(choice);
@@ -88,11 +88,11 @@ export class FortressSystem {
     }
     
     isCardProtected(slotId) {
-        return this.protectedCardSlotId.includes(slotId);
+        return this.protectedCardSlotIds.includes(slotId);
     }
     
     resetProtection() {
-        this.protectedCardSlotId = [];
+        this.protectedCardSlotIds = [];
     }
     
     getMeterPercent() {
