@@ -67,7 +67,7 @@ export const PREBUILT_DECKS = [
         color: '#E74C3C', // Rouge
 
         atouts: [
-            'petit_moteur',
+            'gun_room',
             'stabilisateur',
             'arsenal'
         ],
@@ -87,6 +87,8 @@ export const PREBUILT_DECKS = [
             { cardId: 'zigouilleur_fanatique', count: 2 },
             { cardId: 'grand_stratege_zigouilleur', count: 1 },
             { cardId: 'zigouilleur_intello', count: 2 },
+            { cardId: 'zigouilleur_joueur', count: 5 },
+            { cardId: 'zigouilleur_croupier', count: 5 },
             
             
             // Neutres (6)

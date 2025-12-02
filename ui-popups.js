@@ -555,6 +555,9 @@ export class UIPopups {
                             return `Autres ${eff.tag}s +${eff.value}`;
                         }
                     case 'gain_goods': return `+${eff.value} marchandises`;
+                    case 'gain_munitions': return `+${eff.value} munitions`;
+                    case 'gain_munitions_conditional':
+                        return `+${eff.base} munitions (+${eff.base} si 10+ munitions)`;
                     case 'count_tribal':
                         if (eff.includesSelf) {
                             return `+${eff.value} par ${eff.tag} (inclus soi-même)`;
@@ -732,4 +735,221 @@ export class UIPopups {
             tooltip.style.display = 'none';
         }
     }
+
+    /**
+     * Affiche le popup de la loterie avec les 3 tiers
+     */
+    showLotteryPopup() {
+        const popup = document.getElementById('popup');
+        popup.style.display = 'flex';
+        
+        const tiers = [
+            { id: 'petit', name: 'Petite Mise', cost: 10, emoji: '🎲', color: '#4169E1' },
+            { id: 'gambling', name: 'Gambling', cost: 20, emoji: '🎰', color: '#FFD700' },
+            { id: 'allin', name: 'All-In', cost: 40, emoji: '💣', color: '#FF0000' }
+        ];
+        
+        let content = `
+            <div style="text-align: center; padding: 30px; max-width: 500px;">
+                <h2 style="font-size: 32px; margin-bottom: 20px;">🎰 CASINO ZIGOUILLEUR 🎰</h2>
+                <p style="font-size: 16px; color: #aaa; margin-bottom: 30px;">
+                    💣 Munitions: ${this.gm.munitions}
+                </p>
+        `;
+        
+        tiers.forEach(tier => {
+            const canAfford = this.gm.munitions >= tier.cost;
+            const disabled = !canAfford;
+            
+            content += `
+                <button id="lottery-${tier.id}" ${disabled ? 'disabled' : ''} style="
+                    display: block;
+                    width: 100%;
+                    margin: 15px 0;
+                    padding: 20px;
+                    background: ${disabled ? '#333' : `linear-gradient(135deg, ${tier.color}, ${tier.color}dd)`};
+                    border: 3px solid ${tier.color};
+                    border-radius: 12px;
+                    color: white;
+                    font-size: 20px;
+                    font-weight: bold;
+                    cursor: ${disabled ? 'not-allowed' : 'pointer'};
+                    opacity: ${disabled ? '0.4' : '1'};
+                    transition: all 0.3s;
+                " ${!disabled ? `onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'"` : ''}>
+                    ${tier.emoji} ${tier.name} - ${tier.cost} 💣
+                </button>
+            `;
+        });
+        
+        content += `
+                <button id="closeLotteryPopup" style="
+                    margin-top: 25px;
+                    padding: 15px 40px;
+                    background: rgba(139, 0, 0, 0.5);
+                    border: 2px solid #8B0000;
+                    border-radius: 10px;
+                    color: white;
+                    cursor: pointer;
+                    font-size: 16px;
+                ">
+                    Fermer
+                </button>
+            </div>
+        `;
+        
+        popup.innerHTML = content;
+        
+        // Event listeners
+        tiers.forEach(tier => {
+            const button = document.getElementById(`lottery-${tier.id}`);
+            if (button && !button.disabled) {
+                button.onclick = () => {
+                    if (this.gm.hand.length >= 10) {
+                        this.gm.log('❌ Main pleine ! Impossible de jouer à la loterie.');
+                        return;
+                    }
+                    this.gm.lotterySystem.playLottery(tier.id);
+                };
+            }
+        });
+        
+        document.getElementById('closeLotteryPopup').onclick = () => {
+            popup.style.display = 'none';
+        };
+    }
+
+    /**
+     * Animation de la roulette + flash écran
+     */
+    triggerLotteryAnimation(result, callback) {
+        const popup = document.getElementById('popup');
+        popup.style.display = 'flex';
+        
+        // Popup animation
+        popup.innerHTML = `
+            <div style="text-align: center; padding: 50px;">
+                <h2 style="font-size: 36px; margin-bottom: 30px; color: #FF4500; text-shadow: 0 0 20px rgba(255, 69, 0, 0.6);">
+                    💣 ROULETTE DÉJANTÉE 💣
+                </h2>
+                
+                <div style="
+                    position: relative;
+                    width: 200px;
+                    height: 200px;
+                    margin: 40px auto;
+                ">
+                    <div style="
+                        position: absolute;
+                        width: 100%;
+                        height: 100%;
+                        font-size: 60px;
+                        animation: explosion 1s ease-in-out infinite;
+                    ">💥</div>
+                    <div style="
+                        position: absolute;
+                        width: 100%;
+                        height: 100%;
+                        font-size: 40px;
+                        animation: symbols 2s linear infinite;
+                    ">💣🎲💰🎯</div>
+                </div>
+                
+                <p style="font-size: 22px; color: #FF4500; margin-top: 20px; font-weight: bold; animation: textPulse 0.5s ease-in-out infinite;">
+                    BOUM BOUM BOUM !
+                </p>
+            </div>
+            
+            <style>
+                @keyframes explosion {
+                    0%, 100% { transform: scale(0.8); opacity: 0.5; }
+                    50% { transform: scale(1.3); opacity: 1; }
+                }
+                
+                @keyframes symbols {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
+                }
+                
+                @keyframes textPulse {
+                    0%, 100% { transform: scale(1); }
+                    50% { transform: scale(1.1); }
+                }
+            </style>
+        `;
+        
+        // Après 1.5s : révéler résultat + flash
+        setTimeout(() => {
+            // Flash écran
+            const flash = document.createElement('div');
+            flash.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                background: ${result.flashColor};
+                opacity: 0.6;
+                pointer-events: none;
+                z-index: 9998;
+                animation: flashFade 0.5s ease-out;
+            `;
+            document.body.appendChild(flash);
+            
+            // Style animation flash
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes flashFade {
+                    0% { opacity: 0.8; }
+                    100% { opacity: 0; }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            // Retirer flash après animation
+            setTimeout(() => flash.remove(), 500);
+            
+            // Révéler résultat
+            popup.innerHTML = `
+                <div style="text-align: center; padding: 50px; max-width: 600px;">
+                    <h2 style="font-size: 64px; margin-bottom: 20px; animation: resultPop 0.5s ease-out;">
+                        ${result.id === 'oups' || result.id === 'rate_critique' ? '💥' : 
+                        result.id === 'jackpot' || result.id === 'mega_jackpot' ? '🎰🎉' : 
+                        result.id === 'zigouilleur_legendaire' ? '🔥💥' : '✨'}
+                    </h2>
+                    <p style="font-size: 28px; font-weight: bold; color: ${result.flashColor}; margin-bottom: 20px;">
+                        ${result.message}
+                    </p>
+                    <button id="continueButton" style="
+                        margin-top: 30px;
+                        padding: 15px 40px;
+                        background: linear-gradient(135deg, #4CAF50, #45a049);
+                        border: 2px solid #4CAF50;
+                        border-radius: 10px;
+                        color: white;
+                        font-weight: bold;
+                        cursor: pointer;
+                        font-size: 18px;
+                    ">
+                        Continuer
+                    </button>
+                </div>
+                
+                <style>
+                    @keyframes resultPop {
+                        0% { transform: scale(0); }
+                        50% { transform: scale(1.2); }
+                        100% { transform: scale(1); }
+                    }
+                </style>
+            `;
+            
+            // Bouton continuer : ferme popup + applique effet
+            document.getElementById('continueButton').onclick = () => {
+                popup.style.display = 'none';
+                callback(); // Appliquer effet
+            };
+        }, 1500);
+    }
+
 }

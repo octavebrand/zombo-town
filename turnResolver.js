@@ -77,7 +77,7 @@ export class TurnResolver {
         this.discardTemporaryCards();
 
         // H) Déverrouillage slots atouts (tours 3, 6, 9)
-        if (this.gm.turnNumber === 3 || this.gm.turnNumber === 6 || this.gm.turnNumber === 9) {
+        if (this.gm.turnNumber === 2 || this.gm.turnNumber === 5 || this.gm.turnNumber === 8) {
             if (this.gm.unlockedPlayerSlots < 3) {
                 this.gm.unlockedPlayerSlots++;
                 this.gm.log(`🔓 Slot atout ${this.gm.unlockedPlayerSlots} déverrouillé !`);

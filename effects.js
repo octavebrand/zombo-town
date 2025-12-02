@@ -55,14 +55,24 @@ export class EffectResolver {
             
             case 'gain_goods':
                 this.resolveGainGoods(effect.value);
+                this.gm.log(`🛒 +${effect.value} marchandises`);
+                break;
+            case 'gain_munitions':
+                this.gm.munitions += effect.value;
+                this.gm.log(`💣 +${effect.value} munitions`);
+                break;
+            case 'gain_munitions_conditional':
+                if (effect.executeEffect) {
+                    effect.executeEffect(this.gm);
+                }
                 break;
             // Détruire carte enemy et protect card one turn
             case 'instant_protect_ally':
-                this.gm.ui.selectCardToProtect();
+                this.gm.ui.interactions.selectCardToProtect();
                 break;
 
             case 'instant_destroy_enemy':
-                this.gm.ui.selectEnemyToDestroy();
+                this.gm.ui.interactions.selectEnemyToDestroy();
                 break;
             // Création de jeton immédiate
             case 'instant_create_token':
@@ -343,6 +353,7 @@ export class EffectResolver {
 
     // Dévorer voisins (gain value ×mult)
     resolveInstantDevour(effect, sourceCard, sourceSlot) {
+        let totalDevoured = 0;
         const neighbors = this.gm.board.getNeighbors(sourceSlot.id);
         const neighborsWithCards = neighbors.filter(n => n.card !== null);
         
@@ -373,6 +384,11 @@ export class EffectResolver {
         sourceSlot.rewardBonus += totalGained;
         
         this.gm.log(`🍽️ Dévore: ${devoured.join(', ')} → +${totalGained} value`);
+        
+        // Callback custom après dévorement (pour Cannibale Zigouilleur)
+        if (effect.afterDevour) {
+            effect.afterDevour(totalDevoured, this.gm);
+        }
     }
 
     // Transformer créature équipée par le charme

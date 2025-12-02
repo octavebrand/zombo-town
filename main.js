@@ -18,6 +18,7 @@ import { DeckSelectionUI } from './deckSelection.js';
 import { SHOP_REWARDS } from './shopRewards.js';
 import { FortressSystem } from './fortressSystem.js';
 import { FusionSystem } from './fusionsystem.js';
+import { LotterySystem } from './lotterySystem.js';
 
 // ========================================
 // CONSTANTES DE JEU
@@ -130,11 +131,16 @@ class GameManagerStub {
         this.turnNumber = 1;
 
         this.marchandises = 0;
+        this.munitions = 0;
+        this.lastLotteryWasLoss = false;
+
 
         //FORTRESS SYSYTEM BLOCK ENTITY
         this.fortressSystem = new FortressSystem(this);
 
         this.fusionSystem = new FusionSystem(this);
+
+        this.lotterySystem = new LotterySystem(this);
 
         // NOUVEAU: Système d'atouts
         this.unlockedPlayerSlots = 0; // 0, 1, 2, ou 3
@@ -197,6 +203,7 @@ class GameManagerStub {
     }
 
     placeCardOnSlot(cardIndex, slotId) {
+        this.lastLotteryWasLoss = false;
         const card = this.hand[cardIndex];
         const slot = this.board.getSlot(slotId);
         
@@ -314,6 +321,15 @@ class GameManagerStub {
     }
 
     applyCharmEffects(charm, slot) {
+
+        // Trigger atouts qui réagissent aux charmes
+        this.placedAtouts.forEach(atout => {
+            if (atout.effect?.type === 'atout_munitions_on_charm_played') {
+                this.munitions += atout.effect.value;
+                this.log(`Gun Room : +${atout.effect.value} munition`);
+            }
+        });
+
         if (!charm.effect) return;
         
         const effects = Array.isArray(charm.effect) ? charm.effect : [charm.effect];

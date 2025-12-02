@@ -467,7 +467,7 @@ export const ALL_CARDS = [
         'zigouilleur_affame',
         'Zigouilleur Affamé',
         8,
-        ['damage', 'block', 'shared', 'state'],
+        ['damage'],
         Rarity.RARE,
         { type: 'instant_devour_neighbors', multiplier: 2 },
         'Value 8, dévore voisins (gagne value ×2)',
@@ -479,7 +479,7 @@ export const ALL_CARDS = [
         'zigouilleur_adroit',
         'Zigouilleur Adroit',
         5,
-        ['damage', 'block', 'shared', 'state'],
+        ['block', 'state'],
         Rarity.RARE,
         { type: 'instant_missiles', count: 3, value: 5, targetTypes: ['damage', 'shared'] },
         'Value 5, 3 missiles ×5 sur slots damage/shared',
@@ -534,9 +534,10 @@ export const ALL_CARDS = [
         Rarity.UNCOMMON,
         [
             { type: 'maxxer_any', value: 1 },
-            { type: 'on_discard_draw', value: 2 }
+            { type: 'gain_munitions', value: 3 },
+            { type: 'on_discard_draw', value: 1 }
         ],
-        'Value 4, Maxxer +1, draw 2 à la défausse',
+        'Value 4, Maxxer +1, munitions +3, draw 1 à la défausse',
         CardType.CREATURE,
         ['Zigouilleur']
     ),
@@ -565,9 +566,10 @@ export const ALL_CARDS = [
             [
                 { type: 'instant_missiles', count: 7, value: 2, targetTypes: ['damage', 'shared'] },
                 { type: 'maxxer_all', value: 1 },
-                { type: 'instant_draw', value: 1 }
+                { type: 'instant_draw', value: 1 },
+                { type: 'gain_munitions', value: 2 }
             ],
-            'Value 3, 7 missiles ×2, Maxxers +1, draw 1',
+            'Value 3, 7 missiles ×2, Maxxers +1, draw 1, +2 munitions',
             CardType.CREATURE,
             ['Zigouilleur']
         ),
@@ -598,6 +600,41 @@ export const ALL_CARDS = [
             { type: 'instant_missiles', count: 4, value: 2, targetTypes: ['damage', 'shared'] }
         ],
         'Value 5, transforme voisin en Zigouilleur, 4 missiles ×2',
+        CardType.CREATURE,
+        ['Zigouilleur']
+    ),
+
+    new Card(
+        'zigouilleur_joueur',
+        'Zigouilleur Joueur',
+        6,
+        ['damage', 'block', 'shared', 'state'],
+        Rarity.COMMUNE,
+        { type: 'gain_munitions', value: 4 },
+        'Value 6, +4 munitions',
+        CardType.CREATURE,
+        ['Zigouilleur']
+    ),
+
+    new Card(
+        'zigouilleur_croupier',
+        'Zigouilleur Croupier',
+        8,
+        ['damage', 'block', 'shared', 'state'],
+        Rarity.UNCOMMON,
+        {
+            type: 'gain_munitions_conditional',
+            base: 4,
+            executeEffect: (gm) => {
+                gm.munitions += 4;
+                gm.log(`💣 +2 munitions`);
+                if (gm.munitions >= 10) {
+                    gm.munitions += 4;
+                    gm.log(`💣 +4 munitions BONUS (10+ munitions)`);
+                }
+            }
+        },
+        'Value 8, +4 munitions (+4 bonus si 10+ munitions)',
         CardType.CREATURE,
         ['Zigouilleur']
     ),
@@ -661,8 +698,10 @@ export const ALL_CARDS = [
         2,
         ['damage', 'block', 'shared', 'state'],
         Rarity.UNCOMMON,
+        [
         {type: 'gain_goods', value: 1 },
         { type: 'instant_distribute', value: 13, targetTypes: ['damage', 'block', 'shared', 'state'], onlyOccupied: true },
+        ],
         'Value 2, distribue 13 sur slots occupés, gagne 1 marchandise',
         CardType.CREATURE,
         ['Trafiquant']
@@ -689,9 +728,11 @@ export const ALL_CARDS = [
         7,
         ['damage', 'block', 'shared', 'state'],
         Rarity.UNCOMMON,
-        {type: 'gain_goods', value: 1 },
-        { type: 'instant_transform_random_to_mythic' },
-        'Value 7, transforme crÃ©ature alÃ©atoire en Mythique, gagne 1 marchandise',
+        [
+            { type: 'gain_goods', value: 1 },
+            { type: 'instant_transform_random_to_mythic' }
+        ],
+        'Value 7, transforme créature aléatoire en Mythique, gagne 1 marchandise',
         CardType.CREATURE,
         ['Trafiquant']
     ),
@@ -1066,28 +1107,28 @@ export const ALL_CARDS = [
     // NEUTRES (pour équilibrer le deck)
 
     new Card(
-            'assassin_gentil',
-            'Assassin Gentil',
-            3,
-            ['damage', 'block', 'shared', 'state'],
-            Rarity.UNCOMMON,
-            { type: 'instant_destroy_enemy' },
-            'Value 3, détruit un enemy',
-            CardType.CREATURE,
-            []
-        ),
+        'assassin_gentil',
+        'Assassin Gentil',
+        3,
+        ['damage', 'block', 'shared', 'state'],
+        Rarity.UNCOMMON,
+        { type: 'instant_destroy_enemy' },
+        'Value 3, détruit un enemy',
+        CardType.CREATURE,
+        []
+    ),
 
-        new Card(
-            'moine_reveur',
-            'Moine Rêveur',
-            8,
-            ['damage', 'block', 'shared', 'state'],
-            Rarity.UNCOMMON,
-            { type: 'instant_protect_ally' },
-            'Value 8, protège un allié de la défausse ce tour ci',
-            CardType.CREATURE,
-            []
-        ),
+    new Card(
+        'moine_reveur',
+        'Moine Rêveur',
+        8,
+        ['damage', 'block', 'shared', 'state'],
+        Rarity.UNCOMMON,
+        { type: 'instant_protect_ally' },
+        'Value 8, protège un allié de la défausse ce tour ci',
+        CardType.CREATURE,
+        []
+    ),
 
     new Card(
         'tacticien',

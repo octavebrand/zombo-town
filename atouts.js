@@ -117,7 +117,19 @@ export const ALL_ATOUTS = [
         CardType.ATOUT,
         []
     ),
-    
+
+    new Card(
+        'gun_room',
+        'Gun Room',
+        0,
+        ['player'],
+        Rarity.UNCOMMON,
+        { type: 'atout_munitions_on_charm_played', value: 2 },
+        '+2 munition à chaque charme joué',
+        CardType.ATOUT,
+        []
+    ),
+        
     new Card(
         'stabilisateur',
         'Stabilisateur',

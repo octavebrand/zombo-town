@@ -283,16 +283,19 @@ export class UIRenderer {
         const shadowTokenCount = this.gm.fusionSystem.countShadowTokensOnBoard();
         const availableTiers = this.gm.fusionSystem.getAvailableFusionTiers();
         const hasFusionAvailable = availableTiers.length > 0;
-        
+        const showFusionSystem = shadowTokenCount > 0 || this.gm.fusionSystem.fusionLevel > 0;
+
         playerDiv.innerHTML = `
             <div class="hp-bar">❤️ ${hp.currentHp}/${hp.maxHp}</div>
             <div style="font-size: 14px;">PLAYER</div>
             <div style="font-size: 12px; color: #aaa; margin-top: 5px;">
                 Tour ${this.gm.turnNumber} | 📚 Deck: ${this.gm.deck.length} | 🗑️ Défausse: ${this.gm.discard.length}
             </div>
-            <div style="font-size: 13px; color: #FFD700; margin-top: 8px; font-weight: bold;">
-                🛒 Marchandises: ${this.gm.marchandises}
-            </div>
+            ${this.gm.marchandises > 0 ? `
+                <div style="font-size: 13px; color: #FFD700; margin-top: 8px; font-weight: bold;">
+                    🛒 Marchandises: ${this.gm.marchandises}
+                </div>
+            ` : ''}
             ${this.gm.marchandises > 0 ? `
                 <button id="shop-button" style="
                     margin-top: 10px;
@@ -308,26 +311,50 @@ export class UIRenderer {
                     🛒 Ouvrir la Boutique
                 </button>
             ` : ''}
-            
-            <!-- ⬇️ NOUVEAU : Affichage Fusion Ombres -->
-            <div style="font-size: 13px; color: #9370DB; margin-top: 8px; font-weight: bold;">
-                🌑 Tokens Ombre: ${shadowTokenCount} | Niveau: ${this.gm.fusionSystem.fusionLevel}
-            </div>
-            ${hasFusionAvailable ? `
-                <button id="fusion-button" style="
+
+            ${this.gm.munitions > 0 ? `
+                <div style="font-size: 13px; color: #FF4500; margin-top: 8px; font-weight: bold;">
+                    💣 Munitions: ${this.gm.munitions}
+                </div>
+            ` : ''}
+            ${this.gm.munitions > 0 ? `
+                <button id="casino-button" style="
                     margin-top: 10px;
                     padding: 8px 16px;
-                    background: linear-gradient(135deg, #9370DB, #4B0082);
-                    border: 2px solid #9370DB;
+                    background: linear-gradient(135deg, #FF4500, #FF0000);
+                    border: 2px solid #FF4500;
                     border-radius: 8px;
                     color: white;
                     font-weight: bold;
                     cursor: pointer;
                     font-size: 13px;
-                    animation: fusionPulse 2s infinite;
+                    box-shadow: 0 0 10px rgba(255, 69, 0, 0.5);
                 ">
-                    🌑 Fusion Disponible !
+                    🎰 CASINO !
                 </button>
+            ` : ''}
+            
+            <!-- Affichage Fusion Ombres -->
+            ${showFusionSystem ? `
+                <div style="font-size: 13px; color: #9370DB; margin-top: 8px; font-weight: bold;">
+                    🌑 Tokens Ombre: ${shadowTokenCount} | Niveau: ${this.gm.fusionSystem.fusionLevel}
+                </div>
+                ${hasFusionAvailable ? `
+                    <button id="fusion-button" style="
+                        margin-top: 10px;
+                        padding: 8px 16px;
+                        background: linear-gradient(135deg, #9370DB, #4B0082);
+                        border: 2px solid #9370DB;
+                        border-radius: 8px;
+                        color: white;
+                        font-weight: bold;
+                        cursor: pointer;
+                        font-size: 13px;
+                        animation: fusionPulse 2s infinite;
+                    ">
+                        🌑 Fusion Disponible !
+                    </button>
+                ` : ''}
             ` : ''}
         `;
         
@@ -341,6 +368,12 @@ export class UIRenderer {
         const fusionButton = document.getElementById('fusion-button');
         if (fusionButton) {
             fusionButton.onclick = () => this.ui.popups.showFusionPopup();
+        }
+
+        // Event listener casino
+        const casinoButton = document.getElementById('casino-button');
+        if (casinoButton) {
+            casinoButton.onclick = () => this.ui.popups.showLotteryPopup();
         }
     }
 
@@ -452,7 +485,9 @@ export class UIRenderer {
                             }
 
                         case 'gain_goods': return `+${eff.value} marchandises`;
-
+                        case 'gain_munitions': return `+${eff.value} munitions`;
+                        case 'gain_munitions_conditional':
+                            return `+${eff.base} munitions (+${eff.base} si 10+ munitions)`;
                         // Distribution aléatoire
                         case 'instant_missiles':
                             return `${eff.count} missiles ×${eff.value} sur ${eff.targetTypes.join('/')}`;
