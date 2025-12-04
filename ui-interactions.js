@@ -35,6 +35,23 @@ export class UIInteractions {
     onSlotClick(slotId) {
         if (this.ui.selectedCardIndex === null) return;
         
+        // ✅ NOUVEAU : Bloquer si slot occupé
+        const slot = this.gm.board.getSlot(slotId);
+        if (slot.card) {
+            this.gm.log('❌ Ce slot est déjà occupé !');
+            
+            // Animation shake sur le slot
+            const slotElement = document.getElementById(slotId);
+            if (slotElement) {
+                slotElement.style.animation = 'shake 0.3s';
+                setTimeout(() => {
+                    slotElement.style.animation = '';
+                }, 300);
+            }
+            return; // ← Bloque le placement
+        }
+        
+        // Code existant
         const result = this.gm.placeCardOnSlot(this.ui.selectedCardIndex, slotId);
         
         if (result.success) {
@@ -63,6 +80,9 @@ export class UIInteractions {
         const allSlots = this.gm.board.getAllSlots();
         
         allSlots.forEach(slot => {
+            // ✅ NOUVEAU : Skip les slots occupés
+            if (slot.card) return;
+            
             if (slot.canAccept(card)) {
                 const slotElement = document.getElementById(slot.id);
                 if (slotElement) {
