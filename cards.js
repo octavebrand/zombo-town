@@ -518,10 +518,10 @@ export const ALL_CARDS = [
         ['damage', 'block', 'shared', 'state'],
         Rarity.RARE,
         [
-            { type: 'instant_missiles', count: 8, value: 2, targetTypes: ['damage', 'shared'] },
-            { type: 'on_discard_create_token_same_slot', tokenId: 'token_zigouilleur' }
+            { type: 'instant_missiles', count: 5, value: 2, targetTypes: ['damage', 'shared'] },
+            { type: 'gain_munitions', value: 3 }
         ],
-        'Value 5, 8 missiles ×2, laisse jeton Zigouilleur',
+        'Value 5, 5 missiles ×2, munitions +3',
         CardType.CREATURE,
         ['Zigouilleur']
     ),

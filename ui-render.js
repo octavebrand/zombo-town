@@ -288,8 +288,8 @@ export class UIRenderer {
         playerDiv.innerHTML = `
             <div class="hp-bar">❤️ ${hp.currentHp}/${hp.maxHp}</div>
             <div style="font-size: 14px;">PLAYER</div>
-            <div style="font-size: 12px; color: #aaa; margin-top: 5px;">
-                Tour ${this.gm.turnNumber} | 📚 Deck: ${this.gm.deck.length} | 🗑️ Défausse: ${this.gm.discard.length}
+            <div style="font-size: 14px; color: #aaa; margin-top: 5px;">
+                Tour ${this.gm.turnNumber} | Deck: ${this.gm.deck.length} | Défausse: ${this.gm.discard.length}
             </div>
             ${this.gm.marchandises > 0 ? `
                 <div style="font-size: 13px; color: #FFD700; margin-top: 8px; font-weight: bold;">

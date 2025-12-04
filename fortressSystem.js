@@ -9,8 +9,8 @@ export class FortressSystem {
         this.METER_FILL_RATE = 1;
         
         this.TIERS = [
-            { threshold: 15, id: 'lv1', name: 'Draw 1', cost: 15 },
-            { threshold: 30, id: 'lv2', name: 'Maxxer Damage +1', cost: 15 },
+            { threshold: 15, id: 'lv1', name: 'Maxxer Damage +1', cost: 15 },
+            { threshold: 30, id: 'lv2', name: 'Draw 1', cost: 30 },
             { threshold: 50, id: 'lv3', name: 'All Maxxers +1 and Draw 1', cost: 30 },
             { threshold: 70, id: 'lv4', name: 'Protéger carte de la défausse', cost: 50 },
             { threshold: 100, id: 'lv5', name: 'Détruire enemy', cost: 70 }
@@ -65,10 +65,10 @@ export class FortressSystem {
         // Appliquer l'effet
         switch(tierId) {
             case 'lv1':
-                this.gm.drawCards(1);
+                this.gm.maxxers.damage.level += 1;
                 break;
             case 'lv2':
-                this.gm.maxxers.damage.level += 1;
+                this.gm.drawCards(1);
                 break;
             case 'lv3':
                 this.gm.drawCards(1);

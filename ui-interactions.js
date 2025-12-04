@@ -2,6 +2,8 @@
 // UI-INTERACTIONS.JS - Gestion des interactions utilisateur
 // ========================================
 
+import { CardType } from './constants.js';
+
 export class UIInteractions {
     constructor(uiManager) {
         this.ui = uiManager;
@@ -35,27 +37,29 @@ export class UIInteractions {
     onSlotClick(slotId) {
         if (this.ui.selectedCardIndex === null) return;
         
-        // ✅ NOUVEAU : Bloquer si slot occupé
+        // ✅ AJOUTER CETTE LIGNE
+        const selectedCard = this.gm.hand[this.ui.selectedCardIndex];
+        
         const slot = this.gm.board.getSlot(slotId);
-        if (slot.card) {
+        
+        // ✅ Bloquer seulement si : slot occupé ET carte n'est PAS un charme
+        if (slot.card && selectedCard.cardType !== CardType.CHARM) {
             this.gm.log('❌ Ce slot est déjà occupé !');
             
-            // Animation shake sur le slot
             const slotElement = document.getElementById(slotId);
             if (slotElement) {
-                slotElement.style.animation = 'shake 0.3s';
+                slotElement.style.background = 'rgba(255, 0, 0, 0.6)';
                 setTimeout(() => {
-                    slotElement.style.animation = '';
+                    slotElement.style.background = '';
                 }, 300);
             }
-            return; // ← Bloque le placement
+            return;
         }
         
         // Code existant
         const result = this.gm.placeCardOnSlot(this.ui.selectedCardIndex, slotId);
         
         if (result.success) {
-            // Flash vert
             const slotElement = document.getElementById(slotId);
             slotElement.style.background = 'rgba(0, 255, 0, 0.5)';
             setTimeout(() => {
@@ -63,7 +67,6 @@ export class UIInteractions {
                 this.ui.render();
             }, 300);
             
-            // Nettoyer sélection
             this.ui.selectedCardIndex = null;
             this.clearHighlights();
             this.ui.render();
@@ -80,8 +83,8 @@ export class UIInteractions {
         const allSlots = this.gm.board.getAllSlots();
         
         allSlots.forEach(slot => {
-            // ✅ NOUVEAU : Skip les slots occupés
-            if (slot.card) return;
+            // Skip les slots occupés
+            if (slot.card && card.cardType !== CardType.CHARM) return;
             
             if (slot.canAccept(card)) {
                 const slotElement = document.getElementById(slot.id);
