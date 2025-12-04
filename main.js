@@ -843,6 +843,11 @@ function initGameWithDeck(deckId) {
     
     // Setup end turn button
     setupEndTurnButton();
+
+    document.getElementById('guideBtn').onclick = () => {
+        game.ui.popups.showGuidePopup();
+    };
+    
 }
 
 /**
@@ -850,7 +855,7 @@ function initGameWithDeck(deckId) {
  */
 function setupEndTurnButton() {
     document.getElementById('endTurnBtn').onclick = () => {
-
+        
         if (game.gameOver) return;
         game.log('═══════════════════════════════════');
         game.log('🔚 FIN DE TOUR - Résolution...');

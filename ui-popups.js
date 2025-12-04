@@ -952,4 +952,257 @@ export class UIPopups {
         }, 1500);
     }
 
+
+    showGuidePopup() {
+        const popup = document.getElementById('popup');
+        popup.style.display = 'flex';
+        
+        // HTML des tabs (réutilisé 2 fois)
+        const tabsHTML = `
+            <div class="guide-tabs-container" style="
+                display: flex;
+                gap: 10px;
+                margin-bottom: 20px;
+                flex-wrap: wrap;
+                justify-content: center;
+            ">
+                <button class="guide-tab active" data-tab="basics">Règles de Base</button>
+                <button class="guide-tab" data-tab="board">Board & Slots</button>
+                <button class="guide-tab" data-tab="cards">Types de Cartes</button>
+                <button class="guide-tab" data-tab="tribes">Tribus</button>
+                <button class="guide-tab" data-tab="tips">Conseils</button>
+            </div>
+        `;
+        
+        popup.innerHTML = `
+            <div style="
+                background: rgba(0, 0, 0, 0.98);
+                border: 4px solid #FFD700;
+                border-radius: 10px;
+                padding: 30px;
+                max-width: 900px;
+                max-height: 85vh;
+                overflow-y: auto;
+                color: #00ff00;
+                font-family: 'VT323', monospace;
+            ">
+                <h1 style="
+                    font-size: 48px;
+                    text-align: center;
+                    color: #FFD700;
+                    margin-bottom: 20px;
+                    text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+                ">📖 ZOMBO TOWN - GUIDE</h1>
+                
+                <!-- Tabs du haut -->
+                ${tabsHTML}
+                
+                <!-- Contenu dynamique -->
+                <div id="guide-content" style="
+                    font-size: 20px;
+                    line-height: 1.6;
+                    color: #ffffff;
+                    margin: 30px 0;
+                "></div>
+                
+                <!-- Tabs du bas (identiques) -->
+                ${tabsHTML}
+                
+                <!-- Bouton Fermer -->
+                <button id="closeGuide" style="
+                    display: block;
+                    margin: 30px auto 0;
+                    padding: 15px 40px;
+                    background: rgba(139, 0, 0, 0.8);
+                    border: 3px solid #8B0000;
+                    border-radius: 10px;
+                    color: white;
+                    cursor: pointer;
+                    font-size: 24px;
+                    font-family: 'VT323', monospace;
+                ">
+                    Fermer
+                </button>
+            </div>
+        `;
+        
+        // Event listeners pour TOUS les tabs (haut + bas)
+        const allTabs = popup.querySelectorAll('.guide-tab');
+        allTabs.forEach(tab => {
+            tab.onclick = () => {
+                const selectedTab = tab.dataset.tab;
+                
+                // Désactiver TOUS les tabs (haut + bas)
+                allTabs.forEach(t => t.classList.remove('active'));
+                
+                // Activer TOUS les tabs correspondants (haut + bas)
+                popup.querySelectorAll(`[data-tab="${selectedTab}"]`).forEach(t => {
+                    t.classList.add('active');
+                });
+                
+                // Afficher le contenu
+                this.showGuideContent(selectedTab);
+                
+                // Scroll en haut du contenu (pas en haut de la popup)
+                document.getElementById('guide-content').scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start' 
+                });
+            };
+        });
+        
+        // Afficher le premier onglet par défaut
+        this.showGuideContent('basics');
+        
+        // Bouton fermer
+        document.getElementById('closeGuide').onclick = () => {
+            popup.style.display = 'none';
+        };
+    }
+    
+    showGuideContent(tabName) {
+        const content = document.getElementById('guide-content');
+        
+        const guides = {
+            basics: `
+                <h2 style="color: #FFD700; font-size: 25px; margin-bottom: 15px;">But du Jeu</h2>
+                <p>Tuer le monstre méchant avant de mourir.</p>
+                
+                <h2 style="color: #FFD700; font-size: 25px; margin: 20px 0 15px;">⚡ Déroulement d'un Tour</h2>
+                <ol style="margin-left: 30px;">
+                    <li><strong>Placement :</strong> Placez vos cartes sur les slots compatibles du board en réfléchissant bien, une carte posée ne peut plus être retirée.</li>
+                    <li><strong>Cliquez "Fin de Tour" :</strong> Résolution automatique</li>
+                    <li><strong>Résolution :</strong>
+                        <ul style="margin-left: 20px; margin-top: 10px;">
+                            <li>A) Calcul DAMAGE total → Dégâts à l'ennemi</li>
+                            <li>B) Calcul BLOCK total → Shield ajouté</li>
+                            <li>C) Ennemi attaque → Shield absorbe</li>
+                            <li>D) Dégâts résiduels au joueur</li>
+                            <li>E) Effets STATE (draw, heal, etc.)</li>
+                            <li>F) <strong>Défausse de TOUTES les cartes</strong> (sauf atouts et enemies)</li>
+                        </ul>
+                    </li>
+                    <li><strong>Nouveau tour :</strong> </li>
+                    <p> On recommence au 1.</p>
+                    <p>Pas de pioche automatique en début de tour. Il faudra piocher grâce à vos cartes ou aux effets STATE.</p>
+                </ol>
+                
+                <h2 style="color: #FFD700; font-size: 25px; margin: 20px 0 15px;">Attention, fondamental :</h2>
+                <p style="color: #FF1744; font-size: 20px;">
+                    ❌ <strong>TOUTES les cartes sont défaussées en fin de tour</strong> (sauf atouts)
+                </p>
+                <p>→ Les bonus (charmes, auras, maxxers) ne persistent PAS d'un tour à l'autre</p>
+                <p>→ Planifiez vos combos sur un seul tour !</p>
+            `,
+            
+            board: `
+                <h2 style="color: #FFD700; font-size: 36px; margin-bottom: 15px;">Le Board (16 Slots)</h2>
+                
+                <h3 style="color: #00BFFF; font-size: 28px; margin: 15px 0 10px;">🛡️ ENTITE BLOCK (slots bleus)</h3>
+                <p>• Réduit les dégâts ennemis</p>
+                <p>• Alimente le shield si il y a un excédent de blocage.</p>
+                <p>• Le shield persiste entre les tours, avec 20% de moins à chaque tour. </p>
+                <p>• Une jauge combo augmente quand vous gagnez du shield, cliquez dessus pour des bonus</p>
+                
+                <h3 style="color: #FF1744; font-size: 28px; margin: 15px 0 10px;">⚔️ ENTITE DAMAGE (slots rouges)</h3>
+                <p>• Inflige des dégâts à l'ennemi</p>
+                
+                <h3 style="color: #FFD700; font-size: 28px; margin: 15px 0 10px;">✨ ENTITE STATE (slots dorés)</h3>
+                <p>• Value totale → Rewards (draw, heal, marchandises)</p>
+                <p>• Tier 0→4</p>
+                <p>• Pas de maxxer</p>
+
+                <h2 style="color: #FFD700; font-size: 36px; margin: 20px 0 15px;">Les Maxxers</h2>
+                <p>• Ce sont des multiplicateurs qui augmentent la value des slots DAMAGE et BLOCK</p>
+                <p>• Il y a un maxxer BLOCK et un maxxer DAMAGE qui sont associés à leur entité respective.</p>
+                <p>• Attention : A chauque tour ils commencent à 0, ce qui veut dire que les slots BLOCK et DAMAGE sont inutilisables tant que les maxxers n'ont pas été augmentés </p>
+                <p>• Niveau 0 par défaut = ×0 (aucun bonus)</p>
+                <p>• Niveau 1 = ×1 (+25%)</p>
+                <p>• Niveau 2 = ×1.25 (+50%)</p>
+                <p>• ETC</p>
+                <p>• <strong>Reset à 0 chaque tour</strong> </p>
+                
+                <h3 style="color: #00ff00; font-size: 28px; margin: 15px 0 10px;">🎯 PLAYER (3 slots verts)</h3>
+                <p>• Pour les atouts permanents uniquement</p>
+                <p>• Atouts ne se défaussent JAMAIS</p>
+                
+                <h3 style="color: #FF0000; font-size: 28px; margin: 15px 0 10px;">👹 ENEMY (3 slots rouges)</h3>
+                <p>• Cartes ennemies avec HP et effets</p>
+                <p>• Certaines ont des timers (compteurs)</p>
+                <p>• Vous pouvez cibler une carte ennemie en lui cliquant dessus</p>
+                
+                <h2 style="color: #FFD700; font-size: 36px; margin: 20px 0 15px;">🔗 Voisinage</h2>
+                <p>• Les slots adjacents se donnent des bonus</p>
+                <p>• Lignes vertes = voisins actifs</p>
+                <p>• Certaines cartes ont des effets "bonus_neighbors" ou "penalty_neighbors"</p>
+                <p>• Généralement les cartes ayant un effet voisin ne peuvent pas être posées sur les slots partagés (DAMAGE+BLOCK ou DAMAGE+STATE)</p>
+                
+            `,
+            
+            cards: `
+                <h2 style="color: #FFD700; font-size: 36px; margin-bottom: 15px;">🃏 Types de Cartes</h2>
+                
+                <h3 style="color: #00ff00; font-size: 28px; margin: 15px 0 10px;">🐙 CRÉATURES</h3>
+                <p>• Cartes jouables classiques</p>
+                <p>• Elles ont une value, leur force d'une certaine manière, cette value va augmenter la value de l'entité correspondante au slot sur lequel la créature est posée. </p>
+                <p>• Défaussées en fin de tour</p>
+                <p>• Peuvent avoir des effets instant, passifs, ou on_discard</p>
+                
+                <h3 style="color: #9370DB; font-size: 28px; margin: 15px 0 10px;">⚡ CHARMES (Violet)</h3>
+                <p>• Ils équipent des créatures déjà posées</p>
+                <p>• <strong>Pose infinie :</strong> Aucune limite par créature</p>
+                <p>• Défaussés avec la créature équipée</p>
+                <p>• Exemples : +10 value, maxxer +1, heal à la défausse</p>
+                
+                <h3 style="color: #808080; font-size: 28px; margin: 15px 0 10px;">🎫 TOKENS (Gris)</h3>
+                <p>• Générés par des effets de cartes</p>
+                <p>• Défaussés en fin de tour comme les créatures</p>
+                
+                <h3 style="color: #FF0000; font-size: 28px; margin: 15px 0 10px;">👹 ENEMIES</h3>
+                <p>• Cartes ennemies avec HP et attaque</p>
+                <p>• Certaines ont des effets spéciaux ou timers</p>
+                <p>• On peut cibler les cartes ennemies en leur cliquant dessus</p>
+
+                <h3 style="color: #00ff00; font-size: 28px; margin: 15px 0 10px;">🏭 ATOUTS (Vert)</h3>
+                <p>• <strong>Permanents</strong> </p>
+                <p>• Ce ne sont pas vraiment des cartes, les slots players se débloquent au tours 3, 6 et 9. Une fois débloqué, clique dessus pour placer un atout.</p>
+                
+                <h2 style="color: #FFD700; font-size: 36px; margin: 20px 0 15px;">✨ Types d'Effets</h2>
+                <p><strong>Instant :</strong> Se déclenche immédiatement à la pose (draw, discover, missiles)</p>
+                <p><strong>Passif :</strong> Calculé dynamiquement (aura_tribal, count_tribal)</p>
+                <p><strong>On Discard :</strong> Se déclenche à la défausse (jetons, heal, draw)</p>
+                <p><strong>Maxxer :</strong> Boost les maxxers ce tour</p>
+            `,
+            
+            tribes: `
+                <h2 style="color: #FFD700; font-size: 36px; margin-bottom: 15px;">🌟 Les 5 Tribus</h2>
+                
+                <h3 style="color: #00BFFF; font-size: 32px; margin: 20px 0 10px;">🐚 MOLLUSQUES</h3>
+                <p><strong>Identité :</strong> On parle de mollusques, ils n'ont pas d'identité.</p>
+                
+                <h3 style="color: #FF1744; font-size: 32px; margin: 20px 0 10px;">🔪 ZIGOUILLEURS</h3>
+                <p><strong>Identité :</strong> Gné. </p>
+                <p><strong>Système Tribal :</strong> CASINO : amassez des munitions pour jouer au casino.</p>
+                
+                <h3 style="color: #FFD700; font-size: 32px; margin: 20px 0 10px;">💰 TRAFIQUANTS</h3>
+                <p><strong>Identité :</strong> Business is business</p>
+                <p><strong>Mécaniques :</strong> Variées</p>
+                <p><strong>Système Tribal :</strong> Shop : Il vous faudra des marchandises pour faire des affaires au magasin.</p>
+                
+                <h3 style="color: #9370DB; font-size: 32px; margin: 20px 0 10px;">👤 OMBRES</h3>
+                <p><strong>Identité :</strong> Elles sont partout</p>
+                <p><strong>Système Tribal :</strong> Fusion : fusionnez vos tokens pour plus de puissaaaaance. Plus vous fusionnez, plus vos tokens sont forts. </p>
+                
+                <h3 style="color: #FF00FF; font-size: 32px; margin: 20px 0 10px;">🪞 ILLUSIONS</h3>
+                <p><strong>Identité :</strong> On me voit, on me voit plus.</p>
+                <p><strong>Système Tribal :</strong> Miroir des illusions : vous pouvez copier une carte dans le miroir, elle sera jouable une nouvelle fois depuis le miroir au tour suivant. Plus vous utilisez le miroir plus il est fort et pourra dupliquer la créature à l'intérieur quand vous la jouez. Mais attention, il finit par se briser.</p>
+            `,
+        };
+        
+        content.innerHTML = guides[tabName] || '<p>Contenu non disponible</p>';
+        
+        // Scroll en haut après changement de tab
+        content.scrollTop = 0;
+    }
 }
+
