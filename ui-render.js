@@ -147,8 +147,9 @@ export class UIRenderer {
                         if (this.ui.selectedCardIndex !== null) {
                             return;
                         }
-                        
+
                         // Sinon → retirer carte
+                        this.gm.audioManager.playSFX('click');
                         e.stopPropagation();
                         this.ui.interactions.removeCardFromSlot(slot.id);
                     };
@@ -274,7 +275,10 @@ export class UIRenderer {
                 if (fs.hasAvailableReward()) {
                     const meterEl = entityDiv.querySelector('[data-fortress-meter]');
                     if (meterEl) {
-                        meterEl.onclick = () => this.ui.popups.showFortressRewardPopup();
+                        meterEl.onclick = () => {
+                            this.gm.audioManager.playSFX('click');
+                            this.ui.popups.showFortressRewardPopup();
+                        };
                     }
                 }
             }
@@ -305,7 +309,10 @@ export class UIRenderer {
         if (hasReward) {
             const meterEl = fortressDiv.querySelector('[data-fortress-meter]');
             if (meterEl) {
-                meterEl.onclick = () => this.ui.popups.showFortressRewardPopup();
+                meterEl.onclick = () => {
+                    this.gm.audioManager.playSFX('click');
+                    this.ui.popups.showFortressRewardPopup();
+                };
             }
         }
     }
@@ -330,7 +337,7 @@ export class UIRenderer {
             <div class="hp-bar">❤️ ${hp.currentHp}/${hp.maxHp}</div>
             <div style="font-size: 14px;">PLAYER</div>
             <div style="font-size: 14px; color: #aaa; margin-top: 5px;">
-                Tour ${this.gm.turnNumber} <br>Deck: ${this.gm.deck.length} | Défausse: ${this.gm.discard.length}
+                Tour ${this.gm.turnNumber} <br>Deck: ${this.gm.deck.length} | <span id="discard-link" style="color: #FFD700; cursor: pointer; text-decoration: underline;">Défausse: ${this.gm.discard.length}</span>
             </div>
             ${this.gm.marchandises > 0 ? `
                 <div style="font-size: 13px; color: #FFD700; margin-top: 8px; font-weight: bold;">
@@ -432,28 +439,47 @@ export class UIRenderer {
 
         `;
         
+        // Event listener défausse
+        const discardLink = document.getElementById('discard-link');
+        if (discardLink) {
+            discardLink.onclick = () => {
+                this.gm.audioManager.playSFX('click');
+                this.ui.popups.showDiscardPopup();
+            };
+        }
+
         // Event listener boutique
         const shopButton = document.getElementById('shop-button');
         if (shopButton) {
-            shopButton.onclick = () => this.ui.popups.showShopPopup();
+            shopButton.onclick = () => {
+                this.gm.audioManager.playSFX('click');
+                this.ui.popups.showShopPopup();
+            };
         }
-        
+
         // Event listener fusion
         const fusionButton = document.getElementById('fusion-button');
         if (fusionButton) {
-            fusionButton.onclick = () => this.ui.popups.showFusionPopup();
+            fusionButton.onclick = () => {
+                this.gm.audioManager.playSFX('click');
+                this.ui.popups.showFusionPopup();
+            };
         }
 
         // Event listener casino
         const casinoButton = document.getElementById('casino-button');
         if (casinoButton) {
-            casinoButton.onclick = () => this.ui.popups.showLotteryPopup();
+            casinoButton.onclick = () => {
+                this.gm.audioManager.playSFX('click');
+                this.ui.popups.showLotteryPopup();
+            };
         }
 
         // Event listener miroir
         const mirrorButton = document.getElementById('mirror-button');
         if (mirrorButton) {
             mirrorButton.onclick = () => {
+                this.gm.audioManager.playSFX('click');
                 if (this.gm.mirrorSystem.state === 'empty') {
                     // Mode copie
                     this.ui.interactions.selectCardToCopyMirror();
@@ -706,9 +732,12 @@ export class UIRenderer {
                 ` : ''}
                 <div class="card-rarity" style="margin-top: auto;">${card.rarity}</div>
             `;
-            
-            cardDiv.onclick = () => this.ui.interactions.onCardClick(index);
-            
+
+            cardDiv.onclick = () => {
+                this.gm.audioManager.playSFX('click');
+                this.ui.interactions.onCardClick(index);
+            };
+
             this.handElement.appendChild(cardDiv);
         });
     }

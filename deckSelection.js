@@ -3,11 +3,13 @@
 // ========================================
 
 import { getAllDecks, getDeckById } from './prebuiltDecks.js';
+import { getAudioManager } from './audioManager.js';
 
 export class DeckSelectionUI {
     constructor() {
         this.selectedDeckId = null;
         this.onDeckSelected = null; // Callback
+        this.audioManager = getAudioManager();
     }
     
     /**
@@ -16,6 +18,13 @@ export class DeckSelectionUI {
     show(onDeckSelectedCallback) {
         this.onDeckSelected = onDeckSelectedCallback;
         this.render();
+
+        // ✅ Démarrer musique au premier clic utilisateur
+        const startMusic = () => {
+            this.audioManager.playMusic('deck_selection');
+            document.removeEventListener('click', startMusic);
+        };
+        document.addEventListener('click', startMusic, { once: true });
     }
     
     /**
@@ -142,6 +151,7 @@ export class DeckSelectionUI {
         
         buttons.forEach(btn => {
             btn.addEventListener('click', (e) => {
+                this.audioManager.playSFX('click');
                 const deckId = e.target.dataset.deckId;
                 this.selectDeck(deckId);
             });
@@ -151,6 +161,7 @@ export class DeckSelectionUI {
         const guideBtn = document.getElementById('guideBtnDeckSelect');
         if (guideBtn) {
             guideBtn.onclick = () => {
+                this.audioManager.playSFX('click');
                 this.showGuideFromDeckSelection();
             };
         }
@@ -331,6 +342,7 @@ export class DeckSelectionUI {
         const allTabs = popup.querySelectorAll('.guide-tab');
         allTabs.forEach(tab => {
             tab.onclick = () => {
+                this.audioManager.playSFX('click');
                 const selectedTab = tab.dataset.tab;
                 allTabs.forEach(t => {
                     if (t.dataset.tab === selectedTab) {
@@ -346,14 +358,15 @@ export class DeckSelectionUI {
                     }
                 });
                 this.showGuideContentDeckSelect(selectedTab);
-                document.getElementById('guide-content').scrollIntoView({ 
-                    behavior: 'smooth', 
-                    block: 'start' 
+                document.getElementById('guide-content').scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
                 });
             };
         });
-        
+
         document.getElementById('closeGuide').onclick = () => {
+            this.audioManager.playSFX('click');
             popup.style.display = 'none';
         };
         

@@ -72,11 +72,15 @@ export class UIPopups {
         availableTiers.forEach(tier => {
             const btn = popup.querySelector(`[data-tier="${tier.id}"]`);
             if (btn) {
-                btn.onclick = () => this.handleTierSelection(tier.id);
+                btn.onclick = () => {
+                    this.gm.audioManager.playSFX('click');
+                    this.handleTierSelection(tier.id);
+                };
             }
         });
-        
+
         document.getElementById('closeFortressPopup').onclick = () => {
+            this.gm.audioManager.playSFX('click');
             popup.style.display = 'none';
         };
     }
@@ -185,19 +189,135 @@ export class UIPopups {
                     btn.style.boxShadow = 'none';
                 };
                 btn.onclick = () => {
+                    this.gm.audioManager.playSFX('click');
                     popup.style.display = 'none';
                     this.gm.fusionSystem.fuseShadowTokens(tier.id);
                 };
             }
         });
-        
+
         // Handler bouton annuler
         const cancelBtn = document.getElementById('fusion-cancel-btn');
         if (cancelBtn) {
             cancelBtn.onclick = () => {
+                this.gm.audioManager.playSFX('click');
                 popup.style.display = 'none';
             };
         }
+    }
+
+    // ========================================
+    // DISCARD PILE
+    // ========================================
+
+    showDiscardPopup() {
+        const popup = document.getElementById('popup');
+        if (!popup) return;
+
+        popup.style.display = 'flex';
+
+        const discardCards = this.gm.discard;
+
+        let cardsHTML = '';
+        if (discardCards.length === 0) {
+            cardsHTML = '<p style="color: #aaa; text-align: center; padding: 40px;">La défausse est vide</p>';
+        } else {
+            cardsHTML = '<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; width: 100%;">';
+            discardCards.forEach((card) => {
+                const borderColor = card.rarity === 'Rare' ? '#9370DB' :
+                                   card.rarity === 'Uncommon' ? '#4682B4' : '#666';
+
+                let effectText = '';
+                if (card.effect) {
+                    const effects = Array.isArray(card.effect) ? card.effect : [card.effect];
+                    effectText = effects.map(eff => {
+                        switch(eff.type) {
+                            case 'maxxer_dmg': return `Maxxer DMG +${eff.value}`;
+                            case 'maxxer_block': return `Maxxer BLOCK +${eff.value}`;
+                            case 'maxxer_all': return `Tous maxxers +${eff.value}`;
+                            case 'heal': return `Heal ${eff.value}`;
+                            case 'draw': return `Pioche ${eff.value}`;
+                            case 'instant_draw': return `Pioche ${eff.value}`;
+                            case 'on_discard_create_token': return `Crée jeton à la défausse`;
+                            case 'on_discard_draw': return `Draw ${eff.value} à la défausse`;
+                            default: return eff.type;
+                        }
+                    }).join(' • ');
+                }
+
+                cardsHTML += `
+                    <div style="
+                        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+                        border: 2px solid ${borderColor};
+                        border-radius: 10px;
+                        padding: 15px;
+                        display: flex;
+                        flex-direction: column;
+                        gap: 5px;
+                        min-height: 120px;
+                    ">
+                        <div style="font-size: 20px; font-weight: bold; text-align: center; color: #FFD700;">
+                            ${card.value !== undefined ? card.value : '?'}
+                        </div>
+                        <div style="font-size: 13px; font-weight: bold; text-align: center; color: white;">
+                            ${card.name}
+                        </div>
+                        ${effectText ? `
+                            <div style="font-size: 10px; color: #AED581; text-align: center; line-height: 1.3;">
+                                ${effectText}
+                            </div>
+                        ` : ''}
+                        ${card.tags && card.tags.length > 0 ? `
+                            <div style="font-size: 9px; color: #FFD700; text-align: center; font-style: italic;">
+                                ${card.tags.join(', ')}
+                            </div>
+                        ` : ''}
+                        <div style="font-size: 10px; color: #aaa; text-align: center; margin-top: auto;">
+                            ${card.rarity}
+                        </div>
+                    </div>
+                `;
+            });
+            cardsHTML += '</div>';
+        }
+
+        popup.innerHTML = `
+            <div style="
+                background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+                padding: 30px;
+                border-radius: 15px;
+                border: 3px solid #FFD700;
+                width: 90%;
+                max-width: 900px;
+                max-height: 80vh;
+                overflow-y: auto;
+            ">
+                <h2 style="color: #FFD700; text-align: center; margin-bottom: 20px;">
+                    🗑️ Défausse (${discardCards.length} cartes)
+                </h2>
+
+                ${cardsHTML}
+
+                <button id="closeDiscard" style="
+                    width: 100%;
+                    margin-top: 30px;
+                    padding: 15px;
+                    background: rgba(139, 0, 0, 0.5);
+                    border: 2px solid #8B0000;
+                    border-radius: 10px;
+                    color: white;
+                    cursor: pointer;
+                    font-size: 16px;
+                ">
+                    Fermer
+                </button>
+            </div>
+        `;
+
+        popup.querySelector('#closeDiscard').onclick = () => {
+            this.gm.audioManager.playSFX('click');
+            popup.style.display = 'none';
+        };
     }
 
     // ========================================
@@ -255,11 +375,15 @@ export class UIPopups {
         ['tier1', 'tier2', 'tier3'].forEach(tier => {
             const buyButton = popup.querySelector(`#buy-${tier}`);
             if (buyButton && !buyButton.disabled) {
-                buyButton.onclick = () => this.buyShopReward(tier);
+                buyButton.onclick = () => {
+                    this.gm.audioManager.playSFX('click');
+                    this.buyShopReward(tier);
+                };
             }
         });
-        
+
         popup.querySelector('#closeShop').onclick = () => {
+            this.gm.audioManager.playSFX('click');
             popup.style.display = 'none';
         };
     }
@@ -490,17 +614,19 @@ export class UIPopups {
         // Click handlers
         popup.querySelectorAll('.atout-choice').forEach(choice => {
             choice.onclick = () => {
+                this.gm.audioManager.playSFX('click');
                 const index = parseInt(choice.dataset.index);
                 const result = this.gm.placeAtoutOnSlot(index, slotId);
-                
+
                 if (result.success) {
                     document.body.removeChild(popup);
                     this.ui.render();
                 }
             };
         });
-        
+
         popup.querySelector('#cancelAtout').onclick = () => {
+            this.gm.audioManager.playSFX('click');
             document.body.removeChild(popup);
         };
         
@@ -805,6 +931,7 @@ export class UIPopups {
             const button = document.getElementById(`lottery-${tier.id}`);
             if (button && !button.disabled) {
                 button.onclick = () => {
+                    this.gm.audioManager.playSFX('click');
                     if (this.gm.hand.length >= 10) {
                         this.gm.log('❌ Main pleine ! Impossible de jouer à la loterie.');
                         return;
@@ -813,8 +940,9 @@ export class UIPopups {
                 };
             }
         });
-        
+
         document.getElementById('closeLotteryPopup').onclick = () => {
+            this.gm.audioManager.playSFX('click');
             popup.style.display = 'none';
         };
     }
@@ -946,6 +1074,7 @@ export class UIPopups {
             
             // Bouton continuer : ferme popup + applique effet
             document.getElementById('continueButton').onclick = () => {
+                this.gm.audioManager.playSFX('click');
                 popup.style.display = 'none';
                 callback(); // Appliquer effet
             };
@@ -1030,23 +1159,24 @@ export class UIPopups {
         const allTabs = popup.querySelectorAll('.guide-tab');
         allTabs.forEach(tab => {
             tab.onclick = () => {
+                this.gm.audioManager.playSFX('click');
                 const selectedTab = tab.dataset.tab;
-                
+
                 // Désactiver TOUS les tabs (haut + bas)
                 allTabs.forEach(t => t.classList.remove('active'));
-                
+
                 // Activer TOUS les tabs correspondants (haut + bas)
                 popup.querySelectorAll(`[data-tab="${selectedTab}"]`).forEach(t => {
                     t.classList.add('active');
                 });
-                
+
                 // Afficher le contenu
                 this.showGuideContent(selectedTab);
-                
+
                 // Scroll en haut du contenu (pas en haut de la popup)
-                document.getElementById('guide-content').scrollIntoView({ 
-                    behavior: 'smooth', 
-                    block: 'start' 
+                document.getElementById('guide-content').scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
                 });
             };
         });
@@ -1056,6 +1186,7 @@ export class UIPopups {
         
         // Bouton fermer
         document.getElementById('closeGuide').onclick = () => {
+            this.gm.audioManager.playSFX('click');
             popup.style.display = 'none';
         };
     }

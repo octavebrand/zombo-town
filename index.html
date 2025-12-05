@@ -35,6 +35,24 @@
         <div id="logContainer"></div>
         
     </div>
+
+    <!-- Audio Controls (Compact) -->
+    <div id="audioControlsContainer">
+        <!-- Icône cliquable -->
+        <div id="audioIcon" title="Contrôles Audio">
+            SON
+        </div>
+        
+        <!-- Panneau qui se déploie -->
+        <div id="audioPanel" class="audio-panel-hidden">
+            <div class="audio-control-item">
+                <label for="volumeSlider">Volume</label>
+                <input type="range" id="volumeSlider" min="0" max="100" value="50">
+                <span id="volumeValue">50%</span>
+            </div>
+            <button id="muteBtn" class="audio-btn">🔊 Unmute</button>
+        </div>
+    </div>
     
     <!-- Popup overlay (STATE rewards + résultats) -->
     <div id="popup" style="

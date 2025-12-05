@@ -261,8 +261,9 @@ export class EffectResolver {
         // Handlers
         options.forEach((card, index) => {
             document.getElementById(`discover_${index}`).onclick = () => {
+                this.gm.audioManager.playSFX('click');
                 popup.style.display = 'none';
-                
+
                 // Ajouter carte en main
                 if (this.gm.hand.length < 10) {
                     const cardCopy = {...card};

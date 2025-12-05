@@ -20,10 +20,13 @@ import { FortressSystem } from './fortressSystem.js';
 import { FusionSystem } from './fusionsystem.js';
 import { LotterySystem } from './lotterySystem.js';
 import { MirrorSystem } from './mirrorSystem.js';
+import { getAudioManager } from './audioManager.js';
+import { SplashScreen } from './splashScreen.js';
 
 // ========================================
 // CONSTANTES DE JEU
 // ========================================
+
 
 const GAME_CONFIG = {
     STARTING_HAND: 5,
@@ -134,6 +137,8 @@ class GameManagerStub {
         this.munitions = 0;
         this.lastLotteryWasLoss = false;
 
+        this.audioManager = getAudioManager();
+
         this.fortressSystem = new FortressSystem(this);
 
         this.fusionSystem = new FusionSystem(this);
@@ -182,7 +187,12 @@ class GameManagerStub {
         this.pendingSlotBonuses = [];   // bonus a appliquer au tour suivant
 
         this.gameOver = false;
+
+        this.audioManager.stopMusic();
+        this.audioManager.playMusic('combat');
     }
+
+    
     
     shuffleDeck() {
         for (let i = this.deck.length - 1; i > 0; i--) {
@@ -209,10 +219,12 @@ class GameManagerStub {
         const slot = this.board.getSlot(slotId);
         
         if (!card) {
+            this.audioManager.playSFX('card_invalid');
             return { success: false, reason: "Carte introuvable" };
         }
         
         if (!slot) {
+            this.audioManager.playSFX('card_invalid');
             return { success: false, reason: "Slot introuvable" };
         }
 
@@ -220,6 +232,7 @@ class GameManagerStub {
         if (card.cardType === CardType.CHARM) {
             // Vérifier qu'il y a une créature
             if (!slot.card) {
+                this.audioManager.playSFX('card_invalid');
                 return { success: false, reason: "Pas de créature sur ce slot" };
             }
 
@@ -246,12 +259,13 @@ class GameManagerStub {
             // Trigger atouts "heal_on_charm_played"
             this.checkAtoutHealOnCharmPlayed();
             this.effectResolver.resolveCardEffects(card, slot.id);
-            
+            this.audioManager.playSFX('card_place');
             return { success: true };
         }
         
         // Vérifier compatibilité
         if (!slot.canAccept(card)) {
+            this.audioManager.playSFX('card_invalid');
             return { success: false, reason: "Slot incompatible avec cette carte" };
         }
         
@@ -266,30 +280,20 @@ class GameManagerStub {
         if (card.timer) {
             card.turnPlaced = this.turnNumber;
         }
-
-        // Si une ancienne carte était là, la remettre en main (ou défausser si main pleine)
-        if (result.oldCard) {
-            if (this.hand.length < GAME_CONFIG.MAX_HAND_SIZE) {
-                this.hand.push(result.oldCard);
-                this.log(`↩️ ${result.oldCard.name} retournée en main (remplacée)`);
-            } else {
-                this.discard.push(result.oldCard);
-                this.log(`🗑️ ${result.oldCard.name} défaussée (main pleine)`);
-            }
-        }
             
             this.log(`✅ ${card.name} posée sur ${slotId}`);
-            
+
             // Résoudre les effets de la carte
             this.effectResolver.resolveCardEffects(card, slotId);
 
             this.recalculateMaxxers();
 
             this.ui.render();
-            
+            this.audioManager.playSFX('card_place');
+
             return { success: true };
         }
-        
+        this.audioManager.playSFX('card_invalid');
         return { success: false, reason: "Placement impossible" };
     }
 
@@ -686,6 +690,7 @@ class GameManagerStub {
         // Handlers
         rewards.forEach((reward, index) => {
             document.getElementById(`reward_${index}`).onclick = () => {
+                this.audioManager.playSFX('click');
                 popup.style.display = 'none';
                 callback(reward);
             };
@@ -708,6 +713,13 @@ class GameManagerStub {
         popup.style.display = 'flex';
         
         const isVictory = result === 'victory';
+
+        this.audioManager.stopMusic(); // Stop combat music
+            if (isVictory) {
+                this.audioManager.playSFX('victory');
+            } else {
+                this.audioManager.playSFX('defeat');
+            }
         
         popup.innerHTML = `
             <div style="text-align: center; padding: 40px;">
@@ -731,8 +743,9 @@ class GameManagerStub {
                 </button>
             </div>
         `;
-        
+
         document.getElementById('restartBtn').onclick = () => {
+            this.audioManager.playSFX('click');
             location.reload(); // Recharger la page
         };
     }
@@ -892,6 +905,8 @@ function initGameWithDeck(deckId) {
     // Créer UI manager
     ui = new UIManager(game);
     game.ui = ui;
+
+    setupAudioControls(game.audioManager);
     
     // Render initial
     ui.render();
@@ -906,6 +921,7 @@ function initGameWithDeck(deckId) {
     setupEndTurnButton();
 
     document.getElementById('guideBtn').onclick = () => {
+        game.audioManager.playSFX('click');
         game.ui.popups.showGuidePopup();
     };
     
@@ -916,7 +932,8 @@ function initGameWithDeck(deckId) {
  */
 function setupEndTurnButton() {
     document.getElementById('endTurnBtn').onclick = () => {
-        
+        game.audioManager.playSFX('click');
+
         if (game.gameOver) return;
         game.log('═══════════════════════════════════');
         game.log('🔚 FIN DE TOUR - Résolution...');
@@ -1090,12 +1107,69 @@ function showResultsPopup(results, game, ui) {
     
     // Handler bouton nouveau tour
     btn.onclick = () => {
+        game.audioManager.playSFX('click');
         popup.remove();
         game.startNewTurn();
         ui.render();
     };
 }
 
+function setupAudioControls(audioManager) {
+    const volumeSlider = document.getElementById('volumeSlider');
+    const volumeValue = document.getElementById('volumeValue');
+    const muteBtn = document.getElementById('muteBtn');
+    const audioIcon = document.getElementById('audioIcon');
+    const audioPanel = document.getElementById('audioPanel');
+    
+    if (!volumeSlider || !muteBtn || !audioIcon) {
+        console.warn('[Audio] Contrôles audio non trouvés dans le DOM');
+        return;
+    }
+    
+    // Toggle panneau au clic sur l'icône
+    let isPanelOpen = false;
+    audioIcon.onclick = () => {
+        isPanelOpen = !isPanelOpen;
+        if (isPanelOpen) {
+            audioPanel.classList.remove('audio-panel-hidden');
+            audioPanel.classList.add('audio-panel-visible');
+        } else {
+            audioPanel.classList.remove('audio-panel-visible');
+            audioPanel.classList.add('audio-panel-hidden');
+        }
+    };
+    
+    // Fermer le panneau si on clique ailleurs
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('#audioControlsContainer')) {
+            audioPanel.classList.remove('audio-panel-visible');
+            audioPanel.classList.add('audio-panel-hidden');
+            isPanelOpen = false;
+        }
+    });
+    
+    // Init volume display
+    volumeSlider.value = audioManager.getVolume() * 100;
+    volumeValue.textContent = Math.round(audioManager.getVolume() * 100) + '%';
+    
+    // Volume slider
+    volumeSlider.oninput = (e) => {
+        const volume = e.target.value / 100;
+        audioManager.setVolume(volume);
+        volumeValue.textContent = Math.round(volume * 100) + '%';
+    };
+    
+    // Mute button
+    muteBtn.onclick = () => {
+        audioManager.playSFX('click');
+        const isMuted = audioManager.toggleMute();
+        muteBtn.textContent = isMuted ? '🔇 Muted' : '🔊 Unmute';
+        // Changer aussi l'icône
+        audioIcon.textContent = isMuted ? '🔇' : '🔊';
+    };
+    
+    console.log('✅ Contrôles audio initialisés (mode compact)');
+}
 
 // ========================================
 // INITIALISATION
@@ -1108,6 +1182,11 @@ let deckSelectionUI;
 window.addEventListener('DOMContentLoaded', () => {
     console.log('🎮 Initialisation du prototype v2.0...');
     
+    // Afficher splash screen en premier
+    const splashScreen = new SplashScreen();
+    splashScreen.show(() => {
+        console.log('✅ Splash screen validé, musique lobby lancée');
+
     // Créer UI de sélection de deck
     deckSelectionUI = new DeckSelectionUI();
     
@@ -1120,4 +1199,5 @@ window.addEventListener('DOMContentLoaded', () => {
     });
     
     console.log('✅ Écran de sélection affiché');
+    });
 });
