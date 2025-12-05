@@ -61,6 +61,10 @@ export class FortressSystem {
         
         // Dépenser le coût
         this.meter = Math.max(0, this.meter - tier.cost);
+
+        // ⚡ NOUVEAU : Réduire le shield du même montant
+        this.shield = Math.max(0, this.shield - tier.cost);
+        this.gm.log(`⚡ Fortress: -${tier.cost} shield consommé pour la récompense`);
         
         // Appliquer l'effet
         switch(tierId) {

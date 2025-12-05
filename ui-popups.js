@@ -1102,7 +1102,8 @@ export class UIPopups {
                 <p>• Réduit les dégâts ennemis</p>
                 <p>• Alimente le shield si il y a un excédent de blocage.</p>
                 <p>• Le shield persiste entre les tours, avec 20% de moins à chaque tour. </p>
-                <p>• Une jauge combo augmente quand vous gagnez du shield, cliquez dessus pour des bonus</p>
+                <p>• Une jauge combo augmente quand vous gagnez du shield, cliquez dessus pour des bonus.</p>
+                <p>• Si vous utilisez des bonus, vous perdez du shield. Beware.</p>
                 
                 <h3 style="color: #FF1744; font-size: 28px; margin: 15px 0 10px;">⚔️ ENTITE DAMAGE (slots rouges)</h3>
                 <p>• Inflige des dégâts à l'ennemi</p>
