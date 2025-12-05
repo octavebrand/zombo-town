@@ -544,6 +544,67 @@ class GameManagerStub {
         return { value: total, tier: this.stateTier };
     }
 
+    /**
+     * Calcule les totaux DAMAGE et BLOCK en temps réel (preview)
+     * SANS les appliquer (utilisé pour affichage UI uniquement)
+     */
+    previewCombatTotals() {
+        // === DAMAGE ===
+        const damageSlots = this.board.getSlotsByType('damage');
+        const sharedSlots = this.board.getSlotsByType('shared');
+        
+        let damageTotal = 0;
+        
+        // DAMAGE slots
+        damageSlots.forEach(slot => {
+            if (slot.card) {
+                damageTotal += this.board.getFinalCardValue(slot.id);
+            }
+        });
+        
+        // SHARED slots (les 2 comptent pour damage)
+        sharedSlots.forEach(slot => {
+            if (slot.card) {
+                damageTotal += this.board.getFinalCardValue(slot.id);
+            }
+        });
+        
+        // Appliquer maxxer damage
+        const damageMaxxerLevel = this.maxxers.damage.level;
+        const damageMultiplier = 1 + (damageMaxxerLevel * 0.25);
+        damageTotal = Math.floor(damageTotal * damageMultiplier);
+        
+        // === BLOCK ===
+        const blockSlots = this.board.getSlotsByType('block');
+        
+        let blockTotal = 0;
+        
+        // BLOCK slots
+        blockSlots.forEach(slot => {
+            if (slot.card) {
+                blockTotal += this.board.getFinalCardValue(slot.id);
+            }
+        });
+        
+        // SHARED_1 uniquement compte pour BLOCK
+        const shared1 = this.board.getSlot('shared_1');
+        if (shared1?.card) {
+            blockTotal += this.board.getFinalCardValue('shared_1');
+        }
+        
+        // Appliquer maxxer block
+        const blockMaxxerLevel = this.maxxers.block.level;
+        const blockMultiplier = 1 + (blockMaxxerLevel * 0.25);
+        blockTotal = Math.floor(blockTotal * blockMultiplier);
+        
+        return {
+            damage: damageTotal,
+            damageMaxxer: damageMaxxerLevel,
+            block: blockTotal,
+            blockMaxxer: blockMaxxerLevel
+        };
+    }
+
     applyPendingSlotBonuses() {
         if (this.pendingSlotBonuses.length === 0) return;
         

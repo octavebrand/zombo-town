@@ -7,22 +7,22 @@ import { Slot } from './constants.js';
 // Positions spatiales (en % de l'écran pour responsive)
 const SLOT_POSITIONS = {
     // BLOCK (left side)
-    block_left:   { x: 15, y: 35 },
-    block_top:    { x: 26, y: 19 },
-    block_bottom: { x: 26, y: 52 },
+    block_left:   { x: 15, y: 40 },
+    block_top:    { x: 26, y: 23 },
+    block_bottom: { x: 26, y: 57 },
     
     // DAMAGE (center)
     damage_top:    { x: 50, y: 23 },
-    damage_bottom: { x: 50, y: 48 },
+    damage_bottom: { x: 50, y: 57 },
     
     // STATE (right side)
-    state_right:  { x: 85, y: 35 },
+    state_right:  { x: 85, y: 40 },
     state_top:    { x: 74, y: 23 },
-    state_bottom: { x: 74, y: 48 },
+    state_bottom: { x: 74, y: 57 },
     
     // SHARED (between entities)
-    shared_1: { x: 37.5, y: 35 }, // BLOCK ↔ DAMAGE
-    shared_2: { x: 62.5, y: 35 }, // DAMAGE ↔ STATE
+    shared_1: { x: 37.5, y: 40 }, // BLOCK ↔ DAMAGE
+    shared_2: { x: 62.5, y: 40 }, // DAMAGE ↔ STATE
     
     // ENEMY (top)
     enemy_1: { x: 35, y: 10 },
@@ -30,9 +30,9 @@ const SLOT_POSITIONS = {
     enemy_3: { x: 65, y: 10 },
     
     // PLAYER (bottom)
-    player_1: { x: 10, y: 70 },
-    player_2: { x: 10, y: 80 },
-    player_3: { x: 10, y: 90 }
+    player_1: { x: 40, y: 70 },
+    player_2: { x: 50, y: 70 },
+    player_3: { x: 60, y: 70 }
 };
 
 // Voisinage (selon schéma corrigé)

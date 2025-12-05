@@ -201,6 +201,9 @@ export class UIRenderer {
             { type: 'state', name: 'STATE', x: 74, y: 40, maxxer: null }
         ];
         
+        // Calculer preview des totaux combat
+        const preview = this.gm.previewCombatTotals();
+        
         entities.forEach(entity => {
             const entityDiv = document.createElement('div');
             entityDiv.className = 'entity';
@@ -208,16 +211,25 @@ export class UIRenderer {
             entityDiv.style.left = `${entity.x}%`;
             entityDiv.style.top = `${entity.y}%`;
             
-            let html = `<div class="entity-name">${entity.name}</div>`;
+            //let html = `<div class="entity-name">${entity.name}</div>`;
+            let html = '';
+
+            // Afficher total combat pour DAMAGE et BLOCK
+            if (entity.type === 'damage') {
+                html += `<div class="entity-value">${preview.damage}</div>`;
+            }
+
+            if (entity.type === 'block') {
+                html += `<div class="entity-value">${preview.block}</div>`;
+            }
             
             // Maxxer pour BLOCK et DAMAGE
             if (entity.maxxer) {
-                const icon = entity.type === 'damage' ? '🔥' : '🛡️';
                 const mult = entity.maxxer.getMultiplier();
-                html += `<div class="entity-maxxer">${icon} x${mult.toFixed(1)}</div>`;
+                html += `<div class="entity-maxxer">Maxxer<br>x${mult.toFixed(1)}</div>`;
             }
             
-            // Jauge Fortress pour BLOCK
+            /* // Jauge Fortress pour BLOCK
             if (entity.type === 'block') {
                 const fs = this.gm.fortressSystem;
                 const percent = fs.getMeterPercent();
@@ -236,7 +248,7 @@ export class UIRenderer {
                         ${hasReward ? '<div class="reward-available">⚡ Dispo</div>' : ''}
                     </div>
                 `;
-            }
+            } */
             
             // Tier et progression pour STATE
             if (entity.type === 'state') {
@@ -245,7 +257,7 @@ export class UIRenderer {
                 
                 html += `
                     <div style="font-size: 20px; font-weight: bold; margin: 5px 0; color: #FFD700;">
-                        🌟 Tier ${stateData.tier}
+                        Tier ${stateData.tier}
                     </div>
                     <div style="font-size: 16px; color: #AED581;">
                         ${stateData.value}${nextThreshold ? ` / ${nextThreshold}` : ''}
@@ -267,6 +279,35 @@ export class UIRenderer {
                 }
             }
         });
+        
+        // Container Fortress séparé
+        const fs = this.gm.fortressSystem;
+        const percent = fs.getMeterPercent();
+        const hasReward = fs.hasAvailableReward();
+        
+        const fortressDiv = document.createElement('div');
+        fortressDiv.className = 'fortress-container';
+        
+        fortressDiv.innerHTML = `
+            <div class="fortress-shield-info">🛡️ Shield: ${fs.shield}</div>
+            <div class="fortress-meter ${hasReward ? 'has-reward' : ''}" 
+                data-fortress-meter="true"
+                style="cursor: ${hasReward ? 'pointer' : 'default'}">
+                <div class="fortress-meter-fill" style="width: ${percent}%"></div>
+            </div>
+            <div class="fortress-meter-label">${Math.floor(fs.meter)} / 100</div>
+            ${hasReward ? '<div class="reward-available">⚡ DISPO</div>' : ''}
+        `;
+        
+        this.boardElement.appendChild(fortressDiv);
+        
+        // Event listener pour la jauge
+        if (hasReward) {
+            const meterEl = fortressDiv.querySelector('[data-fortress-meter]');
+            if (meterEl) {
+                meterEl.onclick = () => this.ui.popups.showFortressRewardPopup();
+            }
+        }
     }
 
     // ========================================
@@ -289,7 +330,7 @@ export class UIRenderer {
             <div class="hp-bar">❤️ ${hp.currentHp}/${hp.maxHp}</div>
             <div style="font-size: 14px;">PLAYER</div>
             <div style="font-size: 14px; color: #aaa; margin-top: 5px;">
-                Tour ${this.gm.turnNumber} | Deck: ${this.gm.deck.length} | Défausse: ${this.gm.discard.length}
+                Tour ${this.gm.turnNumber} <br>Deck: ${this.gm.deck.length} | Défausse: ${this.gm.discard.length}
             </div>
             ${this.gm.marchandises > 0 ? `
                 <div style="font-size: 13px; color: #FFD700; margin-top: 8px; font-weight: bold;">
@@ -475,7 +516,27 @@ export class UIRenderer {
     
     renderHand() {
         this.handElement.innerHTML = '';
+
+        // Overlap dynamique via classes CSS
+        const cardCount = this.gm.hand.length;
         
+        // Nettoyer anciennes classes
+        this.handElement.classList.remove('few-cards', 'medium-cards', 'many-cards');
+        
+        // Appliquer la bonne classe
+        if (cardCount <= 6) {
+            this.handElement.classList.add('few-cards');
+        } else if (cardCount <= 9) {
+            this.handElement.classList.add('medium-cards');
+        } else {
+            this.handElement.classList.add('many-cards');
+        }
+        
+        if (this.gm.hand.length === 0) {
+            this.handElement.innerHTML = '<div style="color: #aaa; padding: 20px;">Main vide</div>';
+            return;
+        }
+
         if (this.gm.hand.length === 0) {
             this.handElement.innerHTML = '<div style="color: #aaa; padding: 20px;">Main vide</div>';
             return;
@@ -543,8 +604,6 @@ export class UIRenderer {
                         case 'instant_all_slots_bonus': return `All slots +${eff.value}`;  
                         case 'instant_destroy_enemy': return `Détruit enemy ciblé`;
                         case 'instant_protect_ally': return `Protège la créature ciblée ce tour ci`;
-
-                        // Effets auras tribales
                         case 'aura_tribal':
                             if (eff.includesSelf) {
                                 return `Toutes ${eff.tag}s +${eff.value}`;
@@ -556,25 +615,19 @@ export class UIRenderer {
                         case 'gain_munitions': return `+${eff.value} munitions`;
                         case 'gain_munitions_conditional':
                             return `+${eff.base} munitions (+${eff.base} si 10+ munitions)`;
-                        // Distribution aléatoire
                         case 'instant_missiles':
                             return `${eff.count} missiles ×${eff.value} sur ${eff.targetTypes.join('/')}`;
                         case 'instant_distribute':
                             const occupiedText = eff.onlyOccupied ? ' (slots occupés)' : '';
                             return `Distribue ${eff.value} sur ${eff.targetTypes.join('/')}${occupiedText}`;    
-
-                        // Count tribal (self-scaling)
                         case 'count_tribal':
                             if (eff.includesSelf) {
                                 return `+${eff.value} par ${eff.tag} (inclus soi-même)`;
                             } else {
                                 return `+${eff.value} par autre ${eff.tag}`;
                             }
-
                         case 'instant_devour_neighbors':
                             return `Dévore voisins (×${eff.multiplier} value)`;
-
-                        // Création jetons
                         case 'instant_create_token':
                             return `Crée jeton en main`;
                         case 'instant_create_token_on_neighbors':
@@ -594,19 +647,6 @@ export class UIRenderer {
                             return `Crée créature aléatoire sur même slot (défausse)`;
                         case 'bonus_per_discard':
                             return `+${eff.value} par ${eff.tag} défaussé au tour précédent`;
-
-                        // Effets charmes
-                        case 'charm_boost_creature': return `Créature +${eff.value}`;
-                        case 'charm_boost_neighbors': return `Voisins +${eff.value}`;
-                        case 'charm_penalty_neighbors': return `Voisins ${eff.value}`;
-                        case 'charm_maxxer_slot': return `Maxxer +${eff.value}`;
-                        case 'charm_random_boost': return `Créature +${eff.min} à +${eff.max}`;
-                        case 'charm_heal_on_discard': return `Heal ${eff.value} à la défausse`;
-                        case 'atout_damage_eot': return `Dégâts +${eff.value} fin de tour`;
-                        case 'atout_block_eot': return `Blocage +${eff.value} fin de tour`;
-                        case 'atout_heal_on_charm_played' : return `Heal ${eff.value} quand un charme est joué`;
-                        
-                        // Discover / Transform
                         case 'instant_discover':
                             if (eff.filter && eff.filter.tag) {
                                 return `Discover ${eff.filter.tag}`;
@@ -621,6 +661,18 @@ export class UIRenderer {
                         case 'instant_transform_random_to_mythic':
                             return `Transform créature aléatoire en Mythique`;
 
+                        // Effets charmes
+                        case 'charm_boost_creature': return `Créature +${eff.value}`;
+                        case 'charm_boost_neighbors': return `Voisins +${eff.value}`;
+                        case 'charm_penalty_neighbors': return `Voisins ${eff.value}`;
+                        case 'charm_maxxer_slot': return `Maxxer +${eff.value}`;
+                        case 'charm_random_boost': return `Créature +${eff.min} à +${eff.max}`;
+                        case 'charm_heal_on_discard': return `Heal ${eff.value} à la défausse`;
+                        case 'atout_damage_eot': return `Dégâts +${eff.value} fin de tour`;
+                        case 'atout_block_eot': return `Blocage +${eff.value} fin de tour`;
+                        case 'atout_heal_on_charm_played' : return `Heal ${eff.value} quand un charme est joué`;
+                        
+                        
                         // Effets atouts
                         case 'atout_draw_eot': 
                             return `Pioche ${eff.value} fin de tour (max ${eff.max_hand} main)`;

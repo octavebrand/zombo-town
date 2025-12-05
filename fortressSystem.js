@@ -11,7 +11,7 @@ export class FortressSystem {
         this.TIERS = [
             { threshold: 15, id: 'lv1', name: 'Maxxer Damage +1', cost: 15 },
             { threshold: 30, id: 'lv2', name: 'Draw 1', cost: 30 },
-            { threshold: 50, id: 'lv3', name: 'All Maxxers +1 and Draw 1', cost: 30 },
+            { threshold: 40, id: 'lv3', name: 'All Maxxers +1 and Draw 1', cost: 40 },
             { threshold: 70, id: 'lv4', name: 'Protéger carte de la défausse', cost: 50 },
             { threshold: 100, id: 'lv5', name: 'Détruire enemy', cost: 70 }
         ];

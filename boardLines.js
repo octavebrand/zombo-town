@@ -84,7 +84,7 @@ export class BoardLinesRenderer {
         this.gm.board.slots.damage.forEach(slot => {
             this.drawLine(
                 slot.position.x, slot.position.y,
-                50, 35, // Changé de 40 à 35 (remonté de 5%)
+                50, 40, 
                 slot.card ? 'flow-damage-active' : 'flow-damage-inactive'
             );
         });
@@ -93,7 +93,7 @@ export class BoardLinesRenderer {
         this.gm.board.slots.block.forEach(slot => {
             this.drawLine(
                 slot.position.x, slot.position.y,
-                26, 35, // Changé de 40 à 35
+                26, 40, 
                 slot.card ? 'flow-block-active' : 'flow-block-inactive'
             );
         });
@@ -102,7 +102,7 @@ export class BoardLinesRenderer {
         this.gm.board.slots.state.forEach(slot => {
             this.drawLine(
                 slot.position.x, slot.position.y,
-                74, 35, // Changé de 40 à 35
+                74, 40, 
                 slot.card ? 'flow-state-active' : 'flow-state-inactive'
             );
         });
@@ -113,17 +113,17 @@ export class BoardLinesRenderer {
             
             // shared_1 → BLOCK (26, 35) et DAMAGE (50, 35)
             if (slot.id === 'shared_1') {
-                this.drawLine(slot.position.x, slot.position.y, 26, 35, 
+                this.drawLine(slot.position.x, slot.position.y, 26, 40, 
                     hasCard ? 'flow-block-active' : 'flow-block-inactive');
-                this.drawLine(slot.position.x, slot.position.y, 50, 35, 
+                this.drawLine(slot.position.x, slot.position.y, 50, 40, 
                     hasCard ? 'flow-damage-active' : 'flow-damage-inactive');
             }
             
             // shared_2 → DAMAGE (50, 35) et STATE (74, 35)
             if (slot.id === 'shared_2') {
-                this.drawLine(slot.position.x, slot.position.y, 50, 35, 
+                this.drawLine(slot.position.x, slot.position.y, 50, 40, 
                     hasCard ? 'flow-damage-active' : 'flow-damage-inactive');
-                this.drawLine(slot.position.x, slot.position.y, 74, 35, 
+                this.drawLine(slot.position.x, slot.position.y, 74, 40, 
                     hasCard ? 'flow-state-active' : 'flow-state-inactive');
             }
         });
@@ -137,23 +137,60 @@ export class BoardLinesRenderer {
         line.setAttribute('y2', `${y2}%`);
         line.setAttribute('class', className);
         
-        // Style selon classe
+        // Styles améliorés : plus discrets + pointillés
         const styles = {
-            'neighbor-inactive': { stroke: 'rgba(255, 255, 255, 0.2)', width: 3 },
-            'neighbor-active': { stroke: '#00FF00', width: 6 },
-            'flow-damage-inactive': { stroke: 'rgba(255, 255, 255, 0.15)', width: 3 },
-            'flow-damage-active': { stroke: '#FF4500', width: 6 },
-            'flow-block-inactive': { stroke: 'rgba(255, 255, 255, 0.15)', width: 3 },
-            'flow-block-active': { stroke: '#4169E1', width: 6 },
-            'flow-state-inactive': { stroke: 'rgba(255, 255, 255, 0.15)', width: 3 },
-            'flow-state-active': { stroke: '#FFD700', width: 6 }
+            'neighbor-inactive': { 
+                stroke: 'rgba(255, 255, 255, 0.06)', // Très transparent
+                width: 1.5, 
+                dasharray: '2,4' // Pointillés subtils
+            },
+            'neighbor-active': { 
+                stroke: 'rgba(0, 255, 0, 0.4)', 
+                width: 3,
+                dasharray: '0'
+            },
+            'flow-damage-inactive': { 
+                stroke: 'rgba(255, 69, 0, 0.04)', 
+                width: 1.5,
+                dasharray: '2,4'
+            },
+            'flow-damage-active': { 
+                stroke: 'rgba(255, 69, 0, 0.5)', 
+                width: 3,
+                dasharray: '0'
+            },
+            'flow-block-inactive': { 
+                stroke: 'rgba(65, 105, 225, 0.04)', 
+                width: 1.5,
+                dasharray: '2,4'
+            },
+            'flow-block-active': { 
+                stroke: 'rgba(65, 105, 225, 0.5)', 
+                width: 3,
+                dasharray: '0'
+            },
+            'flow-state-inactive': { 
+                stroke: 'rgba(255, 215, 0, 0.04)', 
+                width: 1.5,
+                dasharray: '2,4'
+            },
+            'flow-state-active': { 
+                stroke: 'rgba(255, 215, 0, 0.5)', 
+                width: 3,
+                dasharray: '0'
+            }
         };
         
         const style = styles[className];
         if (style) {
             line.setAttribute('stroke', style.stroke);
             line.setAttribute('stroke-width', style.width);
+            line.setAttribute('stroke-dasharray', style.dasharray);
+            line.setAttribute('stroke-linecap', 'round');
         }
+        
+        // Transition smooth
+        line.style.transition = 'all 0.3s ease';
         
         this.svg.appendChild(line);
     }
