@@ -27,7 +27,7 @@ export class BoardLinesRenderer {
             pointer-events: none;
             z-index: 0;
         `;
-        
+
         const boardElement = document.getElementById('board');
         if (boardElement) {
             boardElement.appendChild(this.svg);
@@ -50,6 +50,7 @@ export class BoardLinesRenderer {
         
         // 2. Lignes value flow vers entités
         this.renderValueFlowLines();
+
     }
     
     renderNeighborLines() {
@@ -130,19 +131,50 @@ export class BoardLinesRenderer {
     }
     
     drawLine(x1, y1, x2, y2, className) {
-        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-        line.setAttribute('x1', `${x1}%`);
-        line.setAttribute('y1', `${y1}%`);
-        line.setAttribute('x2', `${x2}%`);
-        line.setAttribute('y2', `${y2}%`);
-        line.setAttribute('class', className);
+        // Obtenir les dimensions du SVG pour convertir % en pixels
+        const svgRect = this.svg.getBoundingClientRect();
+        const width = svgRect.width;
+        const height = svgRect.height;
         
-        // Styles améliorés : plus discrets + pointillés
+        // Convertir % en pixels
+        const px1 = (x1 / 100) * width;
+        const py1 = (y1 / 100) * height;
+        const px2 = (x2 / 100) * width;
+        const py2 = (y2 / 100) * height;
+        
+        // Calculer le point milieu
+        const midX = (px1 + px2) / 2;
+        const midY = (py1 + py2) / 2;
+        
+        // Créer un offset perpendiculaire pour la courbe
+        const dx = px2 - px1;
+        const dy = py2 - py1;
+        const length = Math.sqrt(dx * dx + dy * dy);
+        
+        // Amplitude de la courbe (ajuste entre 1 et 5)
+        const curveIntensity = 2;
+        const perpX = (-dy / length) * curveIntensity;
+        const perpY = (dx / length) * curveIntensity;
+        
+        // Point de contrôle
+        const ctrlX = midX + perpX;
+        const ctrlY = midY + perpY;
+        
+        // Créer le path
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        
+        // Courbe quadratique (maintenant en pixels)
+        const d = `M ${px1} ${py1} Q ${ctrlX} ${ctrlY} ${px2} ${py2}`;
+        path.setAttribute('d', d);
+        path.setAttribute('class', className);
+        path.setAttribute('fill', 'none');
+        
+        // Styles
         const styles = {
             'neighbor-inactive': { 
-                stroke: 'rgba(255, 255, 255, 0.06)', // Très transparent
+                stroke: 'rgba(255, 255, 255, 0.06)',
                 width: 1.5, 
-                dasharray: '2,4' // Pointillés subtils
+                dasharray: '2,4'
             },
             'neighbor-active': { 
                 stroke: 'rgba(0, 255, 0, 0.4)', 
@@ -183,16 +215,16 @@ export class BoardLinesRenderer {
         
         const style = styles[className];
         if (style) {
-            line.setAttribute('stroke', style.stroke);
-            line.setAttribute('stroke-width', style.width);
-            line.setAttribute('stroke-dasharray', style.dasharray);
-            line.setAttribute('stroke-linecap', 'round');
+            path.setAttribute('stroke', style.stroke);
+            path.setAttribute('stroke-width', style.width);
+            path.setAttribute('stroke-dasharray', style.dasharray);
+            path.setAttribute('stroke-linecap', 'round');
         }
         
         // Transition smooth
-        line.style.transition = 'all 0.3s ease';
+        path.style.transition = 'all 0.3s ease';
         
-        this.svg.appendChild(line);
+        this.svg.appendChild(path);
     }
     
     hasBonusEffect(card) {
